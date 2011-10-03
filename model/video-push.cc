@@ -1,0 +1,368 @@
+/* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
+/*
+ * Copyright (c) 2011 University of Trento, Italy
+ * 					  University of California, Los Angeles, U.S.A.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation;
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *
+ * Authors: Alessandro Russo <russo@disi.unitn.it>
+ *          University of Trento, Italy
+ *          University of California, Los Angeles U.S.A.
+ */
+
+#define NS_LOG_APPEND_CONTEXT                                   \
+  if (GetObject<Node> ()) { std::clog << "[node " << GetObject<Node> ()->GetId () << "] "; }
+
+#include "ns3/log.h"
+#include "ns3/address.h"
+#include "ns3/node.h"
+#include "ns3/nstime.h"
+#include "ns3/data-rate.h"
+#include "ns3/random-variable.h"
+#include "ns3/socket.h"
+#include "ns3/simulator.h"
+#include "ns3/socket-factory.h"
+#include "ns3/packet.h"
+#include "ns3/uinteger.h"
+#include "ns3/enum.h"
+#include "ns3/trace-source-accessor.h"
+#include "ns3/udp-socket-factory.h"
+#include "ns3/address-utils.h"
+#include "ns3/inet-socket-address.h"
+#include "ns3/udp-socket.h"
+
+#include "video-push.h"
+
+NS_LOG_COMPONENT_DEFINE ("VideoPush");
+
+using namespace std;
+
+namespace ns3 {
+
+NS_OBJECT_ENSURE_REGISTERED (VideoPush);
+
+TypeId
+VideoPush::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::VideoPush")
+    .SetParent<Application> ()
+    .AddConstructor<VideoPush> ()
+    .AddAttribute ("Local", "The Address on which to Bind the rx socket.",
+                   AddressValue (),
+                   MakeAddressAccessor (&VideoPush::m_local),
+                   MakeAddressChecker ())
+    .AddAttribute ("PeerType", "Type of peer: source or peer.",
+                   EnumValue(PEER),
+                   MakeEnumAccessor(&VideoPush::m_peerType),
+                   MakeEnumChecker (PEER, "Regular Peer",
+                		   	   	   SOURCE,"Source peer") )
+    .AddAttribute ("DataRate", "The data rate in on state.",
+                   DataRateValue (DataRate ("500kb/s")),
+                   MakeDataRateAccessor (&VideoPush::m_cbrRate),
+                   MakeDataRateChecker ())
+    .AddAttribute ("PacketSize", "The size of packets sent in on state",
+                   UintegerValue (512),
+                   MakeUintegerAccessor (&VideoPush::m_pktSize),
+                   MakeUintegerChecker<uint32_t> (1))
+    .AddAttribute ("Remote", "The address of the destination",
+                   AddressValue (),
+                   MakeAddressAccessor (&VideoPush::m_peer),
+                   MakeAddressChecker ())
+    .AddAttribute ("OnTime", "A RandomVariable used to pick the duration of the 'On' state.",
+                   RandomVariableValue (ConstantVariable (1.0)),
+                   MakeRandomVariableAccessor (&VideoPush::m_onTime),
+                   MakeRandomVariableChecker ())
+    .AddAttribute ("OffTime", "A RandomVariable used to pick the duration of the 'Off' state.",
+                   RandomVariableValue (ConstantVariable (1.0)),
+                   MakeRandomVariableAccessor (&VideoPush::m_offTime),
+                   MakeRandomVariableChecker ())
+    .AddAttribute ("MaxBytes",
+                   "The total number of bytes to send. Once these bytes are sent, "
+                   "no packet is sent again, even in on state. The value zero means "
+                   "that there is no limit.",
+                   UintegerValue (0),
+                   MakeUintegerAccessor (&VideoPush::m_maxBytes),
+                   MakeUintegerChecker<uint32_t> ())
+    .AddAttribute ("Protocol", "The type of protocol to use.",
+                   TypeIdValue (UdpSocketFactory::GetTypeId ()),
+                   MakeTypeIdAccessor (&VideoPush::m_tid),
+                   MakeTypeIdChecker ())
+    .AddTraceSource ("Tx", "A new packet is created and is sent",
+                   MakeTraceSourceAccessor (&VideoPush::m_txTrace))
+	.AddTraceSource ("Rx", "A packet has been received",
+				   MakeTraceSourceAccessor (&VideoPush::m_rxTrace))
+  ;
+  return tid;
+}
+
+
+VideoPush::VideoPush ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+  m_socket = 0;
+  m_connected = false;
+  m_residualBits = 0;
+  m_lastStartTime = Seconds (0);
+  m_totBytes = 0;
+  m_totalRx = 0;
+}
+
+VideoPush::~VideoPush()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+}
+
+void
+VideoPush::SetMaxBytes (uint32_t maxBytes)
+{
+  NS_LOG_FUNCTION (this << maxBytes);
+  m_maxBytes = maxBytes;
+}
+
+uint32_t VideoPush::GetTotalRx () const
+{
+  return m_totalRx;
+}
+
+Ptr<Socket>
+VideoPush::GetTxSocket (void) const
+{
+  NS_LOG_FUNCTION (this);
+  return m_socket;
+}
+
+Ptr<Socket>
+VideoPush::GetListeningSocket (void) const
+{
+  NS_LOG_FUNCTION (this);
+  return m_socket;
+}
+
+std::list<Ptr<Socket> >
+VideoPush::GetAcceptedSockets (void) const
+{
+  NS_LOG_FUNCTION (this);
+  return m_socketList;
+}
+
+void
+VideoPush::DoDispose (void)
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  m_socket = 0;
+  m_socketList.clear();
+  // chain up
+  Application::DoDispose ();
+}
+
+// Application Methods
+void VideoPush::StartApplication () // Called at time specified by Start
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  // Create the socket if not already
+  if (!m_socket)
+    {
+      m_socket = Socket::CreateSocket (GetNode (), m_tid);
+      m_socket->Bind ();
+      m_socket->Connect (m_peer);
+      m_socket->SetAllowBroadcast (false);
+      m_socket->ShutdownRecv ();
+    }
+  // Insure no pending event
+  CancelEvents ();
+
+  m_socket->SetRecvCallback (MakeCallback (&VideoPush::HandleRead, this));
+  m_socket->SetAcceptCallback (
+    MakeNullCallback<bool, Ptr<Socket>, const Address &> (),
+    MakeCallback (&VideoPush::HandleAccept, this));
+  m_socket->SetCloseCallbacks (
+    MakeCallback (&VideoPush::HandlePeerClose, this),
+    MakeCallback (&VideoPush::HandlePeerError, this));
+
+  // If we are not yet connected, there is nothing to do here
+  // The ConnectionComplete upcall will start timers at that time
+  //if (!m_connected) return;
+  ScheduleStartEvent ();
+}
+
+void VideoPush::StopApplication () // Called at time specified by Stop
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  while(!m_socketList.empty ()) //these are accepted sockets, close them
+    {
+      Ptr<Socket> acceptedSocket = m_socketList.front ();
+      m_socketList.pop_front ();
+      acceptedSocket->Close ();
+    }
+  CancelEvents ();
+  if(m_socket)
+    {
+      m_socket->Close ();
+      m_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket> > ());
+    }
+  else
+    {
+      NS_LOG_WARN ("VideoPush found null socket to close in StopApplication");
+    }
+}
+
+void VideoPush::HandleRead (Ptr<Socket> socket)
+{
+  NS_LOG_FUNCTION (this << socket);
+  Ptr<Packet> packet;
+  Address from;
+  while ((packet = socket->RecvFrom (from)))
+    {
+      if (packet->GetSize () == 0)
+        { //EOF
+          break;
+        }
+      if (InetSocketAddress::IsMatchingType (from))
+        {
+          m_totalRx += packet->GetSize ();
+          InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
+          NS_LOG_INFO ("Node " <<m_node->GetId()<<" Received " << packet->GetSize () << " bytes from " <<
+                       address.GetIpv4 () << " [" << address << "]"
+                                   << " total Rx " << m_totalRx);
+          //cast address to void , to suppress 'address' set but not used
+          //compiler warning in optimized builds
+          (void) address;
+        }
+      m_rxTrace (packet, from);
+    }
+}
+
+void VideoPush::HandlePeerClose (Ptr<Socket> socket)
+{
+  NS_LOG_INFO ("VideoPush, peerClose");
+}
+
+void VideoPush::HandlePeerError (Ptr<Socket> socket)
+{
+  NS_LOG_INFO ("VideoPush, peerError");
+}
+
+
+void VideoPush::HandleAccept (Ptr<Socket> s, const Address& from)
+{
+  NS_LOG_FUNCTION (this << s << from);
+  s->SetRecvCallback (MakeCallback (&VideoPush::HandleRead, this));
+  m_socketList.push_back (s);
+}
+
+void VideoPush::CancelEvents ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  if (m_sendEvent.IsRunning ())
+    { // Cancel the pending send packet event
+      // Calculate residual bits since last packet sent
+      Time delta (Simulator::Now () - m_lastStartTime);
+      int64x64_t bits = delta.To (Time::S) * m_cbrRate.GetBitRate ();
+      m_residualBits += bits.GetHigh ();
+    }
+  Simulator::Cancel (m_sendEvent);
+  Simulator::Cancel (m_startStopEvent);
+}
+
+// Event handlers
+void VideoPush::StartSending ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+  m_lastStartTime = Simulator::Now ();
+  ScheduleNextTx ();  // Schedule the send packet event
+  ScheduleStopEvent ();
+}
+
+void VideoPush::StopSending ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+  CancelEvents ();
+
+  ScheduleStartEvent ();
+}
+
+// Private helpers
+void VideoPush::ScheduleNextTx ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  if (m_maxBytes == 0 || m_totBytes < m_maxBytes)
+    {
+      uint32_t bits = m_pktSize * 8 - m_residualBits;
+      NS_LOG_LOGIC ("bits = " << bits);
+      Time nextTime (Seconds (bits /
+                              static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
+      NS_LOG_LOGIC ("nextTime = " << nextTime);
+      m_sendEvent = Simulator::Schedule (nextTime,
+                                         &VideoPush::SendPacket, this);
+    }
+  else
+    { // All done, cancel any pending events
+      StopApplication ();
+    }
+}
+
+void VideoPush::ScheduleStartEvent ()
+{  // Schedules the event to start sending data (switch to the "On" state)
+  NS_LOG_FUNCTION_NOARGS ();
+
+  Time offInterval = Seconds (m_offTime.GetValue ());
+  NS_LOG_LOGIC ("start at " << offInterval);
+  m_startStopEvent = Simulator::Schedule (offInterval, &VideoPush::StartSending, this);
+}
+
+void VideoPush::ScheduleStopEvent ()
+{  // Schedules the event to stop sending data (switch to "Off" state)
+  NS_LOG_FUNCTION_NOARGS ();
+
+  Time onInterval = Seconds (m_onTime.GetValue ());
+  NS_LOG_LOGIC ("stop at " << onInterval);
+  m_startStopEvent = Simulator::Schedule (onInterval, &VideoPush::StopSending, this);
+}
+
+
+void VideoPush::SendPacket ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+  NS_ASSERT (m_sendEvent.IsExpired ());
+  Ptr<Packet> packet = Create<Packet> (m_pktSize);
+  NS_LOG_LOGIC ("sending packet at " << Simulator::Now ()<< " UID "<< packet->GetUid());
+  m_txTrace (packet);
+  m_socket->Send (packet);
+  m_totBytes += m_pktSize;
+  m_lastStartTime = Simulator::Now ();
+  m_residualBits = 0;
+  ScheduleNextTx ();
+}
+
+void VideoPush::ConnectionSucceeded (Ptr<Socket>)
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  m_connected = true;
+  ScheduleStartEvent ();
+}
+
+void VideoPush::ConnectionFailed (Ptr<Socket>)
+{
+  NS_LOG_FUNCTION_NOARGS ();
+  cout << "VideoPush, Connection Failed" << endl;
+}
+
+} // Namespace ns3
