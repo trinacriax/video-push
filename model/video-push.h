@@ -46,6 +46,10 @@ class Socket;
 
 enum PeerType {PEER, SOURCE};
 
+enum PeerPolicy {RANDOM};
+
+enum ChunkPolicy {LATEST};
+
 class VideoPushApplication : public Application
 {
 
@@ -142,6 +146,8 @@ private:
 	bool            m_sending;      // True if currently in sending state
 	TypeId          m_tid;
 	Ptr<Ipv4> 		m_ipv4;
+
+	enum PeerPolicy m_peerSelection; // Peer selection algorithm
 	TracedCallback<Ptr<const Packet> > m_txTrace;
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxTrace;
 };

@@ -99,6 +99,10 @@ VideoPushApplication::GetTypeId (void)
                    TypeIdValue (UdpSocketFactory::GetTypeId ()),
                    MakeTypeIdAccessor (&VideoPushApplication::m_tid),
                    MakeTypeIdChecker ())
+    .AddAttribute ("PeerPolicy", "Peer selection algorithm.",
+				   EnumValue(RANDOM),
+				   MakeEnumAccessor(&VideoPushApplication::m_peerSelection),
+				   MakeEnumChecker (RANDOM, "Random peer selection."))
     .AddTraceSource ("Tx", "A new packet is created and is sent",
                    MakeTraceSourceAccessor (&VideoPushApplication::m_txTrace))
 	.AddTraceSource ("Rx", "A packet has been received",
