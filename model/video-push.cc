@@ -120,6 +120,8 @@ VideoPushApplication::VideoPushApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socket = 0;
+  m_localPort = 0;
+//  m_localAddress = GetObject<Ipv4>()->GetAddress(1,1).GetLocal();
   m_connected = false;
   m_residualBits = 0;
   m_lastStartTime = Seconds (0);
