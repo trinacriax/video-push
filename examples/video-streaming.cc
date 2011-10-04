@@ -22,7 +22,7 @@
 #include "ns3/csma-module.h"
 #include "ns3/inet-socket-address.h"
 #include "ns3/video-helper.h"
-#include "ns3/on-off-helper.h"
+#include "ns3/wifi-module.h"
 
 using namespace ns3;
 
@@ -33,10 +33,10 @@ main (int argc, char *argv[])
 {
 	SeedManager::SetSeed(1234);
 	bool verbose = true;
-	uint32_t nCsma = 2;
+	uint32_t node = 2;
 
 	CommandLine cmd;
-	cmd.AddValue ("nCsma", "Number of \"extra\" CSMA nodes/devices", nCsma);
+	cmd.AddValue ("nCsma", "Number of \"extra\" CSMA nodes/devices", node);
 	cmd.AddValue ("verbose", "Tell echo applications to log if true", verbose);
 
 	cmd.Parse (argc,argv);
@@ -55,26 +55,39 @@ main (int argc, char *argv[])
 		LogComponentEnable ("CsmaNetDevice",  LogLevel( LOG_LEVEL_ALL | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
 	}
 
-	PointToPointHelper pointToPoint;
-	pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
-	pointToPoint.SetChannelAttribute ("Delay", StringValue ("2ms"));
+	NodeContainer nodes;
+	nodes.Create(2);
 
-	NodeContainer csmaNodes;
-	csmaNodes.Create (nCsma);
+	WifiHelper wifi = WifiHelper::Default ();
+	wifi.SetStandard (WIFI_PHY_STANDARD_80211g);
 
-	CsmaHelper csma;
-	csma.SetChannelAttribute ("DataRate", StringValue ("100Mbps"));
-	csma.SetChannelAttribute ("Delay", TimeValue (NanoSeconds (6560)));
+	NqosWifiMacHelper wifiMac = NqosWifiMacHelper::Default ();
+	wifiMac.SetType ("ns3::AdhocWifiMac");
 
-	NetDeviceContainer csmaDevices;
-	csmaDevices = csma.Install (csmaNodes);
+	YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
+
+	YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
+
+	YansWifiPhyHelper phy = wifiPhy;
+	phy.SetChannel (wifiChannel.Create ());
+	NqosWifiMacHelper mac = wifiMac;
+
+	NetDeviceContainer nodesDevices = wifi.Install(phy, mac, nodes);
+
+	Ipv4StaticRoutingHelper staticRouting;
+	Ipv4ListRoutingHelper listRouters;
+	listRouters.Add (staticRouting, 0);
+
+	InternetStackHelper internetRouters;
+	internetRouters.SetRoutingHelper (listRouters);
+	internetRouters.Install (nodes);
 
 	InternetStackHelper stack;
-	stack.Install (csmaNodes);
+	stack.Install (nodes);
 
 	Ipv4AddressHelper address;
 	address.SetBase ("10.1.1.0", "255.255.255.0");
-	Ipv4InterfaceContainer addresses = address.Assign (csmaDevices);
+	Ipv4InterfaceContainer addresses = address.Assign (nodesDevices);
 
 	Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
@@ -83,9 +96,9 @@ main (int argc, char *argv[])
 	video.SetAttribute ("OnTime", RandomVariableValue (ConstantVariable (10.0)));
 	video.SetAttribute ("OffTime", RandomVariableValue (ConstantVariable (1.0)));
 	video.SetAttribute ("DataRate", StringValue ("10kb/s"));
-	video.SetAttribute ("PacketSize", UintegerValue (1000));
+	video.SetAttribute ("PacketSize", UintegerValue (1200));
 
-	ApplicationContainer apps1 = video.Install (csmaNodes.Get(1));
+	ApplicationContainer apps1 = video.Install (nodes.Get(1));
 	apps1.Start (Seconds (1.0));
 	apps1.Stop (Seconds (10.0));
 
@@ -96,7 +109,7 @@ main (int argc, char *argv[])
 	video.SetAttribute ("DataRate", StringValue ("10kb/s"));
 	video.SetAttribute ("PacketSize", UintegerValue (1200));
 
-	ApplicationContainer apps2 = video.Install (csmaNodes.Get(0));
+	ApplicationContainer apps2 = video.Install (nodes.Get(0));
 	apps2.Start (Seconds (1.0));
 	apps2.Stop (Seconds (10.0));
 
