@@ -62,10 +62,17 @@ namespace streaming{
 		uint8_t *c_attributes;
 	};
 
+		static inline std::ostream&
+		operator << (std::ostream& o, const ChunkVideo &a)
+		{
+		return o<<"Id: "<< a.c_id <<" S: "<<a.c_size<<" Ts "<< a.c_tstamp << " As "<<a.c_attributes_size<<"\n";
+		}
+
 		static inline bool
 		operator < (const ChunkVideo &a, const ChunkVideo &b){
 			return (a.c_id < b.c_id);
 		}
+
 		static inline bool
 		operator == (const ChunkVideo &a, const ChunkVideo &b){
 			return (a.c_id == b.c_id )&& (a.c_size == b.c_size) && (a.c_tstamp == b.c_tstamp);
