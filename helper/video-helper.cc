@@ -32,7 +32,7 @@ namespace ns3 {
 
 VideoHelper::VideoHelper (std::string protocol, Address address)
 {
-  m_factory.SetTypeId ("ns3::VideoPush");
+  m_factory.SetTypeId ("ns3::VideoPushApplication");
   m_factory.Set ("Protocol", StringValue (protocol));
   m_factory.Set ("Remote", AddressValue (address));
 }

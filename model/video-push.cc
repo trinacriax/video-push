@@ -45,70 +45,70 @@
 
 #include "video-push.h"
 
-NS_LOG_COMPONENT_DEFINE ("VideoPush");
+NS_LOG_COMPONENT_DEFINE ("VideoPushApplication");
 
 using namespace std;
 
 namespace ns3 {
 
-NS_OBJECT_ENSURE_REGISTERED (VideoPush);
+NS_OBJECT_ENSURE_REGISTERED (VideoPushApplication);
 
 TypeId
-VideoPush::GetTypeId (void)
+VideoPushApplication::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::VideoPush")
+  static TypeId tid = TypeId ("ns3::VideoPushApplication")
     .SetParent<Application> ()
-    .AddConstructor<VideoPush> ()
+    .AddConstructor<VideoPushApplication> ()
     .AddAttribute ("Local", "The Address on which to Bind the rx socket.",
                    AddressValue (),
-                   MakeAddressAccessor (&VideoPush::m_local),
+                   MakeAddressAccessor (&VideoPushApplication::m_localAddress),
                    MakeAddressChecker ())
     .AddAttribute ("PeerType", "Type of peer: source or peer.",
                    EnumValue(PEER),
-                   MakeEnumAccessor(&VideoPush::m_peerType),
+                   MakeEnumAccessor(&VideoPushApplication::m_peerType),
                    MakeEnumChecker (PEER, "Regular Peer",
                 		   	   	   SOURCE,"Source peer") )
     .AddAttribute ("DataRate", "The data rate in on state.",
                    DataRateValue (DataRate ("500kb/s")),
-                   MakeDataRateAccessor (&VideoPush::m_cbrRate),
+                   MakeDataRateAccessor (&VideoPushApplication::m_cbrRate),
                    MakeDataRateChecker ())
     .AddAttribute ("PacketSize", "The size of packets sent in on state",
                    UintegerValue (512),
-                   MakeUintegerAccessor (&VideoPush::m_pktSize),
+                   MakeUintegerAccessor (&VideoPushApplication::m_pktSize),
                    MakeUintegerChecker<uint32_t> (1))
     .AddAttribute ("Remote", "The address of the destination",
                    AddressValue (),
-                   MakeAddressAccessor (&VideoPush::m_peer),
+                   MakeAddressAccessor (&VideoPushApplication::m_peer),
                    MakeAddressChecker ())
     .AddAttribute ("OnTime", "A RandomVariable used to pick the duration of the 'On' state.",
                    RandomVariableValue (ConstantVariable (1.0)),
-                   MakeRandomVariableAccessor (&VideoPush::m_onTime),
+                   MakeRandomVariableAccessor (&VideoPushApplication::m_onTime),
                    MakeRandomVariableChecker ())
     .AddAttribute ("OffTime", "A RandomVariable used to pick the duration of the 'Off' state.",
                    RandomVariableValue (ConstantVariable (1.0)),
-                   MakeRandomVariableAccessor (&VideoPush::m_offTime),
+                   MakeRandomVariableAccessor (&VideoPushApplication::m_offTime),
                    MakeRandomVariableChecker ())
     .AddAttribute ("MaxBytes",
                    "The total number of bytes to send. Once these bytes are sent, "
                    "no packet is sent again, even in on state. The value zero means "
                    "that there is no limit.",
                    UintegerValue (0),
-                   MakeUintegerAccessor (&VideoPush::m_maxBytes),
+                   MakeUintegerAccessor (&VideoPushApplication::m_maxBytes),
                    MakeUintegerChecker<uint32_t> ())
     .AddAttribute ("Protocol", "The type of protocol to use.",
                    TypeIdValue (UdpSocketFactory::GetTypeId ()),
-                   MakeTypeIdAccessor (&VideoPush::m_tid),
+                   MakeTypeIdAccessor (&VideoPushApplication::m_tid),
                    MakeTypeIdChecker ())
     .AddTraceSource ("Tx", "A new packet is created and is sent",
-                   MakeTraceSourceAccessor (&VideoPush::m_txTrace))
+                   MakeTraceSourceAccessor (&VideoPushApplication::m_txTrace))
 	.AddTraceSource ("Rx", "A packet has been received",
-				   MakeTraceSourceAccessor (&VideoPush::m_rxTrace))
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxTrace))
   ;
   return tid;
 }
 
 
-VideoPush::VideoPush ()
+VideoPushApplication::VideoPushApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socket = 0;
@@ -119,46 +119,45 @@ VideoPush::VideoPush ()
   m_totalRx = 0;
 }
 
-VideoPush::~VideoPush()
+VideoPushApplication::~VideoPushApplication()
 {
-  NS_LOG_FUNCTION_NOARGS ();
 }
 
 void
-VideoPush::SetMaxBytes (uint32_t maxBytes)
+VideoPushApplication::SetMaxBytes (uint32_t maxBytes)
 {
   NS_LOG_FUNCTION (this << maxBytes);
   m_maxBytes = maxBytes;
 }
 
-uint32_t VideoPush::GetTotalRx () const
+uint32_t VideoPushApplication::GetTotalRx () const
 {
   return m_totalRx;
 }
 
 Ptr<Socket>
-VideoPush::GetTxSocket (void) const
+VideoPushApplication::GetTxSocket (void) const
 {
   NS_LOG_FUNCTION (this);
   return m_socket;
 }
 
 Ptr<Socket>
-VideoPush::GetListeningSocket (void) const
+VideoPushApplication::GetListeningSocket (void) const
 {
   NS_LOG_FUNCTION (this);
   return m_socket;
 }
 
 std::list<Ptr<Socket> >
-VideoPush::GetAcceptedSockets (void) const
+VideoPushApplication::GetAcceptedSockets (void) const
 {
   NS_LOG_FUNCTION (this);
   return m_socketList;
 }
 
 void
-VideoPush::DoDispose (void)
+VideoPushApplication::DoDispose (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -169,7 +168,7 @@ VideoPush::DoDispose (void)
 }
 
 // Application Methods
-void VideoPush::StartApplication () // Called at time specified by Start
+void VideoPushApplication::StartApplication () // Called at time specified by Start
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -177,29 +176,32 @@ void VideoPush::StartApplication () // Called at time specified by Start
   if (!m_socket)
     {
       m_socket = Socket::CreateSocket (GetNode (), m_tid);
-      m_socket->Bind ();
-      m_socket->Connect (m_peer);
+      NS_ASSERT (m_socket != 0);
+	  int status;
+	  status = m_socket->Bind (InetSocketAddress(Ipv4Address::GetAny (), m_localPort));
+//	  Ptr<Socket> socket = Socket::CreateSocket (GetObject<Node> (), UdpSocketFactory::GetTypeId ());
+	  NS_ASSERT (status != -1);
+//	  InetSocketAddress dst = InetSocketAddress (m_peer, 0);
+//	  status = m_socket->Connect (dst);
+//	  NS_ASSERT (status != -1);
       m_socket->SetAllowBroadcast (false);
-      m_socket->ShutdownRecv ();
+      m_socket->SetRecvCallback (MakeCallback (&VideoPushApplication::HandleReceive, this));
+      m_socket->SetAcceptCallback (
+         MakeNullCallback<bool, Ptr<Socket>, const Address &> (),
+         MakeCallback (&VideoPushApplication::HandleAccept, this));
+      m_socket->SetCloseCallbacks (
+         MakeCallback (&VideoPushApplication::HandlePeerClose, this),
+         MakeCallback (&VideoPushApplication::HandlePeerError, this));
     }
   // Insure no pending event
   CancelEvents ();
-
-  m_socket->SetRecvCallback (MakeCallback (&VideoPush::HandleRead, this));
-  m_socket->SetAcceptCallback (
-    MakeNullCallback<bool, Ptr<Socket>, const Address &> (),
-    MakeCallback (&VideoPush::HandleAccept, this));
-  m_socket->SetCloseCallbacks (
-    MakeCallback (&VideoPush::HandlePeerClose, this),
-    MakeCallback (&VideoPush::HandlePeerError, this));
-
   // If we are not yet connected, there is nothing to do here
   // The ConnectionComplete upcall will start timers at that time
   //if (!m_connected) return;
   ScheduleStartEvent ();
 }
 
-void VideoPush::StopApplication () // Called at time specified by Stop
+void VideoPushApplication::StopApplication () // Called at time specified by Stop
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -221,7 +223,7 @@ void VideoPush::StopApplication () // Called at time specified by Stop
     }
 }
 
-void VideoPush::HandleRead (Ptr<Socket> socket)
+void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 {
   NS_LOG_FUNCTION (this << socket);
   Ptr<Packet> packet;
@@ -247,25 +249,25 @@ void VideoPush::HandleRead (Ptr<Socket> socket)
     }
 }
 
-void VideoPush::HandlePeerClose (Ptr<Socket> socket)
+void VideoPushApplication::HandlePeerClose (Ptr<Socket> socket)
 {
   NS_LOG_INFO ("VideoPush, peerClose");
 }
 
-void VideoPush::HandlePeerError (Ptr<Socket> socket)
+void VideoPushApplication::HandlePeerError (Ptr<Socket> socket)
 {
   NS_LOG_INFO ("VideoPush, peerError");
 }
 
 
-void VideoPush::HandleAccept (Ptr<Socket> s, const Address& from)
+void VideoPushApplication::HandleAccept (Ptr<Socket> s, const Address& from)
 {
   NS_LOG_FUNCTION (this << s << from);
-  s->SetRecvCallback (MakeCallback (&VideoPush::HandleRead, this));
+  s->SetRecvCallback (MakeCallback (&VideoPushApplication::HandleReceive, this));
   m_socketList.push_back (s);
 }
 
-void VideoPush::CancelEvents ()
+void VideoPushApplication::CancelEvents ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -281,7 +283,7 @@ void VideoPush::CancelEvents ()
 }
 
 // Event handlers
-void VideoPush::StartSending ()
+void VideoPushApplication::StartSending ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_lastStartTime = Simulator::Now ();
@@ -289,7 +291,7 @@ void VideoPush::StartSending ()
   ScheduleStopEvent ();
 }
 
-void VideoPush::StopSending ()
+void VideoPushApplication::StopSending ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   CancelEvents ();
@@ -298,7 +300,7 @@ void VideoPush::StopSending ()
 }
 
 // Private helpers
-void VideoPush::ScheduleNextTx ()
+void VideoPushApplication::ScheduleNextTx ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -310,7 +312,7 @@ void VideoPush::ScheduleNextTx ()
                               static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
       NS_LOG_LOGIC ("nextTime = " << nextTime);
       m_sendEvent = Simulator::Schedule (nextTime,
-                                         &VideoPush::SendPacket, this);
+                                         &VideoPushApplication::SendPacket, this);
     }
   else
     { // All done, cancel any pending events
@@ -318,40 +320,50 @@ void VideoPush::ScheduleNextTx ()
     }
 }
 
-void VideoPush::ScheduleStartEvent ()
-{  // Schedules the event to start sending data (switch to the "On" state)
-  NS_LOG_FUNCTION_NOARGS ();
-
-  Time offInterval = Seconds (m_offTime.GetValue ());
-  NS_LOG_LOGIC ("start at " << offInterval);
-  m_startStopEvent = Simulator::Schedule (offInterval, &VideoPush::StartSending, this);
-}
-
-void VideoPush::ScheduleStopEvent ()
+void VideoPushApplication::ScheduleStopEvent ()
 {  // Schedules the event to stop sending data (switch to "Off" state)
   NS_LOG_FUNCTION_NOARGS ();
 
   Time onInterval = Seconds (m_onTime.GetValue ());
   NS_LOG_LOGIC ("stop at " << onInterval);
-  m_startStopEvent = Simulator::Schedule (onInterval, &VideoPush::StopSending, this);
+  m_startStopEvent = Simulator::Schedule (onInterval, &VideoPushApplication::StopSending, this);
 }
 
+void VideoPushApplication::ScheduleStartEvent ()
+{  // Schedules the event to start sending data (switch to the "On" state)
+  NS_LOG_FUNCTION_NOARGS ();
 
-void VideoPush::SendPacket ()
+  Time offInterval = Seconds (m_offTime.GetValue ());
+  NS_LOG_LOGIC ("start at " << offInterval);
+  m_startStopEvent = Simulator::Schedule (offInterval, &VideoPushApplication::StartSending, this);
+}
+
+void VideoPushApplication::PeerLoop ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+  SendPacket();
+  ScheduleNextTx ();
+}
+
+void VideoPushApplication::SendHello ()
+{
+
+}
+
+void VideoPushApplication::SendPacket ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   NS_ASSERT (m_sendEvent.IsExpired ());
   Ptr<Packet> packet = Create<Packet> (m_pktSize);
   NS_LOG_LOGIC ("sending packet at " << Simulator::Now ()<< " UID "<< packet->GetUid());
   m_txTrace (packet);
-  m_socket->Send (packet);
+  m_socket->SendTo(packet, 0, m_peer);
   m_totBytes += m_pktSize;
   m_lastStartTime = Simulator::Now ();
   m_residualBits = 0;
-  ScheduleNextTx ();
 }
 
-void VideoPush::ConnectionSucceeded (Ptr<Socket>)
+void VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -359,7 +371,7 @@ void VideoPush::ConnectionSucceeded (Ptr<Socket>)
   ScheduleStartEvent ();
 }
 
-void VideoPush::ConnectionFailed (Ptr<Socket>)
+void VideoPushApplication::ConnectionFailed (Ptr<Socket>)
 {
   NS_LOG_FUNCTION_NOARGS ();
   cout << "VideoPush, Connection Failed" << endl;

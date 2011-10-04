@@ -22,19 +22,21 @@
  *          University of California, Los Angeles U.S.A.
  */
 
-#ifndef VIDEO_PUSH_H_
-#define VIDEO_PUSH_H_
+#ifndef __VIDEO_PUSH_H__
+#define __VIDEO_PUSH_H__
 
 #include "chunk-video.h"
 #include "neighbor-set.h"
 
 #include "ns3/address.h"
+#include "ns3/ipv4-address.h"
 #include "ns3/application.h"
 #include "ns3/event-id.h"
 #include "ns3/ptr.h"
 #include "ns3/data-rate.h"
 #include "ns3/random-variable.h"
 #include "ns3/traced-callback.h"
+#include "ns3/ipv4.h"
 
 namespace ns3{
 
@@ -44,13 +46,13 @@ class Socket;
 
 enum PeerType {PEER, SOURCE};
 
-class VideoPush : public Application
+class VideoPushApplication : public Application
 {
 
 public:
 	static TypeId GetTypeId (void);
-	VideoPush ();
-	virtual ~VideoPush ();
+	VideoPushApplication ();
+	virtual ~VideoPushApplication ();
 
 	/**
 	* \param maxBytes the total number of bytes to send
@@ -98,21 +100,33 @@ private:
 					  const RandomVariable& offtime,
 					  uint32_t size);
 
-	// Event handlers
+	void PeerLoop();
+
 	void StartSending ();
 	void StopSending ();
 	void SendPacket ();
+	void SendHello ();
 
-	void HandleRead (Ptr<Socket>);
+	// Event handlers
+	void HandleReceive (Ptr<Socket>);
 	void HandleAccept (Ptr<Socket>, const Address& from);
 	void HandlePeerClose (Ptr<Socket>);
 	void HandlePeerError (Ptr<Socket>);
 
+	void ScheduleNextTx ();
+	void ScheduleStartEvent ();
+	void ScheduleStopEvent ();
+	void ConnectionSucceeded (Ptr<Socket>);
+	void ConnectionFailed (Ptr<Socket>);
+	void Ignore (Ptr<Socket>);
+
 	Ptr<Socket>     m_socket;       // Associated socket
 	std::list<Ptr<Socket> > m_socketList; //the accepted sockets
-	Address         m_local;        // Local address to bind to
+	Address     	m_localAddress;	// Local address to bind to
+	uint16_t 		m_localPort;	// Local port to bind to
+
 	uint32_t        m_totalRx;      // Total bytes received
-	Address         m_peer;         // Peer address
+	Address 		m_peer;         // Peer address
 	bool            m_connected;    // True if connected
 	RandomVariable  m_onTime;       // rng for On Time
 	RandomVariable  m_offTime;      // rng for Off Time
@@ -127,17 +141,9 @@ private:
 	EventId         m_sendEvent;    // Eventid of pending "send packet" event
 	bool            m_sending;      // True if currently in sending state
 	TypeId          m_tid;
+	Ptr<Ipv4> 		m_ipv4;
 	TracedCallback<Ptr<const Packet> > m_txTrace;
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxTrace;
-
-
-private:
-  void ScheduleNextTx ();
-  void ScheduleStartEvent ();
-  void ScheduleStopEvent ();
-  void ConnectionSucceeded (Ptr<Socket>);
-  void ConnectionFailed (Ptr<Socket>);
-  void Ignore (Ptr<Socket>);
 };
 
 #endif /* VIDEO_PUSH_H_ */

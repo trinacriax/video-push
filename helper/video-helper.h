@@ -30,7 +30,6 @@
 #include "ns3/object-factory.h"
 #include "ns3/address.h"
 #include "ns3/attribute.h"
-#include "ns3/ipv4-address.h"
 #include "ns3/net-device.h"
 #include "ns3/node-container.h"
 #include "ns3/application-container.h"
@@ -111,3 +110,4 @@ private:
 
 
 #endif /* VIDEO_HELPER_H_ */
+
