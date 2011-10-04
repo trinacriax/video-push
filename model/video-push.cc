@@ -127,6 +127,7 @@ VideoPushApplication::VideoPushApplication ()
   m_lastStartTime = Seconds (0);
   m_totBytes = 0;
   m_totalRx = 0;
+  m_latestChunkID = 0;
 }
 
 VideoPushApplication::~VideoPushApplication()
