@@ -1,12 +1,13 @@
 ## -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 def build(bld):
-	module = bld.create_ns3_module('video-push', ['internet', 'network', 'tools', 'point-to-point', 'wifi', 'mobility', 'csma'])
+	module = bld.create_ns3_module('video-push', ['internet', 'network', 'config-store', 'tools', 'point-to-point', 'wifi', 'mobility', 'applications', 'csma'])
 	module.includes = '.'
 	module.source = [
 		'model/chunk-buffer.cc',		
 		'model/neighbor-set.cc',
 		'model/video-push.cc',
+		'model/chunk-packet.cc',
 		'helper/video-helper.cc',
 		]
 
@@ -18,6 +19,7 @@ def build(bld):
 		'model/neighbor.h',
 		'model/neighbor-set.h',
 		'model/video-push.h',
+		'model/chunk-packet.h',
 		'helper/video-helper.h',
 	]
 
