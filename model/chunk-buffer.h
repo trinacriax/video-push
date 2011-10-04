@@ -53,6 +53,5 @@ protected:
 	std::map<uint32_t, ChunkVideo> chunk_buffer;
 
 };
-#endif
-
 }
+#endif
