@@ -23,9 +23,6 @@
  *          University of California, Los Angeles U.S.A.
  */
 
-/// \brief	This header file declares the Protocol Independent Multicast - Dense Mode (PIM-DM), RFC 3973
-
-
 #ifndef __CHUNK_HEADER_H__
 #define __CHUNK_HEADER_H__
 
@@ -42,9 +39,29 @@ namespace streaming {
 * \brief Chunk Header
 */
 
+//	0               1               2               3
+//	0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                      Chunk Identifier                         |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                          Chunk                                |
+//	|                        Timestamp                              |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                         Chunk Size                            |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                   Chunk Attributes Size                       |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                        Chunk Data                          ....
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                        Chunk Attributes                    ....
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+
 class ChunkHeader : public Header
 {
 public:
+  ChunkHeader (ChunkVideo chunk);
   ChunkHeader ();
   virtual ~ChunkHeader ();
 

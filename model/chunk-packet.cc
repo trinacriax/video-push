@@ -39,8 +39,11 @@ NS_LOG_COMPONENT_DEFINE ("ChunkHeader");
 
 NS_OBJECT_ENSURE_REGISTERED (ChunkHeader);
 
+ChunkHeader::ChunkHeader (ChunkVideo chunk)
+{m_chunk = chunk;}
+
 ChunkHeader::ChunkHeader ()
-{}
+{m_chunk = ChunkVideo();}
 
 ChunkHeader::~ChunkHeader ()
 {}
@@ -79,15 +82,15 @@ ChunkHeader::Serialize (Buffer::Iterator start) const
 {
   Buffer::Iterator i = start;
   i.WriteHtonU32 (m_chunk.c_id);
-  i.WriteHtonU32 (m_chunk.c_size);
-  for(int s = 0; s < m_chunk.c_size ; s++){
-	  i.WriteU8(m_chunk.c_data[s]);
-  }
   i.WriteHtonU64 (m_chunk.c_tstamp);
+  i.WriteHtonU32 (m_chunk.c_size);
+  i.WriteHtonU32 (m_chunk.c_attributes_size);
+  for(int s = 0; s < m_chunk.c_size ; s++){
+  	  i.WriteU8(m_chunk.c_data[s]);
+    }
   for(int s = 0; s < m_chunk.c_attributes_size ; s++){
 	i.WriteU8(m_chunk.c_attributes[s]);
   }
-  i.WriteHtonU32 (m_chunk.c_attributes_size);
 }
 
 uint32_t
@@ -97,17 +100,17 @@ ChunkHeader::Deserialize (Buffer::Iterator start)
   uint32_t size = 0;
   m_chunk.c_id = i.ReadNtohU32();
   size +=4;
+  m_chunk.c_tstamp = i.ReadNtohU64();
+  size +=8;
   m_chunk.c_size = i.ReadNtohU32();
+  size +=4;
+  m_chunk.c_attributes_size = i.ReadNtohU32();
   size +=4;
   m_chunk.c_data = (uint8_t*)calloc(m_chunk.c_size, sizeof(uint8_t));
   for(int s = 0; s < m_chunk.c_size ; s++){
 	m_chunk.c_data[s] = i.ReadU8();
   }
   size += m_chunk.c_size;
-  m_chunk.c_tstamp = i.ReadNtohU64();
-  size +=8;
-  m_chunk.c_attributes_size = i.ReadNtohU32();
-  size +=4;
   m_chunk.c_attributes = (uint8_t*)calloc(m_chunk.c_attributes_size , sizeof(uint8_t));
   for(int s = 0; s < m_chunk.c_attributes_size ; s++){
   	m_chunk.c_attributes[s] = i.ReadU8();
