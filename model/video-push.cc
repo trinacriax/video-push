@@ -247,6 +247,9 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
       if (InetSocketAddress::IsMatchingType (from))
         {
           m_totalRx += packet->GetSize ();
+          ChunkHeader chunk;
+          packet->RemoveHeader(chunk);
+          NS_LOG_INFO("Received chunk "<< chunk);
           InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
           NS_LOG_INFO ("Node " <<m_node->GetId()<<" Received " << packet->GetSize () << " bytes from " <<
                        address.GetIpv4 () << " [" << address << "]"
