@@ -148,6 +148,7 @@ private:
 	Ptr<Ipv4> 		m_ipv4;
 
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm
+	enum ChunkPolicy m_chunkSelection; // Chunk selection algorithm
 	TracedCallback<Ptr<const Packet> > m_txTrace;
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxTrace;
 };

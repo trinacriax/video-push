@@ -103,6 +103,10 @@ VideoPushApplication::GetTypeId (void)
 				   EnumValue(RANDOM),
 				   MakeEnumAccessor(&VideoPushApplication::m_peerSelection),
 				   MakeEnumChecker (RANDOM, "Random peer selection."))
+	.AddAttribute ("ChunkPolicy", "Chunk selection algorithm.",
+				   EnumValue(LATEST),
+				   MakeEnumAccessor(&VideoPushApplication::m_chunkSelection),
+				   MakeEnumChecker (LATEST, "Latest useful chunk"))
     .AddTraceSource ("Tx", "A new packet is created and is sent",
                    MakeTraceSourceAccessor (&VideoPushApplication::m_txTrace))
 	.AddTraceSource ("Rx", "A packet has been received",
