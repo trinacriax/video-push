@@ -33,7 +33,7 @@ namespace ns3{
 		copy->c_data = (uint8_t *) calloc(copy->c_size,sizeof(uint8_t));
 		NS_ASSERT(copy->c_data);
 		memcpy(copy->c_data, &chunk.c_data, chunk.c_size);
-		copy->c_attributes = calloc(copy->c_attributes_size,sizeof(copy->c_data));
+		copy->c_attributes = (uint8_t *)calloc(copy->c_attributes_size,sizeof(copy->c_data));
 		NS_ASSERT(copy->c_attributes);
 		memcpy(copy->c_attributes, &chunk.c_attributes, chunk.c_attributes_size);
 		return copy;

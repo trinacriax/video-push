@@ -26,6 +26,7 @@
 #define __CHUNK_VIDEO_H__
 
 #include <stdint.h>
+#include <iostream>
 namespace ns3{
 
 namespace streaming{
@@ -57,8 +58,8 @@ namespace streaming{
 		uint32_t c_size;
 		uint8_t *c_data;
 		uint64_t c_tstamp;
-		void *c_attributes;
 		uint32_t c_attributes_size;
+		uint8_t *c_attributes;
 	};
 
 		static inline bool
