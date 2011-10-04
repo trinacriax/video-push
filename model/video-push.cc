@@ -42,7 +42,7 @@
 #include "ns3/address-utils.h"
 #include "ns3/inet-socket-address.h"
 #include "ns3/udp-socket.h"
-
+#include <memory.h>
 #include "video-push.h"
 
 NS_LOG_COMPONENT_DEFINE ("VideoPushApplication");
@@ -364,7 +364,14 @@ void VideoPushApplication::SendPacket ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   NS_ASSERT (m_sendEvent.IsExpired ());
-  Ptr<Packet> packet = Create<Packet> (m_pktSize);
+  Ptr<Packet> packet = Create<Packet> (10);
+  uint64_t tstamp = Simulator::Now().GetMilliSeconds();
+  ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,10);
+  ChunkVideo *copy = cv.Copy();
+  cv.c_data = (uint8_t *) calloc(cv.c_size,sizeof(uint8_t));
+  cv.c_attributes = (uint8_t *) calloc(cv.c_attributes_size,sizeof(uint8_t));
+  ChunkHeader chunk = ChunkHeader (*copy);
+  packet->AddHeader(chunk);
   NS_LOG_LOGIC ("sending packet at " << Simulator::Now ()<< " UID "<< packet->GetUid());
   m_txTrace (packet);
   m_socket->SendTo(packet, 0, m_peer);
