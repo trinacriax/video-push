@@ -83,7 +83,7 @@ main (int argc, char *argv[])
 	video.SetAttribute ("OnTime", RandomVariableValue (ConstantVariable (10.0)));
 	video.SetAttribute ("OffTime", RandomVariableValue (ConstantVariable (1.0)));
 	video.SetAttribute ("DataRate", StringValue ("10kb/s"));
-	video.SetAttribute ("PacketSize", UintegerValue (1200));
+	video.SetAttribute ("PacketSize", UintegerValue (1000));
 
 	ApplicationContainer apps1 = video.Install (csmaNodes.Get(1));
 	apps1.Start (Seconds (1.0));
