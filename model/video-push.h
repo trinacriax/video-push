@@ -27,6 +27,8 @@
 
 #define PUSH_PORT 9999
 #include "chunk-video.h"
+#include "chunk-buffer.h"
+#include "chunk-packet.h"
 #include "neighbor-set.h"
 
 #include "ns3/address.h"
@@ -148,6 +150,7 @@ private:
 	TypeId          m_tid;
 	Ptr<Ipv4> 		m_ipv4;
 
+	uint32_t 		m_latestChunkID;
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm
 	enum ChunkPolicy m_chunkSelection; // Chunk selection algorithm
 	TracedCallback<Ptr<const Packet> > m_txTrace;
