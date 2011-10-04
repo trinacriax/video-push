@@ -120,8 +120,8 @@ VideoPushApplication::VideoPushApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socket = 0;
-  m_localPort = 0;
-//  m_localAddress = GetObject<Ipv4>()->GetAddress(1,1).GetLocal();
+  m_localPort = PUSH_PORT;
+  m_ipv4 = GetObject<Ipv4>();
   m_connected = false;
   m_residualBits = 0;
   m_lastStartTime = Seconds (0);
@@ -191,10 +191,8 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
 	  status = m_socket->Bind (InetSocketAddress(Ipv4Address::GetAny (), m_localPort));
 //	  Ptr<Socket> socket = Socket::CreateSocket (GetObject<Node> (), UdpSocketFactory::GetTypeId ());
 	  NS_ASSERT (status != -1);
-//	  InetSocketAddress dst = InetSocketAddress (m_peer, 0);
-//	  status = m_socket->Connect (dst);
-//	  NS_ASSERT (status != -1);
-      m_socket->SetAllowBroadcast (false);
+	  // Bind to any IP address so that broadcasts can be received
+      m_socket->SetAllowBroadcast (true);
       m_socket->SetRecvCallback (MakeCallback (&VideoPushApplication::HandleReceive, this));
       m_socket->SetAcceptCallback (
          MakeNullCallback<bool, Ptr<Socket>, const Address &> (),
@@ -237,6 +235,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 {
   NS_LOG_FUNCTION (this << socket);
   Ptr<Packet> packet;
+
   Address from;
   while ((packet = socket->RecvFrom (from)))
     {

@@ -25,6 +25,7 @@
 #ifndef __VIDEO_PUSH_H__
 #define __VIDEO_PUSH_H__
 
+#define PUSH_PORT 9999
 #include "chunk-video.h"
 #include "neighbor-set.h"
 
