@@ -78,10 +78,10 @@ main (int argc, char *argv[])
 
 	Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
-	InetSocketAddress dst1 = InetSocketAddress (addresses.GetAddress (0));
+	InetSocketAddress dst1 = InetSocketAddress (addresses.GetAddress (0), 9999);
 	VideoHelper video = VideoHelper ("ns3::UdpSocketFactory", dst1);
-	video.SetAttribute ("OnTime", RandomVariableValue (ConstantVariable (1.0)));
-	video.SetAttribute ("OffTime", RandomVariableValue (ConstantVariable (10.0)));
+	video.SetAttribute ("OnTime", RandomVariableValue (ConstantVariable (10.0)));
+	video.SetAttribute ("OffTime", RandomVariableValue (ConstantVariable (1.0)));
 	video.SetAttribute ("DataRate", StringValue ("10kb/s"));
 	video.SetAttribute ("PacketSize", UintegerValue (1200));
 
@@ -89,16 +89,16 @@ main (int argc, char *argv[])
 	apps1.Start (Seconds (1.0));
 	apps1.Stop (Seconds (10.0));
 
-//	InetSocketAddress dst2 = InetSocketAddress (addresses.GetAddress (1));
-//	video = VideoHelper ("ns3::UdpSocketFactory", dst2);
-//	video.SetAttribute ("OnTime", RandomVariableValue (ConstantVariable (10.0)));
-//	video.SetAttribute ("OffTime", RandomVariableValue (ConstantVariable (1.0)));
-//	video.SetAttribute ("DataRate", StringValue ("10kb/s"));
-//	video.SetAttribute ("PacketSize", UintegerValue (1200));
-//
-//	ApplicationContainer apps2 = video.Install (csmaNodes.Get(0));
-//	apps2.Start (Seconds (1.0));
-//	apps2.Stop (Seconds (10.0));
+	InetSocketAddress dst2 = InetSocketAddress (addresses.GetAddress (1));
+	video = VideoHelper ("ns3::UdpSocketFactory", dst2);
+	video.SetAttribute ("OnTime", RandomVariableValue (ConstantVariable (10.0)));
+	video.SetAttribute ("OffTime", RandomVariableValue (ConstantVariable (1.0)));
+	video.SetAttribute ("DataRate", StringValue ("10kb/s"));
+	video.SetAttribute ("PacketSize", UintegerValue (1200));
+
+	ApplicationContainer apps2 = video.Install (csmaNodes.Get(0));
+	apps2.Start (Seconds (1.0));
+	apps2.Stop (Seconds (10.0));
 
 	Simulator::Stop (Seconds (10.0));
 
