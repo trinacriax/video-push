@@ -367,7 +367,7 @@ void VideoPushApplication::SendPacket ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   NS_ASSERT (m_sendEvent.IsExpired ());
-  Ptr<Packet> packet = Create<Packet> (10);
+  Ptr<Packet> packet = Create<Packet> (1);
   uint64_t tstamp = Simulator::Now().GetMilliSeconds();
   ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,10);
   ChunkVideo *copy = cv.Copy();
@@ -375,7 +375,7 @@ void VideoPushApplication::SendPacket ()
   cv.c_attributes = (uint8_t *) calloc(cv.c_attributes_size,sizeof(uint8_t));
   ChunkHeader chunk = ChunkHeader (*copy);
   packet->AddHeader(chunk);
-  NS_LOG_LOGIC ("sending packet at " << Simulator::Now ()<< " UID "<< packet->GetUid());
+  NS_LOG_LOGIC ("sending packet at " << Simulator::Now ()<< " UID "<< packet->GetUid() << " Size "<< packet->GetSize());
   m_txTrace (packet);
   m_socket->SendTo(packet, 0, m_peer);
   m_totBytes += m_pktSize;
