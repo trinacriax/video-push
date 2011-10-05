@@ -43,6 +43,7 @@
 #include "ns3/inet-socket-address.h"
 #include "ns3/udp-socket.h"
 #include <memory.h>
+
 #include "video-push.h"
 
 NS_LOG_COMPONENT_DEFINE ("VideoPushApplication");
@@ -188,9 +189,9 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
     {
       m_socket = Socket::CreateSocket (GetNode (), m_tid);
       NS_ASSERT (m_socket != 0);
+      int32_t iface = 1;//TODO just one interface!
 	  int status;
 	  status = m_socket->Bind (InetSocketAddress(Ipv4Address::GetAny (), m_localPort));
-//	  Ptr<Socket> socket = Socket::CreateSocket (GetObject<Node> (), UdpSocketFactory::GetTypeId ());
 	  NS_ASSERT (status != -1);
 	  // Bind to any IP address so that broadcasts can be received
       m_socket->SetAllowBroadcast (true);
@@ -204,9 +205,6 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
     }
   // Insure no pending event
   CancelEvents ();
-  // If we are not yet connected, there is nothing to do here
-  // The ConnectionComplete upcall will start timers at that time
-  //if (!m_connected) return;
   ScheduleStartEvent ();
 }
 
@@ -230,6 +228,7 @@ void VideoPushApplication::StopApplication () // Called at time specified by Sto
     {
       NS_LOG_WARN ("VideoPush found null socket to close in StopApplication");
     }
+    NS_LOG_DEBUG("Chunks: " << m_chunks.PrintBuffer());
 }
 
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
@@ -247,13 +246,33 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
       if (InetSocketAddress::IsMatchingType (from))
         {
           m_totalRx += packet->GetSize ();
-          ChunkHeader chunk;
-          packet->RemoveHeader(chunk);
-          NS_LOG_INFO("Received chunk "<< chunk);
+          ChunkHeader chunkH;
+          packet->RemoveHeader(chunkH);
+          ChunkVideo *chunk = chunkH.GetChunk();
+          NS_LOG_INFO("Received chunk "<<*chunk);
           InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
           NS_LOG_INFO ("Node " <<m_node->GetId()<<" Received " << packet->GetSize () << " bytes from " <<
                        address.GetIpv4 () << " [" << address << "]"
                                    << " total Rx " << m_totalRx);
+                                   Ptr<NetDevice> pt = socket->GetBoundNetDevice();
+          uint32_t port = address.GetPort();
+          Ipv4Address senderAddr = address.GetIpv4 ();
+          // Update Neighbors START
+          Neighbor *sender = new Neighbor(senderAddr, port);
+          if(!m_neighbors.IsNeighbor(*sender)){
+          	m_neighbors.AddNeighbor(*sender);
+          }
+          NeighborData *ndata = m_neighbors.GetNeighbor(*sender);
+          ndata->n_contact = Simulator::Now();
+          ndata->n_latestChunk = chunk->c_id;
+		  // Update Neighbors END
+
+		  // Update Chunk Buffer START
+		  if(!m_chunks.AddChunk(*chunk)){
+		  	NS_LOG_DEBUG("Chunk " << chunk->c_id <<" already received " << (chunk==m_chunks.GetChunk(chunk->c_id)));
+		  }
+		  // Update ChunkBuffer END
+
           //cast address to void , to suppress 'address' set but not used
           //compiler warning in optimized builds
           (void) address;
@@ -300,8 +319,8 @@ void VideoPushApplication::StartSending ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_lastStartTime = Simulator::Now ();
-  ScheduleNextTx ();  // Schedule the send packet event
   ScheduleStopEvent ();
+  ScheduleNextTx ();  // Schedule the send packet event
 }
 
 void VideoPushApplication::StopSending ()
@@ -321,11 +340,9 @@ void VideoPushApplication::ScheduleNextTx ()
     {
       uint32_t bits = m_pktSize * 8 - m_residualBits;
       NS_LOG_LOGIC ("bits = " << bits);
-      Time nextTime (Seconds (bits /
-                              static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
+      Time nextTime (Seconds (bits / static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
       NS_LOG_LOGIC ("nextTime = " << nextTime);
-      m_sendEvent = Simulator::Schedule (nextTime,
-                                         &VideoPushApplication::SendPacket, this);
+      m_sendEvent = Simulator::Schedule (nextTime, &VideoPushApplication::PeerLoop, this);
     }
   else
     { // All done, cancel any pending events
@@ -333,29 +350,33 @@ void VideoPushApplication::ScheduleNextTx ()
     }
 }
 
-void VideoPushApplication::ScheduleStopEvent ()
+void VideoPushApplication::ScheduleStartEvent ()
 {  // Schedules the event to stop sending data (switch to "Off" state)
   NS_LOG_FUNCTION_NOARGS ();
 
   Time onInterval = Seconds (m_onTime.GetValue ());
-  NS_LOG_LOGIC ("stop at " << onInterval);
-  m_startStopEvent = Simulator::Schedule (onInterval, &VideoPushApplication::StopSending, this);
+  NS_LOG_LOGIC ("start at " << onInterval);
+  m_startStopEvent = Simulator::Schedule (onInterval, &VideoPushApplication::StartSending, this);
 }
 
-void VideoPushApplication::ScheduleStartEvent ()
+void VideoPushApplication::ScheduleStopEvent ()
 {  // Schedules the event to start sending data (switch to the "On" state)
   NS_LOG_FUNCTION_NOARGS ();
 
   Time offInterval = Seconds (m_offTime.GetValue ());
-  NS_LOG_LOGIC ("start at " << offInterval);
-  m_startStopEvent = Simulator::Schedule (offInterval, &VideoPushApplication::StartSending, this);
+  NS_LOG_LOGIC ("stop at " << offInterval);
+  m_startStopEvent = Simulator::Schedule (offInterval, &VideoPushApplication::StopSending, this);
 }
 
 void VideoPushApplication::PeerLoop ()
 {
   NS_LOG_FUNCTION_NOARGS ();
-  SendPacket();
-  ScheduleNextTx ();
+  Time tx = Time::FromDouble(UniformVariable().GetValue(),Time::MS);
+  NS_LOG_DEBUG("PTx @ "<< tx.GetSeconds()<<"s");
+  Simulator::Schedule (tx, &VideoPushApplication::SendPacket, this);
+  tx = Time::FromDouble(tx.GetSeconds()*1.02,Time::S);
+  NS_LOG_DEBUG("NTx @ "<< tx.GetSeconds()<<"s");
+  Simulator::Schedule (tx, &VideoPushApplication::ScheduleNextTx, this);
 }
 
 void VideoPushApplication::SendHello ()
@@ -363,17 +384,22 @@ void VideoPushApplication::SendHello ()
 
 }
 
+ChunkVideo* VideoPushApplication::ChunkSelection(){
+	uint64_t tstamp = Simulator::Now().GetMilliSeconds();
+	ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,0);
+	NS_LOG_DEBUG("Chunk "<< cv);
+	ChunkVideo *copy = cv.Copy();
+	return copy;
+}
+
 void VideoPushApplication::SendPacket ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   NS_ASSERT (m_sendEvent.IsExpired ());
-  Ptr<Packet> packet = Create<Packet> (1);
-  uint64_t tstamp = Simulator::Now().GetMilliSeconds();
-  ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,10);
-  ChunkVideo *copy = cv.Copy();
-  cv.c_data = (uint8_t *) calloc(cv.c_size,sizeof(uint8_t));
-  cv.c_attributes = (uint8_t *) calloc(cv.c_attributes_size,sizeof(uint8_t));
+  ChunkVideo *copy = ChunkSelection();
   ChunkHeader chunk = ChunkHeader (*copy);
+  uint32_t payload = 0; //copy->c_size+copy->c_attributes_size;//data and attributes already in chunk header;
+  Ptr<Packet> packet = Create<Packet> (payload);
   packet->AddHeader(chunk);
   NS_LOG_LOGIC ("sending packet at " << Simulator::Now ()<< " UID "<< packet->GetUid() << " Size "<< packet->GetSize());
   m_txTrace (packet);
@@ -386,7 +412,6 @@ void VideoPushApplication::SendPacket ()
 void VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)
 {
   NS_LOG_FUNCTION_NOARGS ();
-
   m_connected = true;
   ScheduleStartEvent ();
 }

@@ -46,6 +46,7 @@ namespace ns3{
 class Address;
 class RandomVariable;
 class Socket;
+class NeighborsSet;
 
 enum PeerType {PEER, SOURCE};
 
@@ -113,6 +114,7 @@ private:
 	void StopSending ();
 	void SendPacket ();
 	void SendHello ();
+	ChunkVideo* ChunkSelection();
 
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
@@ -149,6 +151,9 @@ private:
 	bool            m_sending;      // True if currently in sending state
 	TypeId          m_tid;
 	Ptr<Ipv4> 		m_ipv4;
+
+	NeighborsSet 	m_neighbors;
+	ChunkBuffer		m_chunks;
 
 	uint32_t 		m_latestChunkID;
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm
