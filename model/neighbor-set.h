@@ -22,8 +22,8 @@
  *          University of California, Los Angeles U.S.A.
  */
 
-#ifndef __NEIGHBOR_SET_H__
-#define __NEIGHBOR_SET_H__
+#ifndef __NEIGHBORS_SET_H__
+#define __NEIGHBORS_SET_H__
 
 #include "neighbor.h"
 #include "ns3/object.h"
@@ -39,39 +39,38 @@ enum PeerState {
 
 struct NeighborData{
 	NeighborData () :
-		n_start (Simulator::Now()), n_active (ACTIVE), log(1)
+		n_contact (Simulator::Now()), n_active (ACTIVE), n_latestChunk(1)
 	{}
-	NeighborData (Time start, PeerState state, uint32_t log):
-		n_start (start), n_active (state), log(log)
+	NeighborData (Time start, PeerState state, uint32_t c_id):
+		n_contact (start), n_active (state), n_latestChunk(c_id)
 	{}
-	Time n_start;
+	Time n_contact;
 	//bitmap
 	//bitmap last time
 	//chunk buffer size;
 	//bandwidth capacity
 	enum PeerState n_active;
-	uint32_t log;
+	uint32_t n_latestChunk;
 	};
 
-class NeighborSet {
+class NeighborsSet {
 
 public:
 
-	NeighborSet () {
-		neighbor_set.clear();
-	}
-	virtual ~NeighborSet ();
+	NeighborsSet ();
+	virtual ~NeighborsSet ();
 
 public:
 	NeighborData* GetNeighbor (Ipv4Address n_addr, uint32_t n_iface);
 	NeighborData* GetNeighbor (Neighbor neighbor);
 	bool AddNeighbor (const Neighbor neighbor, NeighborData data);
+	bool AddNeighbor (Neighbor neighbor);
 	bool DelNeighbor (Ipv4Address n_addr, uint32_t n_iface);
 	bool DelNeighbor (Neighbor neighbor);
 	bool IsNeighbor (const Neighbor neighbor);
 
 protected:
-	std::map<Neighbor, NeighborData> neighbor_set;
+	std::map<Neighbor, NeighborData> m_neighbor_set;
 };
 }
 #endif

@@ -31,20 +31,19 @@
 #include "ns3/nstime.h"
 
 namespace ns3{
-using namespace streaming;
 
 struct Neighbor{
 	Neighbor():
-		n_address (Ipv4Address::GetAny()), n_iface (0){}
+		n_address (Ipv4Address::GetAny()), n_port (0){}
 	Neighbor(Ipv4Address n, uint32_t i):
-			n_address (n), n_iface (i){}
+			n_address (n), n_port (i){}
 	Ipv4Address n_address;
-	uint32_t n_iface;
+	uint32_t n_port;
 };
 
 	static inline bool
 	operator == (const Neighbor &a, const Neighbor &b){
-		return (a.n_address == b.n_address )&& (a.n_iface == b.n_iface);
+		return (a.n_address == b.n_address )&& (a.n_port == b.n_port);
 	}
 
 	static inline bool

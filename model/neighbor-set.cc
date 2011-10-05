@@ -28,52 +28,65 @@
 #include "neighbor-set.h"
 
 namespace ns3{
-using namespace streaming;
 
-NeighborSet::~NeighborSet () {
-	neighbor_set.clear();
+NeighborsSet::NeighborsSet () {
+		m_neighbor_set.clear();
+	}
+
+NeighborsSet::~NeighborsSet () {
+	m_neighbor_set.clear();
 }
 
 NeighborData*
-NeighborSet::GetNeighbor (Ipv4Address n_addr, uint32_t n_iface){
-	Neighbor *n = new Neighbor(n_addr, n_iface);
+NeighborsSet::GetNeighbor (Ipv4Address n_addr, uint32_t n_port){
+	Neighbor *n = new Neighbor(n_addr, n_port);
 	return GetNeighbor(*n);
 }
 
 NeighborData*
-NeighborSet::GetNeighbor (Neighbor neighbor){
+NeighborsSet::GetNeighbor (Neighbor neighbor){
 	NeighborData *n_data = 0;
 	if(IsNeighbor(neighbor))
-		n_data = &(neighbor_set.find(neighbor)->second);
+		n_data = &(m_neighbor_set.find(neighbor)->second);
 	return  n_data;
 }
 
 bool
-NeighborSet::IsNeighbor (const Neighbor neighbor){
-	std::map<Neighbor, NeighborData>::iterator iter = neighbor_set.find(neighbor);
-	return (iter != neighbor_set.end());
+NeighborsSet::IsNeighbor (const Neighbor neighbor){
+	std::map<Neighbor, NeighborData>::iterator iter = m_neighbor_set.find(neighbor);
+	return (iter != m_neighbor_set.end());
 }
 
 bool
-NeighborSet::AddNeighbor (Neighbor neighbor, NeighborData data){
+NeighborsSet::AddNeighbor (Neighbor neighbor, NeighborData data){
 	if(IsNeighbor(neighbor))
 		return false;
 	std::pair<std::map<Neighbor, NeighborData>::iterator,bool> test;
-	test = neighbor_set.insert(std::pair<Neighbor,NeighborData> (neighbor,data));
+	test = m_neighbor_set.insert(std::pair<Neighbor,NeighborData> (neighbor,data));
 	return test.second;
 }
 
 bool
-NeighborSet::DelNeighbor (Ipv4Address n_addr, uint32_t n_iface){
-	Neighbor *n = new Neighbor(n_addr, n_iface);
+NeighborsSet::AddNeighbor (Neighbor neighbor){
+	if(IsNeighbor(neighbor))
+		return false;
+	std::pair<std::map<Neighbor, NeighborData>::iterator,bool> test;
+	NeighborData data;
+	test = m_neighbor_set.insert(std::pair<Neighbor,NeighborData> (neighbor,data));
+	return test.second;
+}
+
+bool
+NeighborsSet::DelNeighbor (Ipv4Address n_addr, uint32_t n_port){
+	Neighbor *n = new Neighbor(n_addr, n_port);
 	return DelNeighbor(*n);
 }
 
 bool
-NeighborSet::DelNeighbor (Neighbor neighbor){
+NeighborsSet::DelNeighbor (Neighbor neighbor){
 	if(!IsNeighbor(neighbor))
 		return false;
-	return (neighbor_set.erase(neighbor) ==1 );
+	return (m_neighbor_set.erase(neighbor) ==1 );
 }
 }
 
