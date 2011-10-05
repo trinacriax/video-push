@@ -83,12 +83,14 @@ public:
   virtual uint32_t GetSerializedSize (void) const;
   virtual void Serialize (Buffer::Iterator start) const;
   virtual uint32_t Deserialize (Buffer::Iterator start);
+  virtual ChunkVideo* GetChunk();
   //\}
 };
   static inline std::ostream&
   operator << (std::ostream& o, const ChunkHeader &a)
   {
-  return o<<"Chunk: "<< a <<"\n";
+	  ChunkHeader chunk =  a.GetChunk();
+  return o<<"Chunk: "<< chunk<<"\n";
   }
 
 
