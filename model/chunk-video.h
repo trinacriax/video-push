@@ -41,21 +41,21 @@ namespace streaming{
 	struct ChunkVideo{
 		ChunkVideo () :
 			c_id (0),
-			c_size(0),
 			c_tstamp (0),
+			c_size(0),
 			c_attributes_size (0)
 		{
-			c_attributes = 0;
 			c_data = 0;
+			c_attributes = 0;
 		}
-		ChunkVideo (uint32_t cid, uint32_t csize, uint64_t ctstamp, uint32_t cattributes_size) :
+		ChunkVideo (uint32_t cid, uint64_t ctstamp, uint32_t csize, uint32_t cattributes_size) :
 			c_id (cid),
 			c_tstamp (ctstamp),
 			c_size(csize),
 			c_attributes_size (cattributes_size)
 		{
-			c_attributes = 0;
 			c_data = 0;
+			c_attributes = 0;
 		}
 		uint32_t c_id;
 		uint64_t c_tstamp;
@@ -65,7 +65,7 @@ namespace streaming{
 		uint8_t *c_attributes;
 
 		ChunkVideo* Copy (){
-			ChunkVideo *copy = new ChunkVideo(c_id, c_size, c_tstamp, c_attributes_size);
+			ChunkVideo *copy = new ChunkVideo(c_id, c_tstamp, c_size, c_attributes_size);
 			copy->c_data = (uint8_t *) calloc(copy->c_size,sizeof(uint8_t));
 			NS_ASSERT(copy->c_data);
 			memcpy(copy->c_data, &c_data, c_size);
@@ -79,7 +79,7 @@ namespace streaming{
 		static inline std::ostream&
 		operator << (std::ostream& o, const ChunkVideo &a)
 		{
-		return o<<"Id: "<< a.c_id <<" S: "<<a.c_size<<" Ts "<< a.c_tstamp << " As "<<a.c_attributes_size<<"\n";
+		return o<<"ID: "<< a.c_id <<" Tstamp "<< a.c_tstamp << " Size "<<a.c_size << " AttrSize "<<a.c_attributes_size;
 		}
 
 		static inline bool
