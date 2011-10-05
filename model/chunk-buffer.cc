@@ -27,32 +27,25 @@
 
 namespace ns3{
 
-	ChunkVideo*
-	ChunkBuffer::Copy (const ChunkVideo chunk){
-		ChunkVideo *copy = new ChunkVideo(chunk.c_id, chunk.c_size, chunk.c_tstamp, chunk.c_attributes_size);
-		copy->c_data = (uint8_t *) calloc(copy->c_size,sizeof(uint8_t));
-		NS_ASSERT(copy->c_data);
-		memcpy(copy->c_data, &chunk.c_data, chunk.c_size);
-		copy->c_attributes = (uint8_t *)calloc(copy->c_attributes_size,sizeof(copy->c_data));
-		NS_ASSERT(copy->c_attributes);
-		memcpy(copy->c_attributes, &chunk.c_attributes, chunk.c_attributes_size);
-		return copy;
-	}
+
+	ChunkBuffer::ChunkBuffer (){chunk_buffer.clear();}
+
+	ChunkBuffer::~ChunkBuffer (){chunk_buffer.clear();}
 
 	ChunkVideo*
 	ChunkBuffer::GetChunk (uint32_t index){
 		ChunkVideo *copy = 0;
 		std::map<uint32_t, ChunkVideo>::iterator const result = chunk_buffer.find(index);
 		if (result != chunk_buffer.end())
-			copy = Copy(result->second);
+			copy = result->second.Copy();
 		return copy;
 	}
 
 	bool
-	ChunkBuffer::AddChunk (const ChunkVideo chunk) {
+	ChunkBuffer::AddChunk (ChunkVideo chunk) {
 		std::map<uint32_t, ChunkVideo>::iterator result = chunk_buffer.find(chunk.c_id);
 		if (result == chunk_buffer.end()){
-			ChunkVideo *copy = Copy(chunk);		;
+			ChunkVideo *copy = chunk.Copy();
 			chunk_buffer.insert(std::pair <uint32_t, ChunkVideo> (chunk.c_id, *copy));
 			return true;
 		}
@@ -72,6 +65,16 @@ namespace ns3{
 	const uint32_t
 	ChunkBuffer::GetChunkSize (ChunkVideo chunk){
 		return chunk.c_size;
+	}
+
+	std::string
+	ChunkBuffer::PrintBuffer(){
+		std::stringstream buf;
+		for(std::map<uint32_t, ChunkVideo>::iterator iter = chunk_buffer.begin();
+			iter != chunk_buffer.end() ; iter++){
+			buf<<iter->first<<", ";
+		}
+		return buf.str();
 	}
 }
 

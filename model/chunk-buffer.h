@@ -28,7 +28,7 @@
 #include "chunk-video.h"
 #include "ns3/object.h"
 #include <map>
-
+#include <string>
 namespace ns3{
 using namespace streaming;
 
@@ -40,14 +40,13 @@ public:
 
 	virtual ~ChunkBuffer ();
 
-	ChunkVideo* Copy (const ChunkVideo chunk);
-
 	ChunkVideo* GetChunk (uint32_t index);
-	bool AddChunk (const ChunkVideo chunk);
+	bool AddChunk (ChunkVideo chunk);
 	bool DelChunk (uint32_t index);
 
 	const uint32_t GetChunkSize (uint32_t index);
 	const uint32_t GetChunkSize (ChunkVideo chunk);
+	std::string PrintBuffer();
 
 protected:
 	std::map<uint32_t, ChunkVideo> chunk_buffer;
