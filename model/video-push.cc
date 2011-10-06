@@ -60,7 +60,7 @@ VideoPushApplication::GetTypeId (void)
   static TypeId tid = TypeId ("ns3::VideoPushApplication")
     .SetParent<Application> ()
     .AddConstructor<VideoPushApplication> ()
-    .AddAttribute ("Local", "The Address on which to Bind the rx socket.",
+    .AddAttribute ("Local", "Node main address",
                    AddressValue (),
                    MakeAddressAccessor (&VideoPushApplication::m_localAddress),
                    MakeAddressChecker ())
