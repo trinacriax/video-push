@@ -407,7 +407,7 @@ void VideoPushApplication::SendPacket ()
   uint32_t payload = 0; //copy->c_size+copy->c_attributes_size;//data and attributes already in chunk header;
   Ptr<Packet> packet = Create<Packet> (payload);
   packet->AddHeader(chunk);
-  NS_LOG_LOGIC ("sending packet at " << Simulator::Now ()<< " UID "<< packet->GetUid() << " Size "<< packet->GetSize());
+  NS_LOG_LOGIC ("Push packet at " << Simulator::Now ()<< " UID "<< packet->GetUid() << " Push Size "<< packet->GetSize());
   m_txTrace (packet);
   m_socket->SendTo(packet, 0, m_peer);
   m_totBytes += m_pktSize;
