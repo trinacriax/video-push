@@ -372,11 +372,13 @@ void VideoPushApplication::PeerLoop ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   Time tx = Time::FromDouble(UniformVariable().GetValue(),Time::MS);
-  NS_LOG_DEBUG("PTx @ "<< tx.GetSeconds()<<"s");
-  Simulator::Schedule (tx, &VideoPushApplication::SendPacket, this);
-  tx = Time::FromDouble(tx.GetSeconds()*1.02,Time::S);
-  NS_LOG_DEBUG("NTx @ "<< tx.GetSeconds()<<"s");
-  Simulator::Schedule (tx, &VideoPushApplication::ScheduleNextTx, this);
+  if(m_peerType == SOURCE){
+	  NS_LOG_DEBUG("PTx @ "<< tx.GetSeconds()<<"s");
+	  Simulator::Schedule (tx, &VideoPushApplication::SendPacket, this);
+	  tx = Time::FromDouble(tx.GetSeconds()*1.02,Time::S);
+	  NS_LOG_DEBUG("NTx @ "<< tx.GetSeconds()<<"s");
+	  Simulator::Schedule (tx, &VideoPushApplication::ScheduleNextTx, this);
+  }
 }
 
 void VideoPushApplication::SendHello ()
