@@ -48,11 +48,18 @@ class RandomVariable;
 class Socket;
 class NeighborsSet;
 
-enum PeerType {PEER, SOURCE};
+enum PeerType {
+	PEER,
+	SOURCE
+};
 
-enum PeerPolicy {RANDOM};
+enum PeerPolicy {
+	RANDOM
+};
 
-enum ChunkPolicy {LATEST};
+enum ChunkPolicy {
+	LATEST
+};
 
 class VideoPushApplication : public Application
 {
