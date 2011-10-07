@@ -64,6 +64,10 @@ VideoPushApplication::GetTypeId (void)
                    AddressValue (),
                    MakeAddressAccessor (&VideoPushApplication::m_localAddress),
                    MakeAddressChecker ())
+    .AddAttribute ("LocalPort", "Node main local port",
+                   UintegerValue (),
+                   MakeUintegerAccessor (&VideoPushApplication::m_localPort),
+                   MakeUintegerChecker<uint16_t> (1))
     .AddAttribute ("PeerType", "Type of peer: source or peer.",
                    EnumValue(PEER),
                    MakeEnumAccessor(&VideoPushApplication::m_peerType),
