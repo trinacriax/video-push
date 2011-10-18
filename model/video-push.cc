@@ -249,11 +249,10 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
         }
       if (InetSocketAddress::IsMatchingType (from))
         {
-          m_totalRx += packet->GetSize ();
           ChunkHeader chunkH;
           packet->RemoveHeader(chunkH);
           ChunkVideo *chunk = chunkH.GetChunk();
-          NS_LOG_INFO("Received chunk "<<*chunk);
+          m_totalRx += chunk->GetSize () + chunk->GetAttributeSize();
           InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
           NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " Received " << packet->GetSize () << " bytes from " <<
                        address.GetIpv4 () << " [" << address << "]" << " total Rx " << m_totalRx);
@@ -402,13 +401,13 @@ void VideoPushApplication::SendPacket ()
   NS_ASSERT (m_sendEvent.IsExpired ());
   ChunkVideo *copy = ChunkSelection();
   ChunkHeader chunk = ChunkHeader (*copy);
-  uint32_t payload = 0; //copy->c_size+copy->c_attributes_size;//data and attributes already in chunk header;
-  Ptr<Packet> packet = Create<Packet> (payload);
+  Ptr<Packet> packet = Create<Packet> ();
   packet->AddHeader(chunk);
-  NS_LOG_LOGIC ("Push packet at " << Simulator::Now ()<< " UID "<< packet->GetUid() << " Push Size "<< packet->GetSize());
+  uint32_t payload = copy->c_size+copy->c_attributes_size;//data and attributes already in chunk header;
+  NS_LOG_LOGIC ("Push packet at " << Simulator::Now ()<< " UID "<< packet->GetUid() << " Push Size "<< payload);
   m_txTrace (packet);
   m_socket->SendTo(packet, 0, m_peer);
-  m_totBytes += m_pktSize;
+  m_totBytes += payload;
   m_lastStartTime = Simulator::Now ();
   m_residualBits = 0;
 }
