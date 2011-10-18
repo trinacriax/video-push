@@ -74,6 +74,9 @@ namespace streaming{
 			memcpy(copy->c_attributes, &c_attributes, c_attributes_size);
 			return copy;
 		}
+
+		uint32_t GetSize(){return c_size;}
+		uint32_t GetAttributeSize(){return c_attributes_size;}
 	};
 
 		static inline std::ostream&
