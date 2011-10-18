@@ -411,6 +411,7 @@ void VideoPushApplication::SendPacket ()
   m_totBytes += payload;
   m_lastStartTime = Simulator::Now ();
   m_residualBits = 0;
+  m_latestChunkID++;
 }
 
 void VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)
