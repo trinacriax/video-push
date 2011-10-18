@@ -254,8 +254,9 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           ChunkVideo *chunk = chunkH.GetChunk();
           m_totalRx += chunk->GetSize () + chunk->GetAttributeSize();
           InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
-          NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " Received " << packet->GetSize () << " bytes from " <<
-                       address.GetIpv4 () << " [" << address << "]" << " total Rx " << m_totalRx);
+          NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) <<
+        		  " Received [" <<  *chunk << "] from " << address.GetIpv4 () <<
+        		  " [" << address << "]" << " total Rx " << m_totalRx);
           uint32_t port = address.GetPort();
           Ipv4Address senderAddr = address.GetIpv4 ();
           // Update Neighbors START
