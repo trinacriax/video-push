@@ -175,7 +175,34 @@ VideoPushApplication::GetAcceptedSockets (void) const
 void
 VideoPushApplication::DoDispose (void)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+//  NS_LOG_FUNCTION_NOARGS ();
+  std::map<uint32_t, ChunkVideo> tmp_buffer = m_chunks.GetChunkBuffer();
+  uint32_t last = 0;
+  uint32_t missed = 0;
+  uint32_t duplicates = 0;
+  for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
+	  while (last < iter->first){
+		missed++;
+		last++;
+	  }
+	  duplicates+=m_duplicates[iter->first];
+	  last = iter->first +1;
+  }
+//  NS_LOG_INFO("done " <<last<<","<<missed<<","<<duplicates);
+  double miss,rec,dup;
+  if (last == 0) {
+	  miss = 1;
+	  rec = dup = 0;
+  }
+  else
+  {
+	  miss = (missed/(1.0*last));
+	  rec = ((last-missed)/(1.0*last));
+	  dup = ((1.0*duplicates)/(last-missed));
+  }
+  char ss[100];
+  sprintf(ss, " R %.2f M %.2f D %.2f T %d",rec,miss,dup,last);
+  NS_LOG_INFO("Chunks Node " << m_node->GetId() << ss);
 
   m_socket = 0;
   m_socketList.clear();
