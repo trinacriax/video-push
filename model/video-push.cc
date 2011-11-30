@@ -272,6 +272,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 		  // Update Chunk Buffer START
 		  if(!m_chunks.AddChunk(*chunk)){
 		  	NS_LOG_DEBUG("Chunk " << chunk->c_id <<" already received " << (chunk==m_chunks.GetChunk(chunk->c_id)));
+		  	m_duplicates[chunk->c_id]++;
 		  }
 		  // Update ChunkBuffer END
 

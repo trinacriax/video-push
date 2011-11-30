@@ -161,6 +161,7 @@ private:
 
 	NeighborsSet 	m_neighbors;
 	ChunkBuffer		m_chunks;
+	uint32_t		m_duplicates[1000]; //TODO size
 
 	uint32_t 		m_latestChunkID;
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm
