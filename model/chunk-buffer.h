@@ -44,8 +44,7 @@ public:
 	bool AddChunk (ChunkVideo chunk);
 	bool DelChunk (uint32_t index);
 
-	const uint32_t GetChunkSize (uint32_t index);
-	const uint32_t GetChunkSize (ChunkVideo chunk);
+	const size_t GetBufferSize ();
 	std::string PrintBuffer();
 
 protected:

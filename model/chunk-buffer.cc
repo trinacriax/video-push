@@ -57,14 +57,11 @@ namespace ns3{
 		return chunk_buffer.erase(index);
 	}
 
-	const uint32_t
-	ChunkBuffer::GetChunkSize (uint32_t index) {
-		return GetChunk(index)->c_size;
+	const size_t
+	ChunkBuffer::GetBufferSize (){
+		return chunk_buffer.size();
 	}
 
-	const uint32_t
-	ChunkBuffer::GetChunkSize (ChunkVideo chunk){
-		return chunk.c_size;
 	}
 
 	std::string
