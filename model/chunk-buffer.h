@@ -46,6 +46,7 @@ public:
 
 	const size_t GetBufferSize ();
 	std::string PrintBuffer();
+	std::map<uint32_t, ChunkVideo> GetChunkBuffer();
 
 protected:
 	std::map<uint32_t, ChunkVideo> chunk_buffer;

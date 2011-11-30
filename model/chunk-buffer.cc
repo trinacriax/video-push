@@ -62,7 +62,11 @@ namespace ns3{
 		return chunk_buffer.size();
 	}
 
+	std::map<uint32_t, ChunkVideo>
+	ChunkBuffer::GetChunkBuffer(){
+		return chunk_buffer;
 	}
+
 
 	std::string
 	ChunkBuffer::PrintBuffer(){
