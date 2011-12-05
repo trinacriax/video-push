@@ -48,6 +48,8 @@
 
 NS_LOG_COMPONENT_DEFINE ("VideoPushApplication");
 
+uint32_t last_chunk;
+
 using namespace std;
 
 namespace ns3 {
@@ -187,6 +189,10 @@ VideoPushApplication::DoDispose (void)
 	  }
 	  duplicates+=m_duplicates[iter->first];
 	  last = iter->first +1;
+  }
+  while(last < last_chunk){
+	  missed++;
+	  last++;
   }
 //  NS_LOG_INFO("done " <<last<<","<<missed<<","<<duplicates);
   double miss,rec,dup;
@@ -439,6 +445,10 @@ void VideoPushApplication::SendPacket ()
   m_lastStartTime = Simulator::Now ();
   m_residualBits = 0;
   m_latestChunkID++;
+  last_chunk = (last_chunk < m_latestChunkID)?m_latestChunkID:last_chunk;
+  if(!m_chunks.AddChunk(*copy)){
+	m_duplicates[copy->c_id]++;
+  }
 }
 
 void VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)
