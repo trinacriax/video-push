@@ -101,8 +101,8 @@ private:
    * \returns Ptr to the application installed.
    */
   Ptr<Application> InstallPriv (Ptr<Node> node) const;
-  std::string m_protocol;
-  Address m_remote;
+//  std::string m_protocol;
+//  Address m_remote;
   ObjectFactory m_factory;
 };
 
