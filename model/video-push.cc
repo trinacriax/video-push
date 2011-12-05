@@ -230,7 +230,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
 	  int status;
 	  status = m_socket->Bind (InetSocketAddress(Ipv4Address::GetAny (), m_localPort));
 	  NS_ASSERT (status != -1);
-	  // Bind to any IP address so that broadcasts can be received
+	  // Bind to any IP address so that packets can be received
       m_socket->SetAllowBroadcast (true);
       m_socket->SetRecvCallback (MakeCallback (&VideoPushApplication::HandleReceive, this));
       m_socket->SetAcceptCallback (
