@@ -182,6 +182,13 @@ VideoPushApplication::DoDispose (void)
   uint32_t last = 0;
   uint32_t missed = 0;
   uint32_t duplicates = 0;
+  Time delay_max;
+  Time delay_min;
+  Time delay_avg;
+  double miss;
+  double rec;
+  double dups;
+  miss = rec = dups = 0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
 	  while (last < iter->first){
 		missed++;
@@ -189,26 +196,36 @@ VideoPushApplication::DoDispose (void)
 	  }
 	  duplicates+=m_duplicates[iter->first];
 	  last = iter->first +1;
+	  Time chunk_delay = Time::FromInteger(iter->second.c_tstamp,Time::NS);
+	  delay_max = (delay_max < chunk_delay)? chunk_delay : delay_max;
+	  delay_min = delay_min==0? delay_max: (delay_min > chunk_delay)? chunk_delay : delay_min;
+	  delay_avg += chunk_delay;
+//	  NS_LOG_INFO ("Time "<< chunk_delay <<" "<<delay_max<< " "<<delay_min<<" "<< delay_avg);
   }
+  if (last == 0) last++;
+  delay_avg = Time::FromInteger(delay_avg.ToInteger(Time::NS) / last, Time::NS);
   while(last < last_chunk){
 	  missed++;
 	  last++;
   }
 //  NS_LOG_INFO("done " <<last<<","<<missed<<","<<duplicates);
-  double miss,rec,dup;
   if (last == 0) {
 	  miss = 1;
-	  rec = dup = 0;
+	  rec = dups = 0;
   }
   else
   {
 	  miss = (missed/(1.0*last));
-	  rec = ((last-missed)/(1.0*last));
-	  dup = ((1.0*duplicates)/(last-missed));
+	  double diff = last-missed ;
+	  rec = diff == 0? 0 : (diff/last);
+	  dups = duplicates/diff;
   }
-  char ss[100];
-  sprintf(ss, " R %.2f M %.2f D %.2f T %d",rec,miss,dup,last);
-  NS_LOG_INFO("Chunks Node " << m_node->GetId() << ss);
+//  char ss[100];
+//  sprintf(ss, " R %.2f M %.2f D %.2f T %d M %lu m %lu A %lu",rec,miss,dups,last,delay_max.ToInteger(Time::NS),delay_min.ToInteger(Time::NS),delay_avg.ToInteger(Time::NS));
+//  NS_LOG_INFO("Chunks Node " << m_node->GetId() << ss);
+  char dd[100];
+  sprintf(dd, " R %.2f M %.2f D %.2f T %d M %lu us m %lu us A %lu us",rec,miss,dups,last,delay_max.ToInteger(Time::US),delay_min.ToInteger(Time::US),delay_avg.ToInteger(Time::US));
+  NS_LOG_INFO("Chunks Node " << m_node->GetId() << dd);
 
   m_socket = 0;
   m_socketList.clear();
