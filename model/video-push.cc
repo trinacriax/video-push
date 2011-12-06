@@ -67,7 +67,7 @@ VideoPushApplication::GetTypeId (void)
                    MakeAddressAccessor (&VideoPushApplication::m_localAddress),
                    MakeAddressChecker ())
     .AddAttribute ("LocalPort", "Node main local port",
-                   UintegerValue (),
+                   UintegerValue (PUSH_PORT),
                    MakeUintegerAccessor (&VideoPushApplication::m_localPort),
                    MakeUintegerChecker<uint16_t> (1))
     .AddAttribute ("PeerType", "Type of peer: source or peer.",
@@ -127,7 +127,6 @@ VideoPushApplication::VideoPushApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socket = 0;
-  m_localPort = PUSH_PORT;
   m_ipv4 = GetObject<Ipv4>();
   m_connected = false;
   m_residualBits = 0;
@@ -247,6 +246,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
 	  int status;
 	  status = m_socket->Bind (InetSocketAddress(Ipv4Address::GetAny (), m_localPort));
 	  NS_ASSERT (status != -1);
+	  NS_LOG_DEBUG("Push Socket "<< m_socket << " to "<<Ipv4Address::GetAny ()<<"::"<< m_localPort);
 	  // Bind to any IP address so that packets can be received
       m_socket->SetAllowBroadcast (true);
       m_socket->SetRecvCallback (MakeCallback (&VideoPushApplication::HandleReceive, this));
