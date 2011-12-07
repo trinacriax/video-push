@@ -25,6 +25,7 @@
 #define NS_LOG_APPEND_CONTEXT                                   \
   if (GetObject<Node> ()) { std::clog << "[node " << GetObject<Node> ()->GetId () << "] "; }
 
+
 #include "ns3/log.h"
 #include "ns3/address.h"
 #include "ns3/node.h"
@@ -45,6 +46,7 @@
 #include <memory.h>
 
 #include "video-push.h"
+#include "ns3/pimdm-routing.h"
 
 NS_LOG_COMPONENT_DEFINE ("VideoPushApplication");
 
@@ -297,6 +299,13 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
         { //EOF
           break;
         }
+      ns3::pimdm::RelayTag relayTag;
+      bool rtag = packet->RemovePacketTag(relayTag);
+      Ipv4Address current = Ipv4Address::ConvertFrom(m_localAddress);
+      if(rtag && current != relayTag.m_receiver){
+    	  NS_LOG_DEBUG("Discarded:"<<current<< " ! "<< relayTag.m_receiver);
+    	  break;
+      }
       if (InetSocketAddress::IsMatchingType (from))
         {
           ChunkHeader chunkH;
