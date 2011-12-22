@@ -68,6 +68,7 @@ public:
 	bool DelNeighbor (Ipv4Address n_addr, uint32_t n_iface);
 	bool DelNeighbor (Neighbor neighbor);
 	bool IsNeighbor (const Neighbor neighbor);
+	int GetSize();
 
 protected:
 	std::map<Neighbor, NeighborData> m_neighbor_set;
