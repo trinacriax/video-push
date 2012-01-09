@@ -203,9 +203,8 @@ VideoPushApplication::DoDispose (void)
 	  delay_avg += chunk_delay;
 //	  NS_LOG_INFO ("Time "<< chunk_delay <<" "<<delay_max<< " "<<delay_min<<" "<< delay_avg);
   }
-  if (last == 0) last++;
-  delay_avg = Time::FromInteger(delay_avg.ToInteger(Time::NS) / last, Time::NS);
-  while(last < last_chunk){
+  delay_avg = Time::FromInteger(delay_avg.ToInteger(Time::NS) / (last ==0?1:last), Time::NS);
+  while(last>0 && last < last_chunk){
 	  missed++;
 	  last++;
   }
