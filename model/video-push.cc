@@ -438,21 +438,22 @@ void VideoPushApplication::ScheduleNextTx ()
 }
 
 void VideoPushApplication::ScheduleStartEvent ()
-{  // Schedules the event to stop sending data (switch to "Off" state)
+{  // Schedules the event to start sending data (switch to "Off" state)
   NS_LOG_FUNCTION_NOARGS ();
 
-  Time onInterval = Seconds (m_onTime.GetValue ());
-  NS_LOG_LOGIC ("start at " << onInterval);
-  m_startStopEvent = Simulator::Schedule (onInterval, &VideoPushApplication::StartSending, this);
+  Time offInterval = Seconds (m_offTime.GetValue ());
+
+  NS_LOG_LOGIC ("start at " << offInterval);
+  m_startStopEvent = Simulator::Schedule (offInterval, &VideoPushApplication::StartSending, this);
 }
 
 void VideoPushApplication::ScheduleStopEvent ()
 {  // Schedules the event to start sending data (switch to the "On" state)
   NS_LOG_FUNCTION_NOARGS ();
 
-  Time offInterval = Seconds (m_offTime.GetValue ());
-  NS_LOG_LOGIC ("stop at " << offInterval);
-  m_startStopEvent = Simulator::Schedule (offInterval, &VideoPushApplication::StopSending, this);
+  Time onInterval = Seconds (m_onTime.GetValue ());
+  NS_LOG_LOGIC ("stop at " << onInterval);
+  m_startStopEvent = Simulator::Schedule (onInterval, &VideoPushApplication::StopSending, this);
 }
 
 void VideoPushApplication::PeerLoop ()
