@@ -436,7 +436,9 @@ void VideoPushApplication::ScheduleNextTx ()
       NS_LOG_LOGIC ("bits = " << bits);
       Time nextTime (Seconds (bits / static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
       NS_LOG_LOGIC ("nextTime = " << nextTime);
-      m_sendEvent = Simulator::Schedule (nextTime, &VideoPushApplication::PeerLoop, this);
+      m_sendEvent = Simulator::ScheduleNow (&VideoPushApplication::PeerLoop, this);
+      NS_LOG_DEBUG("ScheduleNextTx Now");
+      Simulator::Schedule (nextTime, &VideoPushApplication::ScheduleNextTx, this);
     }
   else
     { // All done, cancel any pending events
@@ -466,13 +468,13 @@ void VideoPushApplication::ScheduleStopEvent ()
 void VideoPushApplication::PeerLoop ()
 {
   NS_LOG_FUNCTION_NOARGS ();
-  Time tx = Time::FromDouble(UniformVariable().GetValue(),Time::MS);
+//  Time tx = Time::FromDouble(UniformVariable().GetValue(),Time::MS);
   if(m_peerType == SOURCE){
-	  NS_LOG_DEBUG("PTx @ "<< tx.GetSeconds()<<"s");
-	  Simulator::Schedule (tx, &VideoPushApplication::SendPacket, this);
-	  tx = Time::FromDouble(tx.GetSeconds()*1.02,Time::S);
-	  NS_LOG_DEBUG("NTx @ "<< tx.GetSeconds()<<"s");
-	  Simulator::Schedule (tx, &VideoPushApplication::ScheduleNextTx, this);
+//	  NS_LOG_DEBUG("SendPacket Tx @ "<< tx.GetSeconds()<<"s");
+	  Simulator::ScheduleNow (&VideoPushApplication::SendPacket, this);
+//	  tx = Time::FromDouble(tx.GetSeconds()*1.05,Time::S);
+//	  NS_LOG_DEBUG("ScheduleNextTx Tx @ "<< tx.GetSeconds()<<"s");
+//	  Simulator::Schedule (tx, &VideoPushApplication::ScheduleNextTx, this);
   }
 }
 
