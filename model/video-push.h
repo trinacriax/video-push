@@ -129,6 +129,7 @@ private:
 	void HandlePeerClose (Ptr<Socket>);
 	void HandlePeerError (Ptr<Socket>);
 	Ptr<Ipv4Route> GetRoute (Ipv4Address local, Ipv4Address destination);
+	Ipv4Address GetNextHop (Ipv4Address destination);
 
 	void ScheduleNextTx ();
 	void ScheduleStartEvent ();

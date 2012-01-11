@@ -298,6 +298,14 @@ VideoPushApplication::GetRoute(Ipv4Address local, Ipv4Address destination) {
 	return route;
 }
 
+Ipv4Address
+VideoPushApplication::GetNextHop (Ipv4Address destination) {
+	Ipv4Address local = Ipv4Address::ConvertFrom(m_localAddress);
+	Ptr<Ipv4Route> route = GetRoute (local, destination);
+	return (route == NULL ? Ipv4Address::GetAny(): route->GetGateway());
+}
+
+
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 {
   NS_LOG_FUNCTION (this << socket);
