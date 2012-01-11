@@ -237,7 +237,7 @@ VideoPushApplication::DoDispose (void)
 void VideoPushApplication::StartApplication () // Called at time specified by Start
 {
   NS_LOG_FUNCTION_NOARGS ();
-
+  m_ipv4 = m_node->GetObject<Ipv4>();
   // Create the socket if not already
   if (!m_socket)
     {
