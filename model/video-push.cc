@@ -321,13 +321,20 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
       ns3::pimdm::RelayTag relayTag;
       bool rtag = packet->RemovePacketTag(relayTag);
       Ipv4Address current = Ipv4Address::ConvertFrom(m_localAddress);
-//      Ipv4Address sender = Ipv4Address::ConvertFrom(from);
+      InetSocketAddress inetAddr = InetSocketAddress::ConvertFrom (from);
+      Ipv4Address sourceAddr = inetAddr.GetIpv4 ();
+      uint16_t sourcePort = inetAddr.GetPort();
+      Ipv4Address gateway = GetNextHop(sourceAddr);
       Ipv4Mask mask ("255.255.255.0");
       current = current.GetSubnetDirectedBroadcast(mask);
       NS_LOG_DEBUG("Packet from "<< from << " Local "<< current << " Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast());
       if(rtag && current != relayTag.m_receiver){
     	  NS_LOG_DEBUG("Discarded: not for clients "<<relayTag.m_receiver);
     	  break;
+      }
+      if(gateway!=relayTag.m_sender){
+		  NS_LOG_DEBUG("Gateway "<<gateway<< " Sender " << relayTag.m_sender);
+//		  break;
       }
       if (InetSocketAddress::IsMatchingType (from))
         {
