@@ -286,6 +286,18 @@ void VideoPushApplication::StopApplication () // Called at time specified by Sto
     NS_LOG_DEBUG("Chunks: " << m_chunks.PrintBuffer());
 }
 
+Ptr<Ipv4Route>
+VideoPushApplication::GetRoute(Ipv4Address local, Ipv4Address destination) {
+	Ptr<Packet> receivedPacket = Create<Packet> (100);
+	Ipv4Header hdr;
+	hdr.SetDestination(destination);
+	hdr.SetSource(local);
+	Ptr<NetDevice> oif = 0;
+	Socket::SocketErrno err = Socket::ERROR_NOROUTETOHOST;
+	Ptr<Ipv4Route> route = m_ipv4->GetRoutingProtocol()->RouteOutput(receivedPacket, hdr, oif, err);
+	return route;
+}
+
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 {
   NS_LOG_FUNCTION (this << socket);
