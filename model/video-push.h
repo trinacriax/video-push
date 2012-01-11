@@ -161,11 +161,11 @@ private:
 	TypeId          m_tid;
 	Ptr<Ipv4> 		m_ipv4;
 
-	NeighborsSet 	m_neighbors;
-	ChunkBuffer		m_chunks;
-	uint32_t		m_duplicates[1000]; //TODO size
+	NeighborsSet 	m_neighbors;		// collect neighbors
+	ChunkBuffer		m_chunks;			// current chunk buffer
+	uint32_t		m_duplicates[1000]; // count chunks duplicated
 
-	uint32_t 		m_latestChunkID;
+	uint32_t 		m_latestChunkID;	// store the latest chunk identifier
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm
 	enum ChunkPolicy m_chunkSelection; // Chunk selection algorithm
 	TracedCallback<Ptr<const Packet> > m_txTrace;
