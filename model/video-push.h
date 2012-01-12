@@ -148,8 +148,8 @@ private:
 	uint32_t        m_totalRx;      // Total bytes received
 	Address 		m_peer;         // Peer address
 	bool            m_connected;    // True if connected
-	RandomVariable  m_onTime;       // rng for On Time
-	RandomVariable  m_offTime;      // rng for Off Time
+//	RandomVariable  m_onTime;       // rng for On Time
+//	RandomVariable  m_offTime;      // rng for Off Time
 	PeerType		m_peerType;     // Peer type
 	DataRate        m_cbrRate;      // Rate that data is generated
 	uint32_t        m_pktSize;      // Size of packets
@@ -159,6 +159,7 @@ private:
 	uint32_t        m_totBytes;     // Total bytes sent so far
 	EventId         m_startStopEvent;     // Event id for next start or stop event
 	EventId         m_sendEvent;    // Eventid of pending "send packet" event
+	EventId         m_sendTx;    // Eventid of pending "next transmission" event
 	bool            m_sending;      // True if currently in sending state
 	TypeId          m_tid;
 	Ptr<Ipv4> 		m_ipv4;
