@@ -233,6 +233,21 @@ VideoPushApplication::DoDispose (void)
   Application::DoDispose ();
 }
 
+uint32_t
+VideoPushApplication::GetApplicationId (void) const
+{
+  Ptr<Node> node = GetNode ();
+  for (uint32_t i = 0; i < node->GetNApplications (); ++i)
+    {
+      if (node->GetApplication (i) == this)
+        {
+          return i;
+        }
+    }
+  NS_ASSERT_MSG (false, "forgot to add application to node");
+  return 0; // quiet compiler
+}
+
 // Application Methods
 void VideoPushApplication::StartApplication () // Called at time specified by Start
 {

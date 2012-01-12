@@ -115,6 +115,8 @@ private:
 					  const RandomVariable& offtime,
 					  uint32_t size);
 
+	uint32_t GetApplicationId (void) const;
+
 	void PeerLoop();
 
 	void StartSending ();
