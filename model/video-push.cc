@@ -218,11 +218,10 @@ VideoPushApplication::DoDispose (void)
 	  miss = (missed/(1.0*last));
 	  double diff = last-missed ;
 	  rec = diff == 0? 0 : (diff/last);
-	  dups = duplicates/diff;
+	  dups = duplicates==0?0:duplicates/diff;
   }
 //  char ss[100];
 //  sprintf(ss, " R %.2f M %.2f D %.2f T %d M %lu m %lu A %lu",rec,miss,dups,last,delay_max.ToInteger(Time::NS),delay_min.ToInteger(Time::NS),delay_avg.ToInteger(Time::NS));
-//  NS_LOG_INFO("Chunks Node " << m_node->GetId() << ss);
   char dd[100];
   sprintf(dd, " R %.2f M %.2f D %.2f T %d M %lu us m %lu us A %lu us",rec,miss,dups,last,delay_max.ToInteger(Time::US),delay_min.ToInteger(Time::US),delay_avg.ToInteger(Time::US));
   NS_LOG_INFO("Chunks Node " << m_node->GetId() << dd);
@@ -381,6 +380,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 		  	NS_LOG_DEBUG("Chunk " << chunk->c_id <<" already received " << m_duplicates[chunk->c_id]<<" times");
 		  	m_duplicates[chunk->c_id]++;
 		  }
+		  else m_duplicates[chunk->c_id] = 0;
 		  // Update ChunkBuffer END
 
           //cast address to void , to suppress 'address' set but not used
@@ -524,6 +524,7 @@ void VideoPushApplication::SendPacket ()
   m_totBytes += payload;
   m_lastStartTime = Simulator::Now ();
   m_residualBits = 0;
+  m_duplicates[m_latestChunkID] = 0;
   m_latestChunkID++;
   last_chunk = (last_chunk < m_latestChunkID)?m_latestChunkID:last_chunk;
   if(!m_chunks.AddChunk(*copy)){
