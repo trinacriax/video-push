@@ -24,6 +24,9 @@
 
 #include "chunk-buffer.h"
 #include <memory.h>
+#include "ns3/log.h"
+
+NS_LOG_COMPONENT_DEFINE ("ChunkBuffer");
 
 namespace ns3{
 
