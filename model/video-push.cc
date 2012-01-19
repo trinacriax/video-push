@@ -191,12 +191,14 @@ VideoPushApplication::DoDispose (void)
   double dups;
   miss = rec = dups = 0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
-	  while (last < iter->first){
+	  uint32_t cid = iter->first;
+	  while (last < cid){
+		NS_LOG_INFO ("Missed chunk "<< last << "-"<<m_chunks.GetChunk(last));
 		missed++;
 		last++;
 	  }
-	  duplicates+=m_duplicates[iter->first];
-	  last = iter->first +1;
+	  duplicates+=m_duplicates.find(cid)->second;
+	  last = cid +1;
 	  Time chunk_delay = Time::FromInteger(iter->second.c_tstamp,Time::NS);
 	  delay_max = (delay_max < chunk_delay)? chunk_delay : delay_max;
 	  delay_min = delay_min==0? delay_max: (delay_min > chunk_delay)? chunk_delay : delay_min;
@@ -377,10 +379,11 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 
 		  // Update Chunk Buffer START
 		  if(!m_chunks.AddChunk(*chunk)){
-		  	NS_LOG_DEBUG("Chunk " << chunk->c_id <<" already received " << m_duplicates[chunk->c_id]<<" times");
-		  	m_duplicates[chunk->c_id]++;
+			  if(m_duplicates.find(chunk->c_id)==m_duplicates.end())
+				  m_duplicates.insert(std::pair<uint32_t, uint32_t>(chunk->c_id,0));
+			m_duplicates.find(chunk->c_id)->second++;
+		  	NS_LOG_DEBUG("Chunk " << chunk->c_id <<" already received " << m_duplicates.find(chunk->c_id)->second<<" times");
 		  }
-		  else m_duplicates[chunk->c_id] = 0;
 		  // Update ChunkBuffer END
 
           //cast address to void , to suppress 'address' set but not used
@@ -524,12 +527,14 @@ void VideoPushApplication::SendPacket ()
   m_totBytes += payload;
   m_lastStartTime = Simulator::Now ();
   m_residualBits = 0;
-  m_duplicates[m_latestChunkID] = 0;
-  m_latestChunkID++;
-  last_chunk = (last_chunk < m_latestChunkID)?m_latestChunkID:last_chunk;
+  last_chunk = (last_chunk < m_latestChunkID) ? m_latestChunkID : last_chunk;
   if(!m_chunks.AddChunk(*copy)){
-	m_duplicates[copy->c_id]++;
+	  if (m_duplicates.find(copy->c_id) == m_duplicates.end())
+	  		m_duplicates.insert(std::pair<uint32_t , uint32_t> (copy->c_id,0));
+		m_duplicates.find(copy->c_id)->second++;
   }
+  NS_LOG_DEBUG ("Source sent "<< m_latestChunkID<< "/"<<m_chunks.GetBufferSize());
+  m_latestChunkID++;
 }
 
 void VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)
