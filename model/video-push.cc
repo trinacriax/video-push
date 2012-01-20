@@ -225,7 +225,7 @@ VideoPushApplication::DoDispose (void)
 //  char ss[100];
 //  sprintf(ss, " R %.2f M %.2f D %.2f T %d M %lu m %lu A %lu",rec,miss,dups,last,delay_max.ToInteger(Time::NS),delay_min.ToInteger(Time::NS),delay_avg.ToInteger(Time::NS));
   char dd[100];
-  sprintf(dd, " R %.2f M %.2f D %.2f T %d M %lu us m %lu us A %lu us",rec,miss,dups,last,delay_max.ToInteger(Time::US),delay_min.ToInteger(Time::US),delay_avg.ToInteger(Time::US));
+  sprintf(dd, " R %.3f M %.3f D %.3f T %d M %lu us m %lu us A %lu us",rec,miss,dups,last,delay_max.ToInteger(Time::US),delay_min.ToInteger(Time::US),delay_avg.ToInteger(Time::US));
   NS_LOG_INFO("Chunks Node " << m_node->GetId() << dd);
 
   m_socket = 0;
