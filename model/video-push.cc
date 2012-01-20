@@ -300,7 +300,7 @@ void VideoPushApplication::StopApplication () // Called at time specified by Sto
     {
       NS_LOG_WARN ("VideoPush found null socket to close in StopApplication");
     }
-    NS_LOG_DEBUG("Chunks: " << m_chunks.PrintBuffer());
+//    NS_LOG_DEBUG("Chunks: " << m_chunks.PrintBuffer());
 }
 
 Ptr<Ipv4Route>
