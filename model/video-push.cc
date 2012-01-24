@@ -199,13 +199,13 @@ VideoPushApplication::DoDispose (void)
 	  }
 	  duplicates+=m_duplicates.find(cid)->second;
 	  last = cid +1;
-	  Time chunk_delay = Time::FromInteger(iter->second.c_tstamp,Time::NS);
-	  delay_max = (delay_max < chunk_delay)? chunk_delay : delay_max;
-	  delay_min = delay_min==0? delay_max: (delay_min > chunk_delay)? chunk_delay : delay_min;
-	  delay_avg += chunk_delay;
+	  Time chunk_timestamp = Time::FromInteger(iter->second.c_tstamp,Time::US);
+	  delay_max = (delay_max < chunk_timestamp)? chunk_timestamp : delay_max;
+	  delay_min = delay_min==0? delay_max: (delay_min > chunk_timestamp)? chunk_timestamp : delay_min;
+	  delay_avg += chunk_timestamp;
 //	  NS_LOG_INFO ("Time "<< chunk_delay <<" "<<delay_max<< " "<<delay_min<<" "<< delay_avg);
   }
-  delay_avg = Time::FromInteger(delay_avg.ToInteger(Time::NS) / (last ==0?1:last), Time::NS);
+  delay_avg = Time::FromInteger(delay_avg.ToInteger(Time::US) / (last ==0?1:last), Time::US);
   while(last>0 && last < last_chunk){
 	  missed++;
 	  last++;
@@ -360,11 +360,12 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           ChunkVideo *chunk = chunkH.GetChunk();
           m_totalRx += chunk->GetSize () + chunk->GetAttributeSize();
           InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
-          Time delay_0 = Time::FromInteger(chunk->c_tstamp,Time::MS);
-          Time delay_1 = Simulator::Now() - delay_0;
+          Time delay_0 = Time::FromInteger(chunk->c_tstamp,Time::US);
+          Time delay_1 = Simulator::Now();
+          delay_1 -= delay_0;
+          chunk->c_tstamp = delay_1.ToInteger(Time::US);
           NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress)
                     	  << " Received [" <<  *chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << address << "]" << " total Rx " << m_totalRx);
-          chunk->c_tstamp = delay_1.ToInteger(Time::NS);
           uint32_t port = address.GetPort();
           Ipv4Address senderAddr = address.GetIpv4 ();
           // Update Neighbors START
@@ -505,7 +506,7 @@ void VideoPushApplication::SendHello ()
 }
 
 ChunkVideo* VideoPushApplication::ChunkSelection(){
-	uint64_t tstamp = Simulator::Now().GetMilliSeconds();
+	uint64_t tstamp = Simulator::Now().ToInteger(Time::US);
 	ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,0);
 	NS_LOG_DEBUG("Chunk "<< cv);
 	ChunkVideo *copy = cv.Copy();
@@ -528,6 +529,7 @@ void VideoPushApplication::SendPacket ()
   m_lastStartTime = Simulator::Now ();
   m_residualBits = 0;
   last_chunk = (last_chunk < m_latestChunkID) ? m_latestChunkID : last_chunk;
+  copy->c_tstamp = Simulator::Now().ToInteger(Time::US) - copy->c_tstamp;
   if(!m_chunks.AddChunk(*copy)){
 	  if (m_duplicates.find(copy->c_id) == m_duplicates.end())
 	  		m_duplicates.insert(std::pair<uint32_t , uint32_t> (copy->c_id,0));
