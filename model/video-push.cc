@@ -189,7 +189,9 @@ VideoPushApplication::DoDispose (void)
   double miss;
   double rec;
   double dups;
-  miss = rec = dups = 0;
+  long double dev;
+  int cnt = 0;
+  miss = rec = dups = dev = 0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
 	  uint32_t cid = iter->first;
 	  while (last < cid){
@@ -206,6 +208,14 @@ VideoPushApplication::DoDispose (void)
 //	  NS_LOG_INFO ("Time "<< chunk_delay <<" "<<delay_max<< " "<<delay_min<<" "<< delay_avg);
   }
   delay_avg = Time::FromInteger(delay_avg.ToInteger(Time::US) / (last ==0?1:last), Time::US);
+  for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
+  	  Time chunk_delay = Time::FromInteger(iter->second.c_tstamp,Time::US);
+  	  dev = (chunk_delay.GetNanoSeconds() - delay_avg.GetNanoSeconds())^2;
+  	  cnt++;
+  }
+  cnt--;
+//  NS_LOG_INFO("Computing std deviation over " <<cnt <<" samples");
+  dev = sqrt(dev/(1.0*cnt));
   while(last>0 && last < last_chunk){
 	  missed++;
 	  last++;
@@ -224,8 +234,8 @@ VideoPushApplication::DoDispose (void)
   }
 //  char ss[100];
 //  sprintf(ss, " R %.2f M %.2f D %.2f T %d M %lu m %lu A %lu",rec,miss,dups,last,delay_max.ToInteger(Time::NS),delay_min.ToInteger(Time::NS),delay_avg.ToInteger(Time::NS));
-  char dd[100];
-  sprintf(dd, " R %.3f M %.3f D %.3f T %d M %lu us m %lu us A %lu us",rec,miss,dups,last,delay_max.ToInteger(Time::US),delay_min.ToInteger(Time::US),delay_avg.ToInteger(Time::US));
+  char dd[120];
+  sprintf(dd, " Rec %.3f Miss %.3f Dup %.3f K %d Max %d us Min %d us Avg %d us S %.2f",rec,miss,dups,last,delay_max.ToInteger(Time::US),delay_min.ToInteger(Time::US),delay_avg.ToInteger(Time::US), dev);
   NS_LOG_INFO("Chunks Node " << m_node->GetId() << dd);
 
   m_socket = 0;
