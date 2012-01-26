@@ -459,7 +459,7 @@ void VideoPushApplication::StopSending ()
 void VideoPushApplication::ScheduleNextTx ()
 {
   NS_LOG_FUNCTION_NOARGS ();
-
+  if(m_peerType == PEER) return;
   if (m_maxBytes == 0 || m_totBytes < m_maxBytes)
     {
       uint32_t bits = m_pktSize * 8 - m_residualBits;
