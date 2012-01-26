@@ -195,7 +195,7 @@ VideoPushApplication::DoDispose (void)
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
 	  uint32_t cid = iter->first;
 	  while (last < cid){
-		NS_LOG_INFO ("Missed chunk "<< last << "-"<<m_chunks.GetChunk(last));
+//		// NS_LOG_DEBUG ("Missed chunk "<< last << "-"<<m_chunks.GetChunk(last));
 		missed++;
 		last++;
 	  }
@@ -205,7 +205,7 @@ VideoPushApplication::DoDispose (void)
 	  delay_max = (delay_max < chunk_timestamp)? chunk_timestamp : delay_max;
 	  delay_min = delay_min==0? delay_max: (delay_min > chunk_timestamp)? chunk_timestamp : delay_min;
 	  delay_avg += chunk_timestamp;
-//	  NS_LOG_INFO ("Time "<< chunk_delay <<" "<<delay_max<< " "<<delay_min<<" "<< delay_avg);
+//	  // NS_LOG_DEBUG ("Time "<< chunk_delay <<" "<<delay_max<< " "<<delay_min<<" "<< delay_avg);
   }
   delay_avg = Time::FromInteger(delay_avg.ToInteger(Time::US) / (last ==0?1:last), Time::US);
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
@@ -214,13 +214,13 @@ VideoPushApplication::DoDispose (void)
   	  cnt++;
   }
   cnt--;
-//  NS_LOG_INFO("Computing std deviation over " <<cnt <<" samples");
+//  // NS_LOG_DEBUG("Computing std deviation over " <<cnt <<" samples");
   dev = sqrt(dev/(1.0*cnt));
   while(last>0 && last < last_chunk){
 	  missed++;
 	  last++;
   }
-//  NS_LOG_INFO("done " <<last<<","<<missed<<","<<duplicates);
+//  // NS_LOG_DEBUG("done " <<last<<","<<missed<<","<<duplicates);
   if (last == 0) {
 	  miss = 1;
 	  rec = dups = 0;
@@ -273,7 +273,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
 	  int status;
 	  status = m_socket->Bind (InetSocketAddress(Ipv4Address::GetAny (), m_localPort));
 	  NS_ASSERT (status != -1);
-	  NS_LOG_DEBUG("Push Socket "<< m_socket << " to "<<Ipv4Address::GetAny ()<<"::"<< m_localPort);
+	  // NS_LOG_DEBUG("Push Socket "<< m_socket << " to "<<Ipv4Address::GetAny ()<<"::"<< m_localPort);
 	  // Bind to any IP address so that packets can be received
       m_socket->SetAllowBroadcast (true);
       m_socket->SetRecvCallback (MakeCallback (&VideoPushApplication::HandleReceive, this));
@@ -310,7 +310,7 @@ void VideoPushApplication::StopApplication () // Called at time specified by Sto
     {
       NS_LOG_WARN ("VideoPush found null socket to close in StopApplication");
     }
-//    NS_LOG_DEBUG("Chunks: " << m_chunks.PrintBuffer());
+//    // NS_LOG_DEBUG("Chunks: " << m_chunks.PrintBuffer());
 }
 
 Ptr<Ipv4Route>
@@ -354,13 +354,13 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
       Ipv4Address gateway = GetNextHop(sourceAddr);
       Ipv4Mask mask ("255.255.255.0");
       current = current.GetSubnetDirectedBroadcast(mask);
-      NS_LOG_DEBUG("Packet from "<< from << " Local "<< current << " Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast());
+//      // NS_LOG_DEBUG("Packet from "<< from << " Local "<< current << " Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast());
       if(rtag && current != relayTag.m_receiver){
-    	  NS_LOG_DEBUG("Discarded: not for clients "<<relayTag.m_receiver);
+//    	  // NS_LOG_DEBUG("Discarded: not for clients "<<relayTag.m_receiver);
     	  break;
       }
       if(gateway!=relayTag.m_sender){
-		  NS_LOG_DEBUG("Gateway "<<gateway<< " Sender " << relayTag.m_sender);
+//		  // NS_LOG_DEBUG("Duplicated Gateway "<<gateway<< " Sender " << relayTag.m_sender);
 //		  break;
       }
       if (InetSocketAddress::IsMatchingType (from))
@@ -374,8 +374,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           Time delay_1 = Simulator::Now();
           delay_1 -= delay_0;
           chunk->c_tstamp = delay_1.ToInteger(Time::US);
-          NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress)
-                    	  << " Received [" <<  *chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << address << "]" << " total Rx " << m_totalRx);
+          // NS_LOG_DEBUG ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " Received [" <<  *chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << address << "]" << " total Rx " << m_totalRx);
           uint32_t port = address.GetPort();
           Ipv4Address senderAddr = address.GetIpv4 ();
           // Update Neighbors START
@@ -393,7 +392,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 			  if(m_duplicates.find(chunk->c_id)==m_duplicates.end())
 				  m_duplicates.insert(std::pair<uint32_t, uint32_t>(chunk->c_id,0));
 			m_duplicates.find(chunk->c_id)->second++;
-		  	NS_LOG_DEBUG("Chunk " << chunk->c_id <<" already received " << m_duplicates.find(chunk->c_id)->second<<" times");
+		  	// NS_LOG_DEBUG("Chunk " << chunk->c_id <<" already received " << m_duplicates.find(chunk->c_id)->second<<" times");
 		  }
 		  // Update ChunkBuffer END
 
@@ -407,12 +406,12 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 
 void VideoPushApplication::HandlePeerClose (Ptr<Socket> socket)
 {
-  NS_LOG_INFO ("VideoPush, peerClose");
+	// NS_LOG_DEBUG ("VideoPush, peerClose");
 }
 
 void VideoPushApplication::HandlePeerError (Ptr<Socket> socket)
 {
-  NS_LOG_INFO ("VideoPush, peerError");
+	// NS_LOG_DEBUG ("VideoPush, peerError");
 }
 
 
@@ -468,7 +467,7 @@ void VideoPushApplication::ScheduleNextTx ()
       Time nextTime (Seconds (bits / static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
       NS_LOG_LOGIC ("nextTime = " << nextTime);
       m_sendEvent = Simulator::ScheduleNow (&VideoPushApplication::PeerLoop, this);
-      NS_LOG_DEBUG("ScheduleNextTx Now");
+      // NS_LOG_DEBUG("ScheduleNextTx Now");
       m_sendTx = Simulator::Schedule (nextTime, &VideoPushApplication::ScheduleNextTx, this);
     }
   else
@@ -501,11 +500,11 @@ void VideoPushApplication::PeerLoop ()
   NS_LOG_FUNCTION_NOARGS ();
 //  Time tx = Time::FromDouble(UniformVariable().GetValue(),Time::MS);
   if(m_peerType == SOURCE){
-//	  NS_LOG_DEBUG("SendPacket Tx @ "<< tx.GetSeconds()<<"s");
+//	  // NS_LOG_DEBUG("SendPacket Tx @ "<< tx.GetSeconds()<<"s");
 	  if(m_sendTx.IsRunning())
 	  Simulator::ScheduleNow (&VideoPushApplication::SendPacket, this);
 //	  tx = Time::FromDouble(tx.GetSeconds()*1.05,Time::S);
-//	  NS_LOG_DEBUG("ScheduleNextTx Tx @ "<< tx.GetSeconds()<<"s");
+//	  // NS_LOG_DEBUG("ScheduleNextTx Tx @ "<< tx.GetSeconds()<<"s");
 //	  Simulator::Schedule (tx, &VideoPushApplication::ScheduleNextTx, this);
   }
 }
@@ -518,7 +517,7 @@ void VideoPushApplication::SendHello ()
 ChunkVideo* VideoPushApplication::ChunkSelection(){
 	uint64_t tstamp = Simulator::Now().ToInteger(Time::US);
 	ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,0);
-	NS_LOG_DEBUG("Chunk "<< cv);
+//	// NS_LOG_DEBUG("Chunk "<< cv);
 	ChunkVideo *copy = cv.Copy();
 	return copy;
 }
@@ -532,7 +531,7 @@ void VideoPushApplication::SendPacket ()
   Ptr<Packet> packet = Create<Packet> ();
   packet->AddHeader(chunk);
   uint32_t payload = copy->c_size+copy->c_attributes_size;//data and attributes already in chunk header;
-  NS_LOG_LOGIC ("Push packet at " << Simulator::Now ()<< " UID "<< packet->GetUid() << " Push Size "<< payload);
+  NS_LOG_LOGIC ("Push packet " << *copy<< " UID "<< packet->GetUid() << " Push Size "<< payload);
   m_txTrace (packet);
   m_socket->SendTo(packet, 0, m_peer);
   m_totBytes += payload;
@@ -545,7 +544,7 @@ void VideoPushApplication::SendPacket ()
 	  		m_duplicates.insert(std::pair<uint32_t , uint32_t> (copy->c_id,0));
 		m_duplicates.find(copy->c_id)->second++;
   }
-  NS_LOG_DEBUG ("Source sent "<< m_latestChunkID<< "/"<<m_chunks.GetBufferSize());
+//  // NS_LOG_DEBUG ("Source sent "<< m_latestChunkID<< "/"<<m_chunks.GetBufferSize());
   m_latestChunkID++;
 }
 
