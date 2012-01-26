@@ -27,6 +27,7 @@
 
 #include <stdint.h>
 #include <iostream>
+#include <stdlib.h>
 #include <memory.h>
 #include "ns3/assert.h"
 
