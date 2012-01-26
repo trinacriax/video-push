@@ -160,7 +160,7 @@ private:
 	EventId         m_startStopEvent;     // Event id for next start or stop event
 	EventId         m_sendEvent;    // Eventid of pending "send packet" event
 	EventId         m_sendTx;    // Eventid of pending "next transmission" event
-	bool            m_sending;      // True if currently in sending state
+//	bool            m_sending;      // True if currently in sending state
 	TypeId          m_tid;
 	Ptr<Ipv4> 		m_ipv4;
 
