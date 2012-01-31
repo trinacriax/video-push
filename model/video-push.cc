@@ -189,8 +189,8 @@ VideoPushApplication::DoDispose (void)
   double rec;
   double dups;
   double dev;
-  int cnt = 0;
-  miss = rec = dups = dev = 0;
+  uint32_t cnt;
+  miss = rec = dups = 0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
 	  uint32_t cid = iter->first;
 	  while (last < cid){
@@ -207,9 +207,12 @@ VideoPushApplication::DoDispose (void)
 //	  // NS_LOG_DEBUG ("Time "<< chunk_delay <<" "<<delay_max<< " "<<delay_min<<" "<< delay_avg);
   }
   delay_avg = Time::FromInteger(delay_avg.ToInteger(Time::US) / (last ==0?1:last), Time::US);
+  cnt = 0;
+  dev = 0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
   	  Time chunk_delay = Time::FromInteger(iter->second.c_tstamp,Time::US);
-  	  dev = (chunk_delay.GetNanoSeconds() - delay_avg.GetNanoSeconds())^2;
+  	  double t_dev = ((chunk_delay - delay_avg).ToDouble(Time::US));
+  	  dev += pow(t_dev,2);
   	  cnt++;
   }
   cnt--;
