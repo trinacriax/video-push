@@ -238,7 +238,8 @@ VideoPushApplication::DoDispose (void)
 //  sprintf(ss, " R %.2f M %.2f D %.2f T %d M %lu m %lu A %lu",rec,miss,dups,last,delay_max.ToInteger(Time::NS),delay_min.ToInteger(Time::NS),delay_avg.ToInteger(Time::NS));
   char dd[120];
   sprintf(dd, " Rec %.3f Miss %.3f Dup %.3f K %d Max %ld us Min %ld us Avg %ld us S %.2f",rec,miss,dups,last,delay_max.ToInteger(Time::US),delay_min.ToInteger(Time::US),delay_avg.ToInteger(Time::US), dev);
-  NS_LOG_INFO("Chunks Node " << m_node->GetId() << dd);
+//  NS_LOG_INFO("Chunks Node " << m_node->GetId() << dd);
+  std::cout << "Chunks Node " << m_node->GetId() << dd << "\n";
 
   m_socket = 0;
   m_socketList.clear();
