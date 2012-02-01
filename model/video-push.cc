@@ -44,6 +44,8 @@
 #include "ns3/inet-socket-address.h"
 #include "ns3/udp-socket.h"
 #include <memory.h>
+#include <math.h>
+#include <stdio.h>
 
 #include "video-push.h"
 #include "ns3/pimdm-routing.h"
@@ -377,7 +379,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           Time delay_1 = Simulator::Now();
           delay_1 -= delay_0;
           chunk->c_tstamp = delay_1.ToInteger(Time::US);
-          // NS_LOG_DEBUG ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " Received [" <<  *chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << address << "]" << " total Rx " << m_totalRx);
+          NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " Received [" <<  *chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << relayTag.m_sender << "]" << " total Rx " << m_totalRx);
           uint32_t port = address.GetPort();
           Ipv4Address senderAddr = address.GetIpv4 ();
           // Update Neighbors START
