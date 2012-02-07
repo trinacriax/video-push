@@ -335,6 +335,7 @@ VideoPushApplication::GetNextHop (Ipv4Address destination) {
 	Ipv4Address local = Ipv4Address::ConvertFrom(m_localAddress);
 	Ptr<Ipv4Route> route = GetRoute (local, destination);
 	return (route == NULL ? m_gateway: route->GetGateway());
+
 }
 
 
@@ -521,8 +522,7 @@ void VideoPushApplication::SendHello ()
 
 ChunkVideo* VideoPushApplication::ChunkSelection(){
 	uint64_t tstamp = Simulator::Now().ToInteger(Time::US);
-	ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,0);
-//	// NS_LOG_DEBUG("Chunk "<< cv);
+	ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,0);//AAA Just the chunk header
 	ChunkVideo *copy = cv.Copy();
 	return copy;
 }
@@ -533,7 +533,7 @@ void VideoPushApplication::SendPacket ()
   NS_ASSERT (m_sendEvent.IsExpired ());
   ChunkVideo *copy = ChunkSelection();
   ChunkHeader chunk = ChunkHeader (*copy);
-  Ptr<Packet> packet = Create<Packet> ();
+  Ptr<Packet> packet = Create<Packet> (m_pktSize);//AAA Here the data
   packet->AddHeader(chunk);
   uint32_t payload = copy->c_size+copy->c_attributes_size;//data and attributes already in chunk header;
   NS_LOG_LOGIC ("Push packet " << *copy<< " UID "<< packet->GetUid() << " Push Size "<< payload);

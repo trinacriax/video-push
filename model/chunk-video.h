@@ -46,8 +46,8 @@ namespace streaming{
 			c_size(0),
 			c_attributes_size (0)
 		{
-			c_data = 0;
-			c_attributes = 0;
+//			c_data = 0;
+//			c_attributes = 0;
 		}
 		ChunkVideo (uint32_t cid, uint64_t ctstamp, uint32_t csize, uint32_t cattributes_size) :
 			c_id (cid),
@@ -55,24 +55,18 @@ namespace streaming{
 			c_size(csize),
 			c_attributes_size (cattributes_size)
 		{
-			c_data = 0;
-			c_attributes = 0;
+//			c_data = 0;
+//			c_attributes = 0;
 		}
 		uint32_t c_id;
 		uint64_t c_tstamp;
 		uint32_t c_size;
 		uint32_t c_attributes_size;
-		uint8_t *c_data;
-		uint8_t *c_attributes;
+//		uint8_t *c_data;
+//		uint8_t *c_attributes;
 
 		ChunkVideo* Copy (){
-			ChunkVideo *copy = new ChunkVideo(c_id, c_tstamp, c_size, c_attributes_size);
-			copy->c_data = (uint8_t *) calloc(copy->c_size,sizeof(uint8_t));
-			NS_ASSERT(copy->c_data);
-			memcpy(copy->c_data, &c_data, c_size);
-			copy->c_attributes = (uint8_t *)calloc(copy->c_attributes_size,sizeof(copy->c_data));
-			NS_ASSERT(copy->c_attributes);
-			memcpy(copy->c_attributes, &c_attributes, c_attributes_size);
+			ChunkVideo* copy (new ChunkVideo(c_id, c_tstamp, c_size, c_attributes_size));
 			return copy;
 		}
 

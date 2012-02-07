@@ -66,7 +66,7 @@ ChunkHeader::GetInstanceTypeId (void) const
 uint32_t
 ChunkHeader::GetSerializedSize (void) const
 {
-  uint32_t size = 4 + 4 + m_chunk.c_size + 1 + 8 + 4 + m_chunk.c_attributes_size;
+  uint32_t size = 4 + 4 + 1 + 8 + 4;// + m_chunk.c_attributes_size+ m_chunk.c_size ;
   return size;
 }
 
@@ -88,12 +88,12 @@ ChunkHeader::Serialize (Buffer::Iterator start) const
   i.WriteHtonU64 (m_chunk.c_tstamp);
   i.WriteHtonU32 (m_chunk.c_size);
   i.WriteHtonU32 (m_chunk.c_attributes_size);
-  for(uint32_t s = 0; s < m_chunk.c_size ; s++){
-  	  i.WriteU8(m_chunk.c_data[s]);
-    }
-  for(uint32_t s = 0; s < m_chunk.c_attributes_size ; s++){
-	i.WriteU8(m_chunk.c_attributes[s]);
-  }
+//  for(uint32_t s = 0; s < m_chunk.c_size ; s++){
+//  	  i.WriteU8(m_chunk.c_data[s]);
+//    }
+//  for(uint32_t s = 0; s < m_chunk.c_attributes_size ; s++){
+//	i.WriteU8(m_chunk.c_attributes[s]);
+//  }
 }
 
 uint32_t
@@ -109,16 +109,16 @@ ChunkHeader::Deserialize (Buffer::Iterator start)
   size +=4;
   m_chunk.c_attributes_size = i.ReadNtohU32();
   size +=4;
-  m_chunk.c_data = (uint8_t*)calloc(m_chunk.c_size, sizeof(uint8_t));
-  for(uint32_t s = 0; s < m_chunk.c_size ; s++){
-	m_chunk.c_data[s] = i.ReadU8();
-  }
-  size += m_chunk.c_size;
-  m_chunk.c_attributes = (uint8_t*)calloc(m_chunk.c_attributes_size , sizeof(uint8_t));
-  for(uint32_t s = 0; s < m_chunk.c_attributes_size ; s++){
-  	m_chunk.c_attributes[s] = i.ReadU8();
-  }
-  size += m_chunk.c_attributes_size;
+//  m_chunk.c_data = (uint8_t*)calloc(m_chunk.c_size, sizeof(uint8_t));
+//  for(uint32_t s = 0; s < m_chunk.c_size ; s++){
+//	m_chunk.c_data[s] = i.ReadU8();
+//  }
+//  size += m_chunk.c_size;
+//  m_chunk.c_attributes = (uint8_t*)calloc(m_chunk.c_attributes_size , sizeof(uint8_t));
+//  for(uint32_t s = 0; s < m_chunk.c_attributes_size ; s++){
+//  	m_chunk.c_attributes[s] = i.ReadU8();
+//  }
+//  size += m_chunk.c_attributes_size;
   return size;
 }
 
