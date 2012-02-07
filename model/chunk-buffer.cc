@@ -40,7 +40,7 @@ namespace ns3{
 		ChunkVideo *copy = 0;
 		std::map<uint32_t, ChunkVideo>::iterator const result = chunk_buffer.find(index);
 		if (result != chunk_buffer.end())
-			copy = result->second.Copy();
+			copy = &(result->second);
 		return copy;
 	}
 
