@@ -334,7 +334,7 @@ Ipv4Address
 VideoPushApplication::GetNextHop (Ipv4Address destination) {
 	Ipv4Address local = Ipv4Address::ConvertFrom(m_localAddress);
 	Ptr<Ipv4Route> route = GetRoute (local, destination);
-	return (route == NULL ? Ipv4Address::GetAny(): route->GetGateway());
+	return (route == NULL ? m_gateway: route->GetGateway());
 }
 
 
@@ -359,13 +359,13 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
       Ipv4Address gateway = GetNextHop(sourceAddr);
       Ipv4Mask mask ("255.255.255.0");
       current = current.GetSubnetDirectedBroadcast(mask);
-//      // NS_LOG_DEBUG("Packet from "<< from << " Local "<< current << " Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast());
+      NS_LOG_DEBUG("Packet from "<< from << " Local "<< current << " gw " << gateway<< " Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast());
       if(rtag && current != relayTag.m_receiver){
 //    	  // NS_LOG_DEBUG("Discarded: not for clients "<<relayTag.m_receiver);
     	  break;
       }
       if(gateway!=relayTag.m_sender){
-//		  // NS_LOG_DEBUG("Duplicated Gateway "<<gateway<< " Sender " << relayTag.m_sender);
+    	  NS_LOG_DEBUG("Duplicated Gateway "<<gateway<< " Sender " << relayTag.m_sender);
 //		  break;
       }
       if (InetSocketAddress::IsMatchingType (from))
@@ -564,6 +564,11 @@ void VideoPushApplication::ConnectionFailed (Ptr<Socket>)
 {
   NS_LOG_FUNCTION_NOARGS ();
   cout << "VideoPush, Connection Failed" << endl;
+}
+
+void VideoPushApplication::SetGateway (Ipv4Address gateway)
+{
+	m_gateway = gateway;
 }
 
 } // Namespace ns3

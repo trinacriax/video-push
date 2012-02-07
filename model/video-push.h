@@ -68,6 +68,7 @@ public:
 	static TypeId GetTypeId (void);
 	VideoPushApplication ();
 	virtual ~VideoPushApplication ();
+	void SetGateway (Ipv4Address gateway);
 
 	/**
 	* \param maxBytes the total number of bytes to send
@@ -163,6 +164,7 @@ private:
 //	bool            m_sending;      // True if currently in sending state
 	TypeId          m_tid;
 	Ptr<Ipv4> 		m_ipv4;
+	Ipv4Address		m_gateway;
 
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	ChunkBuffer		m_chunks;			// current chunk buffer
@@ -174,6 +176,6 @@ private:
 	TracedCallback<Ptr<const Packet> > m_txTrace;
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxTrace;
 };
-
-#endif /* VIDEO_PUSH_H_ */
 }
+#endif /* VIDEO_PUSH_H_ */
+
