@@ -91,14 +91,6 @@ VideoPushApplication::GetTypeId (void)
                    AddressValue (),
                    MakeAddressAccessor (&VideoPushApplication::m_peer),
                    MakeAddressChecker ())
-//    .AddAttribute ("OnTime", "A RandomVariable used to pick the duration of the 'On' state.",
-//                   RandomVariableValue (ConstantVariable (1.0)),
-//                   MakeRandomVariableAccessor (&VideoPushApplication::m_onTime),
-//                   MakeRandomVariableChecker ())
-//    .AddAttribute ("OffTime", "A RandomVariable used to pick the duration of the 'Off' state.",
-//                   RandomVariableValue (ConstantVariable (1.0)),
-//                   MakeRandomVariableAccessor (&VideoPushApplication::m_offTime),
-//                   MakeRandomVariableChecker ())
     .AddAttribute ("MaxBytes",
                    "The total number of bytes to send. Once these bytes are sent, "
                    "no packet is sent again, even in on state. The value zero means "
@@ -134,7 +126,6 @@ VideoPushApplication::VideoPushApplication ():
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
   m_duplicates.clear();
-  m_startStopEvent.Cancel();
   m_sendEvent.Cancel();
   m_sendTx.Cancel();
 }
@@ -292,7 +283,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
   // Insure no pending event
   CancelEvents ();
   StartSending ();
-//  ScheduleStartEvent ();
+
 }
 
 void VideoPushApplication::StopApplication () // Called at time specified by Stop
@@ -441,7 +432,6 @@ void VideoPushApplication::CancelEvents ()
     }
   Simulator::Cancel (m_sendEvent);
   Simulator::Cancel (m_sendTx);
-  Simulator::Cancel (m_startStopEvent);
 }
 
 // Event handlers
@@ -449,7 +439,6 @@ void VideoPushApplication::StartSending ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_lastStartTime = Simulator::Now ();
-//  ScheduleStopEvent ();
   ScheduleNextTx ();  // Schedule the send packet event
 }
 
@@ -458,7 +447,6 @@ void VideoPushApplication::StopSending ()
   NS_LOG_FUNCTION_NOARGS ();
   CancelEvents ();
 
-//  ScheduleStartEvent ();
 }
 
 // Private helpers
@@ -480,25 +468,6 @@ void VideoPushApplication::ScheduleNextTx ()
     { // All done, cancel any pending events
       StopApplication ();
     }
-}
-
-void VideoPushApplication::ScheduleStartEvent ()
-{  // Schedules the event to start sending data (switch to "Off" state)
-  NS_LOG_FUNCTION_NOARGS ();
-
-//  Time offInterval = Seconds (m_offTime.GetValue ());
-//
-//  NS_LOG_LOGIC ("start at " << offInterval);
-//  m_startStopEvent = Simulator::Schedule (offInterval, &VideoPushApplication::StartSending, this);
-}
-
-void VideoPushApplication::ScheduleStopEvent ()
-{  // Schedules the event to start sending data (switch to the "On" state)
-  NS_LOG_FUNCTION_NOARGS ();
-
-//  Time onInterval = Seconds (m_onTime.GetValue ());
-//  NS_LOG_LOGIC ("stop at " << onInterval);
-//  m_startStopEvent = Simulator::Schedule (onInterval, &VideoPushApplication::StopSending, this);
 }
 
 void VideoPushApplication::PeerLoop ()
@@ -557,7 +526,7 @@ void VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_connected = true;
-//  ScheduleStartEvent ();
+
 }
 
 void VideoPushApplication::ConnectionFailed (Ptr<Socket>)

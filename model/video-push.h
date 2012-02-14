@@ -135,8 +135,6 @@ private:
 	Ipv4Address GetNextHop (Ipv4Address destination);
 
 	void ScheduleNextTx ();
-	void ScheduleStartEvent ();
-	void ScheduleStopEvent ();
 	void ConnectionSucceeded (Ptr<Socket>);
 	void ConnectionFailed (Ptr<Socket>);
 	void Ignore (Ptr<Socket>);
@@ -149,8 +147,6 @@ private:
 	uint32_t        m_totalRx;      // Total bytes received
 	Address 		m_peer;         // Peer address
 	bool            m_connected;    // True if connected
-//	RandomVariable  m_onTime;       // rng for On Time
-//	RandomVariable  m_offTime;      // rng for Off Time
 	PeerType		m_peerType;     // Peer type
 	DataRate        m_cbrRate;      // Rate that data is generated
 	uint32_t        m_pktSize;      // Size of packets
@@ -158,7 +154,6 @@ private:
 	Time            m_lastStartTime; // Time last packet sent
 	uint32_t        m_maxBytes;     // Limit total number of bytes sent
 	uint32_t        m_totBytes;     // Total bytes sent so far
-	EventId         m_startStopEvent;     // Event id for next start or stop event
 	EventId         m_sendEvent;    // Eventid of pending "send packet" event
 	EventId         m_sendTx;    // Eventid of pending "next transmission" event
 //	bool            m_sending;      // True if currently in sending state
