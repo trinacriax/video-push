@@ -48,8 +48,8 @@ namespace ns3{
 	ChunkBuffer::AddChunk (ChunkVideo chunk) {
 		std::map<uint32_t, ChunkVideo>::iterator result = chunk_buffer.find(chunk.c_id);
 		if (result == chunk_buffer.end()){
-			ChunkVideo *copy = chunk.Copy();
-			chunk_buffer.insert(std::pair <uint32_t, ChunkVideo> (chunk.c_id, *copy));
+			std::pair <uint32_t, ChunkVideo> entry (chunk.c_id, chunk);
+			chunk_buffer.insert(entry);
 			return true;
 		}
 		return false;

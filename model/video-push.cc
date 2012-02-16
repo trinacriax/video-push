@@ -364,14 +364,14 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
         {
           ChunkHeader chunkH;
           packet->RemoveHeader(chunkH);
-          ChunkVideo *chunk = chunkH.GetChunk();
-          m_totalRx += chunk->GetSize () + chunk->GetAttributeSize();
+          ChunkVideo chunk = chunkH.GetChunk();
+          m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
           InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
-          Time delay_0 = Time::FromInteger(chunk->c_tstamp,Time::US);
+          Time delay_0 = Time::FromInteger(chunk.c_tstamp,Time::US);
           Time delay_1 = Simulator::Now();
           delay_1 -= delay_0;
-          chunk->c_tstamp = delay_1.ToInteger(Time::US);
-          NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " Received [" <<  *chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << relayTag.m_sender << "]" << " total Rx " << m_totalRx);
+          chunk.c_tstamp = delay_1.ToInteger(Time::US);
+          NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " Received [" <<  chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << relayTag.m_sender << "]" << " total Rx " << m_totalRx);
           uint32_t port = address.GetPort();
           Ipv4Address senderAddr = address.GetIpv4 ();
           // Update Neighbors START
@@ -381,14 +381,16 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           }
           NeighborData *ndata = m_neighbors.GetNeighbor(*sender);
           ndata->n_contact = Simulator::Now();
-          ndata->n_latestChunk = chunk->c_id;
+          ndata->n_latestChunk = chunk.c_id;
 		  // Update Neighbors END
 
 		  // Update Chunk Buffer START
-		  if(!m_chunks.AddChunk(*chunk)){
-			  if(m_duplicates.find(chunk->c_id)==m_duplicates.end())
-				  m_duplicates.insert(std::pair<uint32_t, uint32_t>(chunk->c_id,0));
-			m_duplicates.find(chunk->c_id)->second++;
+		  if(!m_chunks.AddChunk(chunk)){
+			  if(m_duplicates.find(chunk.c_id)==m_duplicates.end()){
+				  std::pair<uint32_t, uint32_t> dup(chunk.c_id,0);
+				  m_duplicates.insert(dup);
+			  }
+			m_duplicates.find(chunk.c_id)->second++;
 		  	// NS_LOG_DEBUG("Chunk " << chunk->c_id <<" already received " << m_duplicates.find(chunk->c_id)->second<<" times");
 		  }
 		  // Update ChunkBuffer END
@@ -396,6 +398,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           //cast address to void , to suppress 'address' set but not used
           //compiler warning in optimized builds
           (void) address;
+          delete sender;
         }
       m_rxTrace (packet, from);
     }
@@ -520,6 +523,7 @@ void VideoPushApplication::SendPacket ()
   }
 //  // NS_LOG_DEBUG ("Source sent "<< m_latestChunkID<< "/"<<m_chunks.GetBufferSize());
   m_latestChunkID++;
+  delete copy;
 }
 
 void VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)

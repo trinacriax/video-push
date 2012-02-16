@@ -35,10 +35,6 @@ namespace ns3{
 
 namespace streaming{
 
-//enum ChunkState {
-//	Chunk_REC, Chunk_NOT, Chunk_DOWN
-//};
-
 	struct ChunkVideo{
 		ChunkVideo () :
 			c_id (0),
@@ -49,7 +45,16 @@ namespace streaming{
 //			c_data = 0;
 //			c_attributes = 0;
 		}
-		ChunkVideo (uint32_t cid, uint64_t ctstamp, uint32_t csize, uint32_t cattributes_size) :
+		ChunkVideo (const ChunkVideo &cv) :
+					c_id (cv.c_id),
+					c_tstamp (cv.c_tstamp),
+					c_size(cv.c_size),
+					c_attributes_size (cv.c_attributes_size)
+		{
+		//			c_data = 0;
+		//			c_attributes = 0;
+		}
+		ChunkVideo (const uint32_t cid, const uint64_t ctstamp, const uint32_t csize, const uint32_t cattributes_size) :
 			c_id (cid),
 			c_tstamp (ctstamp),
 			c_size(csize),

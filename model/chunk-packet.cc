@@ -70,8 +70,9 @@ ChunkHeader::GetSerializedSize (void) const
   return size;
 }
 
-ChunkVideo* ChunkHeader::GetChunk() {
-	return m_chunk.Copy();
+ChunkVideo ChunkHeader::GetChunk() {
+	ChunkVideo cv (m_chunk);
+	return cv;
 }
 
 void
