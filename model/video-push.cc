@@ -199,7 +199,8 @@ VideoPushApplication::DoDispose (void)
 	  delay_avg += chunk_timestamp;
 //	  // NS_LOG_DEBUG ("Time "<< chunk_delay <<" "<<delay_max<< " "<<delay_min<<" "<< delay_avg);
   }
-  delay_avg = Time::FromInteger(delay_avg.ToInteger(Time::US) / (last ==0?1:last), Time::US);
+  double actual = last-missed;
+  delay_avg = Time::FromDouble(delay_avg.ToDouble(Time::US) / (actual <= 0?1:(actual)), Time::US);
   cnt = 0;
   dev = 0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
