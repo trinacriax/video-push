@@ -358,7 +358,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
     	  break;
       }
       if(gateway!=relayTag.m_sender){
-    	  NS_LOG_DEBUG("Duplicated Gateway "<<gateway<< " Sender " << relayTag.m_sender);
+    	  NS_LOG_DEBUG("Duplicated packet Gateway "<<gateway<< " Sender " << relayTag.m_sender);
 //		  break;
       }
       if (InetSocketAddress::IsMatchingType (from))
