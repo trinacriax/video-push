@@ -391,11 +391,11 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 				  m_duplicates.insert(dup);
 			  }
 			m_duplicates.find(chunk.c_id)->second++;
-			NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " ReceivedDuplicate [" <<  chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << relayTag.m_sender << "]" << " total Rx " << m_totalRx);
+			NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " ReceivedDuplicate [" <<  chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << relayTag.m_sender << "] UID "<< packet->GetUid() << " total Rx " << m_totalRx);
 		  	// NS_LOG_DEBUG("Chunk " << chunk->c_id <<" already received " << m_duplicates.find(chunk->c_id)->second<<" times");
 		  }
 		  else
-			  NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " Received [" <<  chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << relayTag.m_sender << "]" << " total Rx " << m_totalRx);
+			  NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " Received [" <<  chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << relayTag.m_sender << "] UID "<< packet->GetUid() << " total Rx " << m_totalRx);
 		  // Update ChunkBuffer END
 
           //cast address to void , to suppress 'address' set but not used
