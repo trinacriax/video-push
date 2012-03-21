@@ -120,8 +120,8 @@ VideoPushApplication::GetTypeId (void)
 
 
 VideoPushApplication::VideoPushApplication ():
-		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
-		m_connected(false), m_ipv4(0), m_latestChunkID(0), m_socket(0)
+		m_socket(0), m_totalRx(0), m_connected(false), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
+		m_ipv4(0), m_latestChunkID(0)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
@@ -348,7 +348,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
       Ipv4Address current = Ipv4Address::ConvertFrom(m_localAddress);
       InetSocketAddress inetAddr = InetSocketAddress::ConvertFrom (from);
       Ipv4Address sourceAddr = inetAddr.GetIpv4 ();
-      uint16_t sourcePort = inetAddr.GetPort();
+//      uint16_t sourcePort = inetAddr.GetPort();
       Ipv4Address gateway = GetNextHop(sourceAddr);
       Ipv4Mask mask ("255.255.255.0");
       current = current.GetSubnetDirectedBroadcast(mask);

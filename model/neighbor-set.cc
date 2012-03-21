@@ -20,10 +20,15 @@
  * Authors: Alessandro Russo <russo@disi.unitn.it>
  *          University of Trento, Italy
  *          University of California, Los Angeles U.S.A.
+ *
+ *
  */
 
-//#define NS_LOG_APPEND_CONTEXT                                   \
-//  if (GetObject<Node> ()) { std::clog << "[node " << GetObject<Node> ()->GetId () << "] "; }
+/*
+ *
+ *#define NS_LOG_APPEND_CONTEXT                                   \
+ * 	if (GetObject<Node> ()) { std::clog << "[node " << GetObject<Node> ()->GetId () << "] "; }
+ */
 
 #include "neighbor-set.h"
 
