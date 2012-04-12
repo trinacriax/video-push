@@ -120,8 +120,8 @@ VideoPushApplication::GetTypeId (void)
 
 
 VideoPushApplication::VideoPushApplication ():
-		m_socket(0), m_totalRx(0), m_connected(false), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
-		m_ipv4(0), m_latestChunkID(0)
+		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
+		m_connected(false), m_ipv4(0), m_latestChunkID(0), m_socket(0)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
