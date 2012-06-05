@@ -23,6 +23,11 @@ def build(bld):
         'helper/video-helper.h',
     ]
 
+    module_test = bld.create_ns3_module_test_library('video-push')
+    module_test.source = [
+          'test/chunk-header-test-suite.cc',
+          ]
+    
     if bld.env['ENABLE_EXAMPLES']:
         bld.add_subdirs('examples')
         
