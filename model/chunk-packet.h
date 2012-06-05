@@ -31,8 +31,19 @@
 #include "chunk-video.h"
 #include <iostream>
 
+#define CHUNK_HEADER_SIZE 4
+#define CHUNK_SIZE (4 + 4 + 1 + 8 + 4)
+#define CHUNK_ID_SIZE 4
+
+enum ChunkMessageType
+{
+	PULL,
+	CHUNK
+};
+
 namespace ns3 {
 namespace streaming {
+
 
 /**
 * \ingroup VideoPushAppliaction
@@ -42,37 +53,20 @@ namespace streaming {
 //	0               1               2               3
 //	0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
 //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-//	|                      Chunk Identifier                         |
+//	|     Type      |          Reserved             |               |
 //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-//	|                          Chunk                                |
-//	|                        Timestamp                              |
-//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-//	|                         Chunk Size                            |
-//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-//	|                   Chunk Attributes Size                       |
-//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-//	|                        Chunk Data                          ....
-//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-//	|                        Chunk Attributes                    ....
-//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
 
 class ChunkHeader : public Header
 {
 public:
-  ChunkHeader (ChunkVideo chunk);
+  ChunkHeader (ChunkMessageType type);
   ChunkHeader ();
   virtual ~ChunkHeader ();
 
-  ///\name Main ChunkHeader methods
-  //\{
-  ChunkVideo GetChunk() const {return m_chunk;}
-  void SetChunk(ChunkVideo chunk){ m_chunk = chunk;}
-  //\}
-
 private:
-  ChunkVideo m_chunk;
+  ChunkMessageType m_type;
+  uint8_t m_reserved;
+  uint16_t m_checksum;
 
 public:
   ///\name Header serialization/deserialization
@@ -83,18 +77,99 @@ public:
   virtual uint32_t GetSerializedSize (void) const;
   virtual void Serialize (Buffer::Iterator start) const;
   virtual uint32_t Deserialize (Buffer::Iterator start);
-  virtual ChunkVideo GetChunk();
+  virtual ChunkMessageType GetType ();
+  virtual void SetType (ChunkMessageType type);
+  virtual uint8_t GetReserved ();
+  virtual void SetReserved (uint8_t reserved);
+  virtual uint16_t GetChecksum ();
+  virtual void SetChecksum (uint16_t checksum);
+
   //\}
-};
-  static inline std::ostream&
-  operator << (std::ostream& o, const ChunkHeader &a)
+
+  //	0               1               2               3
+  //	0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+  //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  //	|                      Chunk Identifier                         |
+  //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  //	|                          Chunk                                |
+  //	|                        Timestamp                              |
+  //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  //	|                         Chunk Size                            |
+  //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  //	|                   Chunk Attributes Size                       |
+  //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  //	|                        Chunk Data                          ....
+  //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  //	|                        Chunk Attributes                    ....
+  //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+  struct ChunkMessage
   {
-	  ChunkHeader chunk =  a.GetChunk();
-  return o<<"Chunk: "<< chunk<<"\n";
+	  ChunkVideo m_chunk; // Chunk Data
+	  virtual void Print (std::ostream &os) const;
+	  virtual uint32_t GetSerializedSize (void) const;
+	  virtual void Serialize (Buffer::Iterator start) const;
+	  virtual uint32_t Deserialize (Buffer::Iterator start);
+	  virtual ChunkVideo GetChunk ();
+	  virtual void SetChunk (ChunkVideo chunk);
+  };
+
+  //	0               1               2               3
+  //	0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+  //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  //	|                      Chunk Identifier                         |
+  //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+  struct PullMessage
+  {
+	  uint32_t m_chunkID; // Chunk ID to pull
+	  virtual void Print (std::ostream &os) const;
+	  virtual uint32_t GetSerializedSize (void) const;
+	  virtual void Serialize (Buffer::Iterator start) const;
+	  virtual uint32_t Deserialize (Buffer::Iterator start);
+	  virtual uint32_t GetChunk ();
+	  virtual void SetChunk (uint32_t chunkid);
+  };
+
+private:
+	struct{
+		ChunkMessage chunk;
+		PullMessage pull;
+	} m_chunk_message;
+
+
+public:
+
+  ChunkMessage& GetChunkMessage ()
+  {
+    if (m_type == 0)
+      {
+    	m_type = CHUNK;
+      }
+    else
+      {
+        NS_ASSERT (m_type == CHUNK);
+      }
+    return m_chunk_message.chunk;
+  }
+
+  PullMessage& GetPullMessage ()
+  {
+    if (m_type == 0)
+      {
+    	m_type = PULL;
+      }
+    else
+      {
+        NS_ASSERT (m_type == PULL);
+      }
+    return m_chunk_message.pull;
   }
 
 
-}//end namespace mbn
+};
+
+}//end namespace video
 }//end namespace ns3
 
 #endif /* __PIM_DM__HEADER_H__ */

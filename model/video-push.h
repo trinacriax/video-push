@@ -54,11 +54,14 @@ enum PeerType {
 };
 
 enum PeerPolicy {
-	RANDOM
+	RANDOM,
+	DELAY,
+	ROUNDROBIN
 };
 
 enum ChunkPolicy {
-	LATEST
+	LATEST, //latest chunk received
+	LATEST_USEFUL, //latest chunk not owned by some neighbor
 };
 
 class VideoPushApplication : public Application

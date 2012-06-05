@@ -39,11 +39,13 @@ NS_LOG_COMPONENT_DEFINE ("ChunkHeader");
 
 NS_OBJECT_ENSURE_REGISTERED (ChunkHeader);
 
-ChunkHeader::ChunkHeader (ChunkVideo chunk)
-{m_chunk = chunk;}
 
-ChunkHeader::ChunkHeader ()
-{m_chunk = ChunkVideo();}
+ChunkHeader::ChunkHeader (ChunkMessageType type) :
+		m_type (type)
+{}
+ChunkHeader::ChunkHeader () :
+		m_type (CHUNK)
+{}
 
 ChunkHeader::~ChunkHeader ()
 {}
@@ -63,26 +65,122 @@ ChunkHeader::GetInstanceTypeId (void) const
   return GetTypeId ();
 }
 
+ChunkMessageType
+ChunkHeader::GetType ()
+{
+	return m_type;
+}
+
+void
+ChunkHeader::SetType (ChunkMessageType type)
+{
+	m_type = type;
+}
+
+uint8_t
+ChunkHeader::GetReserved ()
+{
+	return m_reserved;
+}
+
+void
+ChunkHeader::SetReserved (uint8_t reserved)
+{
+	m_reserved = reserved;
+}
+
+uint16_t
+ChunkHeader::GetChecksum ()
+{
+	return m_checksum;
+}
+
+void
+ChunkHeader::SetChecksum (uint16_t checksum)
+{
+	m_checksum = checksum;
+}
+
 uint32_t
 ChunkHeader::GetSerializedSize (void) const
 {
-  uint32_t size = 4 + 4 + 1 + 8 + 4;// + m_chunk.c_attributes_size+ m_chunk.c_size ;
+  uint32_t size = CHUNK_HEADER_SIZE;
+  switch (m_type)
+  {
+  case PULL:
+  {
+	  break;
+  }
+  case CHUNK:
+  {
+	  break;
+  }
+  }
   return size;
-}
-
-ChunkVideo ChunkHeader::GetChunk() {
-	ChunkVideo cv (m_chunk);
-	return cv;
 }
 
 void
 ChunkHeader::Print (std::ostream &os) const
 {
-  os<< "ChunkHeader "<< m_chunk <<"\n";
+  os<< "ChunkHeader: Type="<< m_type << ", Resv=" << (uint16_t)m_reserved << ", Checksum="<< m_checksum<< "\n";
 }
 
 void
 ChunkHeader::Serialize (Buffer::Iterator start) const
+{
+  Buffer::Iterator i = start;
+  uint8_t type = (uint8_t)m_type;
+  i.WriteU8 (type);
+  i.WriteU8 (m_reserved);
+  i.WriteHtonU16 (m_checksum);
+}
+
+uint32_t
+ChunkHeader::Deserialize (Buffer::Iterator start)
+{
+  Buffer::Iterator i = start;
+  uint32_t size = 0;
+  m_type = ChunkMessageType (i.ReadU8());
+  size +=1;
+  m_reserved = i.ReadU8 ();
+  size +=1;
+  m_checksum = i.ReadNtohU16 ();
+  size +=2;
+  return size;
+}
+
+//	0               1               2               3
+//	0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                      Chunk Identifier                         |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                          Chunk                                |
+//	|                        Timestamp                              |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                         Chunk Size                            |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                   Chunk Attributes Size                       |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                        Chunk Data                          ....
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                        Chunk Attributes                    ....
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+uint32_t
+ChunkHeader::ChunkMessage::GetSerializedSize (void) const
+{
+  uint32_t size = CHUNK_SIZE;
+  return size;
+}
+
+void
+ChunkHeader::ChunkMessage::Print (std::ostream &os) const
+{
+  os<< "ChunkHeader "<< m_chunk <<"\n";
+}
+
+void
+ChunkHeader::ChunkMessage::Serialize (Buffer::Iterator start) const
 {
   Buffer::Iterator i = start;
   i.WriteHtonU32 (m_chunk.c_id);
@@ -98,7 +196,7 @@ ChunkHeader::Serialize (Buffer::Iterator start) const
 }
 
 uint32_t
-ChunkHeader::Deserialize (Buffer::Iterator start)
+ChunkHeader::ChunkMessage::Deserialize (Buffer::Iterator start)
 {
   Buffer::Iterator i = start;
   uint32_t size = 0;
@@ -121,6 +219,65 @@ ChunkHeader::Deserialize (Buffer::Iterator start)
 //  }
 //  size += m_chunk.c_attributes_size;
   return size;
+}
+
+ChunkVideo
+ChunkHeader::ChunkMessage::GetChunk ()
+{
+	return m_chunk;
+}
+
+void
+ChunkHeader::ChunkMessage::SetChunk (ChunkVideo chunk)
+{
+	m_chunk = chunk;
+}
+
+//	0               1               2               3
+//	0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                      Chunk Identifier                         |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+uint32_t
+ChunkHeader::PullMessage::GetSerializedSize (void) const
+{
+  uint32_t size = CHUNK_ID_SIZE;
+  return size;
+}
+
+void
+ChunkHeader::PullMessage::Print (std::ostream &os) const
+{
+  os<< "ChunkHeader "<< m_chunkID <<"\n";
+}
+
+void
+ChunkHeader::PullMessage::Serialize (Buffer::Iterator start) const
+{
+  Buffer::Iterator i = start;
+  i.WriteHtonU32 (m_chunkID);
+}
+
+uint32_t
+ChunkHeader::PullMessage::Deserialize (Buffer::Iterator start)
+{
+  Buffer::Iterator i = start;
+  uint32_t size = CHUNK_ID_SIZE;
+  m_chunkID = i.ReadNtohU32();
+  return size;
+}
+
+uint32_t
+ChunkHeader::PullMessage::GetChunk ()
+{
+	return m_chunkID;
+}
+
+void
+ChunkHeader::PullMessage::SetChunk (uint32_t chunk)
+{
+	m_chunkID = chunk;
 }
 
 } // namespace pidm
