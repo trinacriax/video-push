@@ -39,9 +39,10 @@ namespace ns3{
 	{chunk_buffer.clear();}
 
 	ChunkVideo*
-	ChunkBuffer::GetChunk (uint32_t index){
+	ChunkBuffer::GetChunk (uint32_t chunkid){
+		NS_ASSERT (chunkid>0);
 		ChunkVideo *copy = 0;
-		std::map<uint32_t, ChunkVideo>::iterator const result = chunk_buffer.find(index);
+		std::map<uint32_t, ChunkVideo>::iterator const result = chunk_buffer.find(chunkid);
 		if (result != chunk_buffer.end())
 			copy = &(result->second);
 		return copy;
