@@ -114,6 +114,11 @@ VideoPushApplication::GetTypeId (void)
                    MakeTraceSourceAccessor (&VideoPushApplication::m_txTrace))
 	.AddTraceSource ("Rx", "A packet has been received",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxTrace))
+	.AddAttribute ("PullTime", "Time between two consecutive pulls.",
+				 TimeValue (Seconds (2)),
+				 MakeTimeAccessor (&VideoPushApplication::SetPullTime,
+								   &VideoPushApplication::GetPullTime),
+				 MakeTimeChecker ())
   ;
   return tid;
 }
@@ -328,6 +333,19 @@ VideoPushApplication::GetNextHop (Ipv4Address destination) {
 	Ptr<Ipv4Route> route = GetRoute (local, destination);
 	return (route == NULL ? m_gateway: route->GetGateway());
 
+}
+
+
+void
+VideoPushApplication::SetPullTime (Time pullt)
+{
+	m_pullTime = pullt;
+}
+
+Time
+VideoPushApplication::GetPullTime () const
+{
+	return m_pullTime;
 }
 
 

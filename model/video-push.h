@@ -133,6 +133,8 @@ private:
 	void SendPacket ();
 	void SendHello ();
 	ChunkVideo* ChunkSelection();
+	void SetPullTime (Time pullt);
+	Time GetPullTime () const;
 
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
@@ -169,6 +171,7 @@ private:
 	Ptr<Ipv4> 		m_ipv4;
 	Ipv4Address		m_gateway;
 
+	Time 			m_pullTime;
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	std::map<uint32_t , uint32_t> m_duplicates; // count chunks duplicated
