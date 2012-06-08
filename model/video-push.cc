@@ -127,6 +127,7 @@ VideoPushApplication::GetTypeId (void)
 VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
 		m_connected(false), m_ipv4(0), m_latestChunkID(0), m_socket(0)
+		m_pullTimer (Timer::CANCEL_ON_DESTROY)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
@@ -285,6 +286,8 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_socket->SetCloseCallbacks (
          MakeCallback (&VideoPushApplication::HandlePeerClose, this),
          MakeCallback (&VideoPushApplication::HandlePeerError, this));
+      m_pullTimer.SetDelay(GetPullTime());
+      m_pullTimer.SetFunction(&VideoPushApplication::PeerLoop, this);
     }
   // Insure no pending event
   CancelEvents ();

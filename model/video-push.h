@@ -40,6 +40,7 @@
 #include "ns3/random-variable.h"
 #include "ns3/traced-callback.h"
 #include "ns3/ipv4.h"
+#include "ns3/timer.h"
 
 namespace ns3{
 
@@ -172,6 +173,7 @@ private:
 	Ipv4Address		m_gateway;
 
 	Time 			m_pullTime;
+	Timer 			m_pullTimer;
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	std::map<uint32_t , uint32_t> m_duplicates; // count chunks duplicated
