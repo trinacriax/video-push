@@ -26,6 +26,7 @@ def build(bld):
     module_test = bld.create_ns3_module_test_library('video-push')
     module_test.source = [
           'test/chunk-header-test-suite.cc',
+          'test/chunk-buffer-test-suite.cc'
           ]
     
     if bld.env['ENABLE_EXAMPLES']:
