@@ -129,6 +129,7 @@ private:
 
 	void PeerLoop();
 	void AddDuplicate (uint32_t chunkid);
+	uint32_t GetDuplicate (uint32_t chunkid);
 
 	void StartSending ();
 	void StopSending ();

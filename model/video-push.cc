@@ -204,8 +204,7 @@ VideoPushApplication::DoDispose (void)
 		missed++;
 		last++;
 	  }
-	  duplicates+=m_duplicates.find(cid)->second;
-	  NS_LOG_DEBUG ("Chunk "<< cid<< " Dup "<< duplicates);
+	  duplicates+= GetDuplicate (cid);
 	  NS_ASSERT(m_chunks.HasChunk(cid));
 	  last = cid +1;
 	  Time chunk_timestamp = GetChunkDelay(cid);
@@ -663,6 +662,14 @@ VideoPushApplication::AddDuplicate (uint32_t chunkid)
 	  m_duplicates.insert(dup);
 	}
 	m_duplicates.find(chunkid)->second++;
+}
+
+uint32_t
+VideoPushApplication::GetDuplicate (uint32_t chunkid)
+{
+	if(m_duplicates.find(chunkid) == m_duplicates.end())
+		return 0;
+	return m_duplicates.find(chunkid)->second;
 }
 
 ChunkVideo*
