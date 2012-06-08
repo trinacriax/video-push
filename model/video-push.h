@@ -128,7 +128,7 @@ private:
 	uint32_t GetApplicationId (void) const;
 
 	void PeerLoop();
-	void CheckDuplicate (uint32_t chunkid);
+	void AddDuplicate (uint32_t chunkid);
 
 	void StartSending ();
 	void StopSending ();

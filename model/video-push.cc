@@ -572,7 +572,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 				  duplicated = !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
 				  if (duplicated)
 				  {
-					  CheckDuplicate (chunk.c_id);
+					  AddDuplicate (chunk.c_id);
 					  duplicated = true;
 					  if(IsPending(chunk.c_id))
 						  RemovePending(chunk.c_id);
@@ -655,7 +655,7 @@ VideoPushApplication::GetPullRetry (uint32_t chunkid)
 }
 
 void
-VideoPushApplication::CheckDuplicate (uint32_t chunkid)
+VideoPushApplication::AddDuplicate (uint32_t chunkid)
 {
 	if(m_duplicates.find(chunkid) == m_duplicates.end())
 	{
