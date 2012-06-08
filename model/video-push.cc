@@ -219,8 +219,7 @@ VideoPushApplication::DoDispose (void)
   cnt = 0;
   dev = 0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
-  	  Time chunk_delay = Time::FromInteger(iter->second.c_tstamp,Time::US);
-  	  double t_dev = ((chunk_delay - delay_avg).ToDouble(Time::US));
+  	  double t_dev = ((GetChunkDelay(iter->second.c_id) - delay_avg).ToDouble(Time::US));
   	  dev += pow(t_dev,2);
   	  cnt++;
   }
