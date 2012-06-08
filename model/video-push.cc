@@ -561,6 +561,30 @@ void VideoPushApplication::StopSending ()
 
 }
 
+ChunkVideo*
+VideoPushApplication::ChunkSelection (ChunkPolicy policy){
+	NS_LOG_FUNCTION(this<<policy);
+	ChunkVideo *copy;
+	switch (policy){
+		case CS_NEW_CHUNK:
+		{
+			uint64_t tstamp = Simulator::Now().ToInteger(Time::US);
+			ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,0);
+			copy = cv.Copy();
+			break;
+		}
+		case CS_LEAST_USEFUL:
+		{
+
+			break;
+		}
+		default:
+		{
+		  NS_LOG_ERROR("Condition not allowed");
+		  break;
+		}
+	}
+	return copy;
 // Private helpers
 void VideoPushApplication::ScheduleNextTx ()
 {
@@ -630,12 +654,6 @@ void VideoPushApplication::SendHello ()
 
 }
 
-ChunkVideo* VideoPushApplication::ChunkSelection(){
-	uint64_t tstamp = Simulator::Now().ToInteger(Time::US);
-	ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,0);//AAA Just the chunk header
-	ChunkVideo *copy = cv.Copy();
-	return copy;
-}
 
 {
 }
