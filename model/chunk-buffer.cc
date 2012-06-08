@@ -99,6 +99,49 @@ namespace ns3{
 		}
 		return buf.str();
 	}
+
+
+	void
+	ChunkBuffer::SetChunkState (uint32_t chunkid, ChunkState state)
+	{
+		if (chunk_state.find(chunkid) == chunk_state.end())
+			chunk_state.insert(std::pair <uint32_t, ChunkState> (chunkid, state));
+		switch (state)
+		{
+			case CHUNK_RECEIVED_PULL:
+			case CHUNK_RECEIVED_PUSH:
+			{
+				NS_ASSERT(HasChunk(chunkid));
+				chunk_state.find(chunkid)->second = state;
+				break;
+			}
+			case CHUNK_MISSED:
+			case CHUNK_SKIPPED:
+			{
+				NS_ASSERT(!HasChunk(chunkid));
+				chunk_state.find(chunkid)->second = state;
+				break;
+			}
+			default:
+			{
+				NS_ASSERT (true);
+				break;
+			}
+		}
+	}
+
+	ChunkState
+	ChunkBuffer::GetChunkState (uint32_t chunkid){
+		NS_ASSERT (chunkid>0);
+		std::map<uint32_t, ChunkState>::iterator iter = chunk_state.find(chunkid);
+		if (iter == chunk_state.end())
+		{
+			return CHUNK_MISSED;
+		}
+		else
+			return iter->second;
+	}
+
 }
 
 

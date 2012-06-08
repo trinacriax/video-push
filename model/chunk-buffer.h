@@ -48,9 +48,12 @@ public:
 	const size_t GetBufferSize ();
 	std::string PrintBuffer();
 	std::map<uint32_t, ChunkVideo> GetChunkBuffer();
+	ChunkState GetChunkState (uint32_t index);
+	void SetChunkState (uint32_t chunkid, ChunkState state);
 
 protected:
 	std::map<uint32_t, ChunkVideo> chunk_buffer;
+	std::map<uint32_t, ChunkState> chunk_state;
 
 };
 }
