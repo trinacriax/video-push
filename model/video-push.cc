@@ -383,6 +383,18 @@ void VideoPushApplication::StartSending ()
 }
 
 void
+VideoPushApplication::SetPullActive (bool pull)
+{
+	m_pullActive = pull;
+}
+
+bool
+VideoPushApplication::GetPullActive () const
+{
+	return m_pullActive;
+}
+
+void
 VideoPushApplication::SetPullTime (Time pullt)
 {
 	m_pullTime = pullt;

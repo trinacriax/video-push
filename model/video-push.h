@@ -144,6 +144,8 @@ private:
 	void SetPullMax (uint32_t max);
 	uint32_t GetPullMax () const;
 
+	void SetPullActive (bool pull);
+	bool GetPullActive () const;
 	void SetChunkDelay (uint32_t chunkid, Time delay);
 	Time GetChunkDelay (uint32_t chunkid);
 
