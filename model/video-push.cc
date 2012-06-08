@@ -359,6 +359,29 @@ void VideoPushApplication::HandleAccept (Ptr<Socket> s, const Address& from)
   m_socketList.push_back (s);
 }
 
+void VideoPushApplication::CancelEvents ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  if (m_sendEvent.IsRunning ())
+    { // Cancel the pending send packet event
+      // Calculate residual bits since last packet sent
+      Time delta (Simulator::Now () - m_lastStartTime);
+      int64x64_t bits = delta.To (Time::S) * m_cbrRate.GetBitRate ();
+      m_residualBits += bits.GetHigh ();
+    }
+  Simulator::Cancel (m_sendEvent);
+  Simulator::Cancel (m_peerLoop);
+}
+
+// Event handlers
+void VideoPushApplication::StartSending ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+  m_lastStartTime = Simulator::Now ();
+  Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
+}
+
 void
 VideoPushApplication::SetPullTime (Time pullt)
 {
@@ -556,27 +579,22 @@ VideoPushApplication::RemovePending (uint32_t chunkid)
 	return true;
 }
 
-void VideoPushApplication::CancelEvents ()
+void
+VideoPushApplication::AddPullRetry (uint32_t chunkid)
 {
-  NS_LOG_FUNCTION_NOARGS ();
-
-  if (m_sendEvent.IsRunning ())
-    { // Cancel the pending send packet event
-      // Calculate residual bits since last packet sent
-      Time delta (Simulator::Now () - m_lastStartTime);
-      int64x64_t bits = delta.To (Time::S) * m_cbrRate.GetBitRate ();
-      m_residualBits += bits.GetHigh ();
-    }
-  Simulator::Cancel (m_sendEvent);
-  Simulator::Cancel (m_sendTx);
+	NS_ASSERT(chunkid>0);
+	if (m_pullRetries.find(chunkid) == m_pullRetries.end())
+		m_pullRetries.insert(std::pair<uint32_t, uint32_t>(chunkid,0));
+	m_pullRetries.find(chunkid)->second++;
 }
 
-// Event handlers
-void VideoPushApplication::StartSending ()
+uint32_t
+VideoPushApplication::GetPullRetry (uint32_t chunkid)
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  m_lastStartTime = Simulator::Now ();
-  ScheduleNextTx ();  // Schedule the send packet event
+	NS_ASSERT(chunkid>0);
+	if (m_pullRetries.find(chunkid) == m_pullRetries.end())
+			return 0;
+	return m_pullRetries.find(chunkid)->second;
 }
 
 void VideoPushApplication::StopSending ()

@@ -140,6 +140,8 @@ private:
 	bool IsPending (uint32_t chunkid);
 	bool RemovePending (uint32_t chunkid);
 
+	void AddPullRetry (uint32_t chunkid);
+	uint32_t GetPullRetry (uint32_t chunkid);
 	void SetPullMax (uint32_t max);
 	uint32_t GetPullMax () const;
 
@@ -188,6 +190,7 @@ private:
 	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
 	std::map<uint32_t , uint32_t> m_duplicates; // count chunks duplicated
 	std::map<uint32_t, uint32_t> m_pendingPull; // count pending pulls
+	std::map<uint32_t, uint32_t> m_pullRetries; // count chunks duplicated
 
 	uint32_t 		m_latestChunkID;	// store the latest chunk identifier
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm
