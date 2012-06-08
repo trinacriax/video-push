@@ -694,7 +694,6 @@ void VideoPushApplication::SendPacket ()
 	}
 }
 
-void VideoPushApplication::SendHello ()
 {
 
 }

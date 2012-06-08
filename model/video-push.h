@@ -132,7 +132,6 @@ private:
 	void StartSending ();
 	void StopSending ();
 	void SendPacket ();
-	void SendHello ();
 	ChunkVideo* ChunkSelection (ChunkPolicy policy);
 	void SetPullTime (Time pullt);
 	Time GetPullTime () const;
