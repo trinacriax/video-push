@@ -649,25 +649,6 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		}
 	}
 	return copy;
-// Private helpers
-void VideoPushApplication::ScheduleNextTx ()
-{
-  NS_LOG_FUNCTION_NOARGS ();
-  if(m_peerType == PEER) return;
-  if (m_maxBytes == 0 || m_totBytes < m_maxBytes)
-    {
-      uint32_t bits = m_pktSize * 8 - m_residualBits;
-      NS_LOG_LOGIC ("bits = " << bits);
-      Time nextTime (Seconds (bits / static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
-      NS_LOG_LOGIC ("nextTime = " << nextTime);
-      m_sendEvent = Simulator::ScheduleNow (&VideoPushApplication::PeerLoop, this);
-      // NS_LOG_DEBUG("ScheduleNextTx Now");
-      m_sendTx = Simulator::Schedule (nextTime, &VideoPushApplication::ScheduleNextTx, this);
-    }
-  else
-    { // All done, cancel any pending events
-      StopApplication ();
-    }
 }
 
 void VideoPushApplication::SendPacket ()
