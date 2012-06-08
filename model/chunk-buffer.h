@@ -41,7 +41,7 @@ public:
 	virtual ~ChunkBuffer ();
 
 	ChunkVideo* GetChunk (uint32_t index);
-	bool AddChunk (ChunkVideo chunk);
+	bool AddChunk (ChunkVideo chunk, ChunkState state);
 	bool DelChunk (uint32_t index);
 
 	const size_t GetBufferSize ();
