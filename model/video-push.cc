@@ -211,7 +211,8 @@ VideoPushApplication::DoDispose (void)
 	  delay_max = (delay_max < chunk_timestamp)? chunk_timestamp : delay_max;
 	  delay_min = delay_min==0? delay_max: (delay_min > chunk_timestamp)? chunk_timestamp : delay_min;
 	  delay_avg += chunk_timestamp;
-	  NS_LOG_DEBUG ("Chunk "<< cid<< " Time "<< chunk_timestamp <<" "<<delay_max<< " "<<delay_min<<" "<< delay_avg);
+	  NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " Dup("<<cid<<")="<<GetDuplicate (cid)<< " Delay("<<cid<<")="<< chunk_timestamp.GetMicroSeconds()
+			  <<" Max="<<delay_max.GetMicroSeconds()<< " Min="<<delay_min.GetMicroSeconds()<<" Avg="<< delay_avg.GetMicroSeconds());
   }
   double actual = last-missed;
   delay_avg = Time::FromDouble(delay_avg.ToDouble(Time::US) / (actual <= 0?1:(actual)), Time::US);
