@@ -43,7 +43,7 @@ ChunkHeaderTestCase::DoRun (void)
 {
   Packet packet;
   streaming::ChunkHeader msgIn;
-  msgIn.SetType(CHUNK);
+  msgIn.SetType(MSG_CHUNK);
   msgIn.SetReserved(0);
   msgIn.SetChecksum(61255);
   msgIn.Print(std::cout);
@@ -53,12 +53,12 @@ ChunkHeaderTestCase::DoRun (void)
   packet.RemoveHeader (msgOut);
   msgOut.Print(std::cout);
   {
-	NS_TEST_ASSERT_MSG_EQ(msgOut.GetType(),CHUNK,"ChunkHeader Type");
+	NS_TEST_ASSERT_MSG_EQ(msgOut.GetType(),MSG_CHUNK,"ChunkHeader Type");
 	NS_TEST_ASSERT_MSG_EQ(msgOut.GetReserved(),0,"Reserved");
 	NS_TEST_ASSERT_MSG_EQ(msgOut.GetChecksum(),61255,"Checksum");
   }
 
-  msgIn.SetType(PULL);
+  msgIn.SetType(MSG_PULL);
   msgIn.SetReserved(1);
   msgIn.SetChecksum(31225);
   msgIn.Print(std::cout);
@@ -67,7 +67,7 @@ ChunkHeaderTestCase::DoRun (void)
   packet.RemoveHeader (msgOut);
   msgOut.Print(std::cout);
   {
-  NS_TEST_ASSERT_MSG_EQ(msgOut.GetType(),PULL,"ChunkHeader Type");
+  NS_TEST_ASSERT_MSG_EQ(msgOut.GetType(),MSG_PULL,"ChunkHeader Type");
   NS_TEST_ASSERT_MSG_EQ(msgOut.GetReserved(),1,"Reserved");
   NS_TEST_ASSERT_MSG_EQ(msgOut.GetChecksum(),31225,"Checksum");
   }
@@ -88,7 +88,7 @@ ChunkTestCase::DoRun (void)
 {
 	  Packet packet;
 	  streaming::ChunkHeader msgIn;
-	  msgIn.SetType(CHUNK);
+	  msgIn.SetType(MSG_CHUNK);
 	  msgIn.SetReserved(0);
 	  msgIn.SetChecksum(45665);
 	  msgIn.Print(std::cout);
@@ -104,7 +104,7 @@ ChunkTestCase::DoRun (void)
 	  packet.RemoveHeader (msgOut);
 	  msgOut.Print(std::cout);
 	  {
-		NS_TEST_ASSERT_MSG_EQ(msgOut.GetType(),CHUNK,"ChunkHeader Type");
+		NS_TEST_ASSERT_MSG_EQ(msgOut.GetType(),MSG_CHUNK,"ChunkHeader Type");
 		NS_TEST_ASSERT_MSG_EQ(msgOut.GetReserved(),0,"Reserved");
 		NS_TEST_ASSERT_MSG_EQ(msgOut.GetChecksum(),45665,"Checksum");
 
@@ -133,7 +133,7 @@ PullTestCase::DoRun (void)
 {
 	  Packet packet;
 	  streaming::ChunkHeader msgIn;
-	  msgIn.SetType(PULL);
+	  msgIn.SetType(MSG_PULL);
 	  msgIn.SetReserved(1);
 	  msgIn.SetChecksum(65535);
 	  msgIn.Print(std::cout);
@@ -148,7 +148,7 @@ PullTestCase::DoRun (void)
 	  packet.RemoveHeader (msgOut);
 	  msgOut.Print(std::cout);
 	  {
-	  NS_TEST_ASSERT_MSG_EQ(msgOut.GetType(),PULL,"ChunkHeader Type");
+	  NS_TEST_ASSERT_MSG_EQ(msgOut.GetType(),MSG_PULL,"ChunkHeader Type");
 	  NS_TEST_ASSERT_MSG_EQ(msgOut.GetReserved(),1,"Reserved");
 	  NS_TEST_ASSERT_MSG_EQ(msgOut.GetChecksum(),65535,"Checksum");
 	  streaming::ChunkHeader::PullMessage &chunkOut = msgIn.GetPullMessage ();
