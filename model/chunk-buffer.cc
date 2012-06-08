@@ -100,6 +100,14 @@ namespace ns3{
 		return buf.str();
 	}
 
+	bool
+	ChunkBuffer::ChunkSkipped (uint32_t chunkid)
+	{
+		NS_ASSERT (chunkid>0);
+		bool ret = (chunk_state.find(missed) != chunk_state.end() && chunk_state.find(missed)->second == CHUNK_SKIPPED);
+		return ret;
+	}
+
 
 	uint32_t
 	ChunkBuffer::GetLeastMissed (){
