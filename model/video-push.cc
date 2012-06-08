@@ -716,19 +716,22 @@ void VideoPushApplication::SendPacket ()
 			Ptr<Packet> packet = Create<Packet> (m_pktSize);//AAA Here the data
 			packet->AddHeader(chunk);
 			uint32_t payload = copy->c_size+copy->c_attributes_size;//data and attributes already in chunk header;
-			NS_LOG_LOGIC ("Push packet " << *copy<< " UID "<< packet->GetUid() << " Push Size "<< payload);
 			m_txTrace (packet);
 			m_socket->SendTo(packet, 0, m_peer);
 			m_totBytes += payload;
 			m_lastStartTime = Simulator::Now ();
 			m_residualBits = 0;
 			last_chunk = (last_chunk < m_latestChunkID) ? m_latestChunkID : last_chunk;
-			copy->c_tstamp = Simulator::Now().ToInteger(Time::US) - copy->c_tstamp;
-			if(!m_chunks.AddChunk(*copy,CHUNK_RECEIVED_PUSH)){
-				NS_ASSERT (m_duplicates.find(copy->c_id) != m_duplicates.end());
-				m_duplicates.insert(std::pair<uint32_t , uint32_t> (copy->c_id,0));
-				SetChunkDelay(copy->c_id,Seconds(0));
+			if(!m_chunks.AddChunk(*copy,CHUNK_RECEIVED_PUSH))
+			{
+				AddDuplicate(copy->c_id);
+				NS_ASSERT (true);
 			}
+			NS_ASSERT (copy->c_id == m_chunks.GetLastChunk());
+			SetChunkDelay(copy->c_id, Seconds(0));
+			NS_LOG_LOGIC ("Node " << GetNode()->GetId() << " push packet " << *copy<< " Dup="<<GetDuplicate(copy->c_id)
+					<< " Delay="<<GetChunkDelay(copy->c_id)<< " UID="<< packet->GetUid() << " Size="<< payload);
+			NS_ASSERT (m_duplicates.find(copy->c_id) == m_duplicates.end());
 			m_latestChunkID++;
 			delete copy;
 			break;
