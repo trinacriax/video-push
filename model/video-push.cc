@@ -340,9 +340,24 @@ VideoPushApplication::GetNextHop (Ipv4Address destination) {
 	Ipv4Address local = Ipv4Address::ConvertFrom(m_localAddress);
 	Ptr<Ipv4Route> route = GetRoute (local, destination);
 	return (route == NULL ? m_gateway: route->GetGateway());
-
 }
 
+void VideoPushApplication::HandlePeerClose (Ptr<Socket> socket)
+{
+	// NS_LOG_DEBUG ("VideoPush, peerClose");
+}
+
+void VideoPushApplication::HandlePeerError (Ptr<Socket> socket)
+{
+	// NS_LOG_DEBUG ("VideoPush, peerError");
+}
+
+void VideoPushApplication::HandleAccept (Ptr<Socket> s, const Address& from)
+{
+  NS_LOG_FUNCTION (this << s << from);
+  s->SetRecvCallback (MakeCallback (&VideoPushApplication::HandleReceive, this));
+  m_socketList.push_back (s);
+}
 
 void
 VideoPushApplication::SetPullTime (Time pullt)
@@ -513,22 +528,32 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
     }
 }
 
-void VideoPushApplication::HandlePeerClose (Ptr<Socket> socket)
+void
+VideoPushApplication::AddPending (uint32_t chunkid)
 {
-	// NS_LOG_DEBUG ("VideoPush, peerClose");
+	NS_ASSERT (chunkid >0);
+	if (m_pendingPull.find(chunkid) == m_pendingPull.end())
+		m_pendingPull.insert(std::pair<uint32_t,uint32_t>(chunkid,0));
+	m_pendingPull.find(chunkid)->second+=1;
 }
 
-void VideoPushApplication::HandlePeerError (Ptr<Socket> socket)
+bool
+VideoPushApplication::IsPending (uint32_t chunkid)
 {
-	// NS_LOG_DEBUG ("VideoPush, peerError");
+	NS_ASSERT (chunkid >0);
+	if (m_pendingPull.find(chunkid) == m_pendingPull.end())
+		return false;
+	return (m_pendingPull.find(chunkid)->second > 0);
 }
 
-
-void VideoPushApplication::HandleAccept (Ptr<Socket> s, const Address& from)
+bool
+VideoPushApplication::RemovePending (uint32_t chunkid)
 {
-  NS_LOG_FUNCTION (this << s << from);
-  s->SetRecvCallback (MakeCallback (&VideoPushApplication::HandleReceive, this));
-  m_socketList.push_back (s);
+	if (m_pendingPull.find(chunkid) == m_pendingPull.end())
+		return false;
+	m_pendingPull.erase(chunkid);
+	NS_ASSERT (m_pendingPull.find(chunkid) == m_pendingPull.end());
+	return true;
 }
 
 void VideoPushApplication::CancelEvents ()

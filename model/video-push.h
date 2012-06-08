@@ -136,6 +136,9 @@ private:
 	ChunkVideo* ChunkSelection (ChunkPolicy policy);
 	void SetPullTime (Time pullt);
 	Time GetPullTime () const;
+	void AddPending (uint32_t chunkid);
+	bool IsPending (uint32_t chunkid);
+	bool RemovePending (uint32_t chunkid);
 
 	void SetPullMax (uint32_t max);
 	uint32_t GetPullMax () const;
@@ -184,6 +187,7 @@ private:
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
 	std::map<uint32_t , uint32_t> m_duplicates; // count chunks duplicated
+	std::map<uint32_t, uint32_t> m_pendingPull; // count pending pulls
 
 	uint32_t 		m_latestChunkID;	// store the latest chunk identifier
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm
