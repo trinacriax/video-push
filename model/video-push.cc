@@ -103,9 +103,9 @@ VideoPushApplication::GetTypeId (void)
                    MakeTypeIdAccessor (&VideoPushApplication::m_tid),
                    MakeTypeIdChecker ())
     .AddAttribute ("PeerPolicy", "Peer selection algorithm.",
-				   EnumValue(RANDOM),
+				   EnumValue(PS_RANDOM),
 				   MakeEnumAccessor(&VideoPushApplication::m_peerSelection),
-				   MakeEnumChecker (RANDOM, "Random peer selection."))
+				   MakeEnumChecker (PS_RANDOM, "Random peer selection."))
 	.AddAttribute ("ChunkPolicy", "Chunk selection algorithm.",
 				   EnumValue(CS_LATEST),
 				   MakeEnumAccessor(&VideoPushApplication::m_chunkSelection),

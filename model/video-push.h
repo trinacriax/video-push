@@ -54,9 +54,9 @@ enum PeerType {
 };
 
 enum PeerPolicy {
-	RANDOM,
-	DELAY,
-	ROUNDROBIN
+	PS_RANDOM,
+	PS_DELAY,
+	PS_ROUNDROBIN
 };
 
 enum ChunkPolicy {

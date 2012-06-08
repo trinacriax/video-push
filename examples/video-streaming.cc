@@ -120,7 +120,7 @@ main (int argc, char *argv[])
 	video.SetAttribute ("PacketSize", UintegerValue (1200));
 	video.SetAttribute ("PeerType", EnumValue (SOURCE));
 	video.SetAttribute ("Local", AddressValue (addresses.GetAddress(0)));
-	video.SetAttribute ("PeerPolicy", EnumValue (RANDOM));
+	video.SetAttribute ("PeerPolicy", EnumValue (PS_RANDOM));
 	video.SetAttribute ("ChunkPolicy", EnumValue (CS_LATEST));
 
 	ApplicationContainer apps1 = video.Install (nodes.Get(0));
