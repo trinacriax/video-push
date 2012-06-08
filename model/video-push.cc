@@ -119,6 +119,11 @@ VideoPushApplication::GetTypeId (void)
 				 MakeTimeAccessor (&VideoPushApplication::SetPullTime,
 								   &VideoPushApplication::GetPullTime),
 				 MakeTimeChecker ())
+	.AddAttribute ("PullMax", "Max number of pull.",
+				   UintegerValue (1),
+				   MakeUintegerAccessor (&VideoPushApplication::SetPullMax,
+						   	   	   	   	 &VideoPushApplication::GetPullMax),
+				   MakeUintegerChecker<uint32_t> (1))
   ;
   return tid;
 }
@@ -127,7 +132,6 @@ VideoPushApplication::GetTypeId (void)
 VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
 		m_connected(false), m_ipv4(0), m_latestChunkID(0), m_socket(0)
-		m_pullTimer (Timer::CANCEL_ON_DESTROY)
 		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0)
 {
   NS_LOG_FUNCTION_NOARGS ();
