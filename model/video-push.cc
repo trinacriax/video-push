@@ -576,8 +576,10 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 					  if(IsPending(chunk.c_id))
 						  RemovePending(chunk.c_id);
 				  }
-				  Time delay = (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US));
-				  SetChunkDelay(chunk.c_id, delay);
+				  else
+				  {
+					  SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
+				  }
 				  last = m_chunks.GetLastChunk();
 				  missed = m_chunks.GetLeastMissed();
 				  if (missed && !m_pullTimer.IsRunning())
