@@ -58,6 +58,8 @@ using namespace std;
 
 namespace ns3 {
 
+#define DELAY_UNIT Time::US
+
 NS_OBJECT_ENSURE_REGISTERED (VideoPushApplication);
 
 TypeId
@@ -299,7 +301,6 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
   // Insure no pending event
   CancelEvents ();
   StartSending ();
-
 }
 
 void VideoPushApplication::StopApplication () // Called at time specified by Stop
@@ -520,71 +521,85 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
         }
       ns3::pimdm::RelayTag relayTag;
       bool rtag = packet->RemovePacketTag(relayTag);
-      Ipv4Address current = Ipv4Address::ConvertFrom(m_localAddress);
-      InetSocketAddress inetAddr = InetSocketAddress::ConvertFrom (from);
-      Ipv4Address sourceAddr = inetAddr.GetIpv4 ();
-//      uint16_t sourcePort = inetAddr.GetPort();
+      InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
+      Ipv4Address sourceAddr = address.GetIpv4 ();
+      uint32_t port = address.GetPort();
       Ipv4Address gateway = GetNextHop(sourceAddr);
       Ipv4Mask mask ("255.255.255.0");
-      current = current.GetSubnetDirectedBroadcast(mask);
-      NS_LOG_DEBUG("Packet from "<< from << " Local "<< current << " gw " << gateway<< " Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast());
-      if(rtag && current != relayTag.m_receiver){
+      Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(mask);
+      NS_LOG_DEBUG("Node " << GetLocalAddress() <<  " receives packet from "<< sourceAddr << " gw " << gateway<< " Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast());
+      if(rtag && subnet != relayTag.m_receiver)
+      {
 //    	  // NS_LOG_DEBUG("Discarded: not for clients "<<relayTag.m_receiver);
     	  break;
       }
-      if(gateway!=relayTag.m_sender){
-    	  NS_LOG_DEBUG("Duplicated packet Gateway "<<gateway<< " Sender " << relayTag.m_sender);
+      if(gateway!=relayTag.m_sender)
+      {
+//    	  NS_LOG_DEBUG("Duplicated packet Gateway "<<gateway<< " Sender " << relayTag.m_sender);
 //		  break;
       }
       if (InetSocketAddress::IsMatchingType (from))
         {
-          ChunkHeader chunkH (CHUNK);
+          ChunkHeader chunkH (MSG_CHUNK);
           packet->RemoveHeader(chunkH);
           switch (chunkH.GetType())
           {
-			  case CHUNK:{
+          	  case MSG_CHUNK:
+			  {
 				  ChunkVideo chunk = chunkH.GetChunkMessage().GetChunk();
 				  m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
-				  InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
-				  Time delay_0 = Time::FromInteger(chunk.c_tstamp,Time::US);
-				  Time delay_1 = Simulator::Now();
-				  delay_1 -= delay_0;
-				  chunk.c_tstamp = delay_1.ToInteger(Time::US);
-				  uint32_t port = address.GetPort();
-				  Ipv4Address senderAddr = address.GetIpv4 ();
-				  // Update Neighbors START
-				  Neighbor *sender = new Neighbor(senderAddr, port);
-				  if(!m_neighbors.IsNeighbor(*sender)){
-					m_neighbors.AddNeighbor(*sender);
-				  }
-				  NeighborData *ndata = m_neighbors.GetNeighbor(*sender);
-				  ndata->n_contact = Simulator::Now();
-				  ndata->n_latestChunk = chunk.c_id;
-				  // Update Neighbors END
-
 				  // Update Chunk Buffer START
-				  if(!m_chunks.AddChunk(chunk)){
-					  if(m_duplicates.find(chunk.c_id)==m_duplicates.end()){
-						  std::pair<uint32_t, uint32_t> dup(chunk.c_id,0);
-						  m_duplicates.insert(dup);
-					  }
-					m_duplicates.find(chunk.c_id)->second++;
-					NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " ReceivedDuplicate [" <<  chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << relayTag.m_sender << "] UID "<< packet->GetUid() << " total Rx " << m_totalRx);
-					// NS_LOG_DEBUG("Chunk " << chunk->c_id <<" already received " << m_duplicates.find(chunk->c_id)->second<<" times");
+				  uint32_t last = m_chunks.GetLastChunk();
+				  uint32_t missed = m_chunks.GetLeastMissed();
+
+				  // INDUCING MISSING CHUNKS START
+
+				  bool duplicated = false;
+#define MISS
+#ifdef MISS
+				  bool missed_chunk;
+				  uint32_t chunktomiss = 1;//Only node 2 misses chunk #1
+				  missed_chunk = (GetNode()->GetId() == 2 && chunk.c_id == chunktomiss && last < chunktomiss);
+				  if(missed_chunk)
+				  {
+					  NS_LOG_INFO ("Node " << GetLocalAddress() << " missed chunk " <<  chunk.c_id);
+					  break;
 				  }
-				  else
-					  NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress) << " Received [" <<  chunk << "::"<< delay_1 <<"] from " << address.GetIpv4 () << " [" << relayTag.m_sender << "] UID "<< packet->GetUid() << " total Rx " << m_totalRx);
-				  // Update ChunkBuffer END
-				  //cast address to void , to suppress 'address' set but not used
-				  //compiler warning in optimized builds
-				  (void) address;
-				  delete sender;
-				  //
+#endif
+				  if (missed == chunk.c_id)
+					  NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk.");
+				  // INDUCING MISSING CHUNKS END.
+				  duplicated = !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
+				  if (duplicated)
+				  {
+					  CheckDuplicate (chunk.c_id);
+					  duplicated = true;
+					  if(IsPending(chunk.c_id))
+						  RemovePending(chunk.c_id);
+				  }
+				  Time delay = (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US));
+				  SetChunkDelay(chunk.c_id, delay);
+				  last = m_chunks.GetLastChunk();
+				  missed = m_chunks.GetLeastMissed();
+				  if (missed && !m_pullTimer.IsRunning())
+					  Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
+				  NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":" Received ")
+						  << chunk << "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"<<" from "
+						  << sourceAddr << " [" << relayTag.m_sender << "] totalRx " << m_totalRx);
 				  break;
 			  }
-			  case PULL:
+			  case MSG_PULL:
 			  {
-
+				  uint32_t chunkid = chunkH.GetPullMessage().GetChunk();
+				  bool hasChunk = m_chunks.HasChunk (chunkid);
+				  NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress)
+				  	  << " Received Pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sourceAddr);
+				  if (hasChunk && m_peerType == PEER)
+				  {
+					  Time delay = Time::FromDouble(UniformVariable().GetValue(1,20), Time::MS);
+					  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sourceAddr);
+					  AddPending(chunkid);
+				  }
 				  break;
 			  }
           }
