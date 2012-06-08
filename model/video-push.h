@@ -60,8 +60,13 @@ enum PeerPolicy {
 };
 
 enum ChunkPolicy {
-	LATEST, //latest chunk received
-	LATEST_USEFUL, //latest chunk not owned by some neighbor
+	CS_NEW_CHUNK,
+	//
+	CS_LATEST, //latest chunk received
+	CS_LATEST_USEFUL, //latest chunk not owned by some neighbor
+	CS_LEAST_USEFUL,
+	CS_LEAST_MISSED
+
 };
 
 class VideoPushApplication : public Application

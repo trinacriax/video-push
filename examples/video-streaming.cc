@@ -121,7 +121,7 @@ main (int argc, char *argv[])
 	video.SetAttribute ("PeerType", EnumValue (SOURCE));
 	video.SetAttribute ("Local", AddressValue (addresses.GetAddress(0)));
 	video.SetAttribute ("PeerPolicy", EnumValue (RANDOM));
-	video.SetAttribute ("ChunkPolicy", EnumValue (LATEST));
+	video.SetAttribute ("ChunkPolicy", EnumValue (CS_LATEST));
 
 	ApplicationContainer apps1 = video.Install (nodes.Get(0));
 	apps1.Start (Seconds (1.0));
