@@ -70,8 +70,9 @@ namespace ns3{
 	}
 
 	bool
-	ChunkBuffer::DelChunk(uint32_t index) {
-		return chunk_buffer.erase(index);
+	ChunkBuffer::DelChunk(uint32_t chunkid) {
+		NS_ASSERT (chunkid>0);
+		return chunk_buffer.erase(chunkid);
 	}
 
 	const size_t
