@@ -112,6 +112,12 @@ namespace ns3{
 		return missed;
 	}
 
+	uint32_t
+	ChunkBuffer::GetLastChunk ()
+	{
+		return last;
+	}
+
 	void
 	ChunkBuffer::SetChunkState (uint32_t chunkid, ChunkState state)
 	{
