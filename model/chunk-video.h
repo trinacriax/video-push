@@ -29,7 +29,15 @@
 #include <iostream>
 #include <stdlib.h>
 #include <memory.h>
+#include <limits.h>
 #include "ns3/assert.h"
+
+enum ChunkState {
+		CHUNK_RECEIVED_PUSH,
+		CHUNK_RECEIVED_PULL,
+		CHUNK_SKIPPED,
+		CHUNK_MISSED
+};
 
 namespace ns3{
 
@@ -54,19 +62,23 @@ namespace streaming{
 		//			c_data = 0;
 		//			c_attributes = 0;
 		}
-		ChunkVideo (const uint32_t cid, const uint64_t ctstamp, const uint32_t csize, const uint32_t cattributes_size) :
+		ChunkVideo (const uint32_t cid, const uint64_t ctstamp, const uint16_t csize, const uint16_t cattributes_size) :
 			c_id (cid),
 			c_tstamp (ctstamp),
 			c_size(csize),
 			c_attributes_size (cattributes_size)
 		{
+			NS_ASSERT (cid>0);
+			NS_ASSERT (ctstamp>=0 && ctstamp<=ULONG_LONG_MAX);
+			NS_ASSERT (csize>=0 && csize<=USHRT_MAX);
+			NS_ASSERT (cattributes_size>=0 && cattributes_size<=USHRT_MAX);
 //			c_data = 0;
 //			c_attributes = 0;
 		}
 		uint32_t c_id;
 		uint64_t c_tstamp;
-		uint32_t c_size;
-		uint32_t c_attributes_size;
+		uint16_t c_size;
+		uint16_t c_attributes_size;
 //		uint8_t *c_data;
 //		uint8_t *c_attributes;
 
@@ -75,8 +87,8 @@ namespace streaming{
 			return copy;
 		}
 
-		uint32_t GetSize(){return c_size;}
-		uint32_t GetAttributeSize(){return c_attributes_size;}
+		uint16_t GetSize(){return c_size;}
+		uint16_t GetAttributeSize(){return c_attributes_size;}
 	};
 
 		static inline std::ostream&
