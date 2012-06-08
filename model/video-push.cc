@@ -279,7 +279,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       NS_ASSERT (m_socket != 0);
 //      int32_t iface = 1;//TODO just one interface!
 	  int status;
-	  status = m_socket->Bind (InetSocketAddress(Ipv4Address::GetAny (), m_localPort));
+	  status = m_socket->Bind (InetSocketAddress(m_localPort));
 	  NS_ASSERT (status != -1);
 	  // NS_LOG_DEBUG("Push Socket "<< m_socket << " to "<<Ipv4Address::GetAny ()<<"::"<< m_localPort);
 	  // Bind to any IP address so that packets can be received
