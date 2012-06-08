@@ -132,6 +132,7 @@ private:
 	void StartSending ();
 	void StopSending ();
 	void SendPacket ();
+	void SendPull (uint32_t chunkid);
 	ChunkVideo* ChunkSelection (ChunkPolicy policy);
 	void SetPullTime (Time pullt);
 	Time GetPullTime () const;

@@ -719,8 +719,19 @@ void VideoPushApplication::SendPacket ()
 	}
 }
 
+void
+VideoPushApplication::SendPull (uint32_t chunkid)
 {
-
+	ChunkHeader pull (MSG_PULL);
+	pull.GetPullMessage ().SetChunk (chunkid);
+	Ptr<Packet> packet = Create<Packet> ();
+	packet->AddHeader(pull);
+	m_txTrace (packet);
+//	Ipv4Address localAddr = Ipv4Address::ConvertFrom(m_localAddress);
+//	Ipv4Address subnet = localAddr.GetSubnetDirectedBroadcast(mask);
+	Ipv4Address subnet ("10.255.255.255");
+//	InetSocketAddress dstC = InetSocketAddress (subnet, PUSH_PORT);
+	m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
 }
 
 
