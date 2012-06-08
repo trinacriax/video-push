@@ -369,6 +369,13 @@ VideoPushApplication::GetPullMax () const
 }
 
 
+Ipv4Address
+VideoPushApplication::GetLocalAddress ()
+{
+	return Ipv4Address::ConvertFrom(m_localAddress);
+}
+
+
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 {
   NS_LOG_FUNCTION (this << socket);
