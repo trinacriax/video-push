@@ -198,17 +198,19 @@ VideoPushApplication::DoDispose (void)
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
 	  uint32_t cid = iter->first;
 	  while (last < cid){
-//		// NS_LOG_DEBUG ("Missed chunk "<< last << "-"<<m_chunks.GetChunk(last));
+		  NS_LOG_DEBUG ("Missed chunk "<< last << "-"<<m_chunks.GetChunk(last));
 		missed++;
 		last++;
 	  }
 	  duplicates+=m_duplicates.find(cid)->second;
+	  NS_LOG_DEBUG ("Chunk "<< cid<< " Dup "<< duplicates);
+	  NS_ASSERT(m_chunks.HasChunk(cid));
 	  last = cid +1;
-	  Time chunk_timestamp = Time::FromInteger(iter->second.c_tstamp,Time::US);
+	  Time chunk_timestamp = GetChunkDelay(cid);
 	  delay_max = (delay_max < chunk_timestamp)? chunk_timestamp : delay_max;
 	  delay_min = delay_min==0? delay_max: (delay_min > chunk_timestamp)? chunk_timestamp : delay_min;
 	  delay_avg += chunk_timestamp;
-//	  // NS_LOG_DEBUG ("Time "<< chunk_delay <<" "<<delay_max<< " "<<delay_min<<" "<< delay_avg);
+	  NS_LOG_DEBUG ("Chunk "<< cid<< " Time "<< chunk_timestamp <<" "<<delay_max<< " "<<delay_min<<" "<< delay_avg);
   }
   double actual = last-missed;
   delay_avg = Time::FromDouble(delay_avg.ToDouble(Time::US) / (actual <= 0?1:(actual)), Time::US);
