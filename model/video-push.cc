@@ -382,6 +382,13 @@ void VideoPushApplication::StartSending ()
   Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
 }
 
+void VideoPushApplication::StopSending ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+  CancelEvents ();
+
+}
+
 void
 VideoPushApplication::SetPullActive (bool pull)
 {
@@ -630,11 +637,15 @@ VideoPushApplication::GetPullRetry (uint32_t chunkid)
 	return m_pullRetries.find(chunkid)->second;
 }
 
-void VideoPushApplication::StopSending ()
+void
+VideoPushApplication::CheckDuplicate (uint32_t chunkid)
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  CancelEvents ();
-
+	if(m_duplicates.find(chunkid) == m_duplicates.end())
+	{
+	  std::pair<uint32_t, uint32_t> dup(chunkid,0);
+	  m_duplicates.insert(dup);
+	}
+	m_duplicates.find(chunkid)->second++;
 }
 
 ChunkVideo*
