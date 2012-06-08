@@ -31,9 +31,12 @@ NS_LOG_COMPONENT_DEFINE ("ChunkBuffer");
 namespace ns3{
 
 
-	ChunkBuffer::ChunkBuffer (){chunk_buffer.clear();}
+	ChunkBuffer::ChunkBuffer () :
+			missed (0), last(0)
+	{chunk_buffer.clear();}
 
-	ChunkBuffer::~ChunkBuffer (){chunk_buffer.clear();}
+	ChunkBuffer::~ChunkBuffer ()
+	{chunk_buffer.clear();}
 
 	ChunkVideo*
 	ChunkBuffer::GetChunk (uint32_t index){
