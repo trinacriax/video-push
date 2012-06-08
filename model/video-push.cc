@@ -406,6 +406,27 @@ VideoPushApplication::GetPullMax () const
 	return m_pullMax;
 }
 
+void
+VideoPushApplication::SetChunkDelay (uint32_t chunkid, Time delay)
+{
+	NS_ASSERT (chunkid>0);
+	NS_ASSERT (m_chunks.HasChunk(chunkid));
+	uint64_t udelay = delay.GetMicroSeconds();
+	if (m_chunk_delay.find(chunkid) == m_chunk_delay.end())
+		m_chunk_delay.insert(std::pair<uint32_t, uint64_t>(chunkid,udelay));
+	else
+		m_chunk_delay.find(chunkid)->second = udelay;
+}
+
+Time
+VideoPushApplication::GetChunkDelay (uint32_t chunkid)
+{
+	NS_ASSERT (chunkid>0);
+	NS_ASSERT (m_chunks.HasChunk(chunkid));
+	NS_ASSERT (m_chunk_delay.find(chunkid) != m_chunk_delay.end());
+	return Time::FromInteger(m_chunk_delay.find(chunkid)->second, Time::US);
+}
+
 
 Ipv4Address
 VideoPushApplication::GetLocalAddress ()

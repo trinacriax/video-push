@@ -145,6 +145,9 @@ private:
 	void SetPullMax (uint32_t max);
 	uint32_t GetPullMax () const;
 
+	void SetChunkDelay (uint32_t chunkid, Time delay);
+	Time GetChunkDelay (uint32_t chunkid);
+
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
 	void HandleAccept (Ptr<Socket>, const Address& from);
