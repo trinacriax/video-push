@@ -44,7 +44,7 @@ ChunkHeader::ChunkHeader (ChunkMessageType type) :
 		m_type (type)
 {}
 ChunkHeader::ChunkHeader () :
-		m_type (CHUNK)
+		m_type (MSG_CHUNK)
 {}
 
 ChunkHeader::~ChunkHeader ()
@@ -107,14 +107,21 @@ ChunkHeader::GetSerializedSize (void) const
   uint32_t size = CHUNK_HEADER_SIZE;
   switch (m_type)
   {
-  case PULL:
-  {
-	  break;
-  }
-  case CHUNK:
-  {
-	  break;
-  }
+	  case MSG_PULL:
+	  {
+		  size += m_chunk_message.pull.GetSerializedSize();
+		  break;
+	  }
+	  case MSG_CHUNK:
+	  {
+		  size += m_chunk_message.chunk.GetSerializedSize();
+		  break;
+	  }
+	  default:
+	  {
+		  NS_ASSERT (false);
+		  break;
+	  }
   }
   return size;
 }
@@ -133,6 +140,24 @@ ChunkHeader::Serialize (Buffer::Iterator start) const
   i.WriteU8 (type);
   i.WriteU8 (m_reserved);
   i.WriteHtonU16 (m_checksum);
+  switch (m_type)
+  {
+	  case MSG_PULL:
+	  {
+		  m_chunk_message.pull.Serialize(i);
+		  break;
+	  }
+	  case MSG_CHUNK:
+	  {
+		  m_chunk_message.chunk.Serialize(i);
+		  break;
+	  }
+	  default:
+	  {
+		  NS_ASSERT (false);
+		  break;
+	  }
+  }
 }
 
 uint32_t
@@ -146,6 +171,24 @@ ChunkHeader::Deserialize (Buffer::Iterator start)
   size +=1;
   m_checksum = i.ReadNtohU16 ();
   size +=2;
+  switch (m_type)
+  {
+	  case MSG_PULL:
+	  {
+		  size += m_chunk_message.pull.Deserialize (i);
+		  break;
+	  }
+	  case MSG_CHUNK:
+	  {
+		  size += m_chunk_message.chunk.Deserialize (i);
+		  break;
+	  }
+	  default:
+	  {
+		  NS_ASSERT (false);
+		  break;
+	  }
+  }
   return size;
 }
 

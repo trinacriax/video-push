@@ -521,18 +521,47 @@ void VideoPushApplication::ScheduleNextTx ()
     }
 }
 
-void VideoPushApplication::PeerLoop ()
+void VideoPushApplication::SendPacket ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
-//  Time tx = Time::FromDouble(UniformVariable().GetValue(),Time::MS);
-  if(m_peerType == SOURCE){
-//	  // NS_LOG_DEBUG("SendPacket Tx @ "<< tx.GetSeconds()<<"s");
-	  if(m_sendTx.IsRunning())
-	  Simulator::ScheduleNow (&VideoPushApplication::SendPacket, this);
-//	  tx = Time::FromDouble(tx.GetSeconds()*1.05,Time::S);
-//	  // NS_LOG_DEBUG("ScheduleNextTx Tx @ "<< tx.GetSeconds()<<"s");
-//	  Simulator::Schedule (tx, &VideoPushApplication::ScheduleNextTx, this);
-  }
+	NS_LOG_FUNCTION_NOARGS ();
+	switch (m_peerType)
+	{
+		case PEER:
+		{
+			break;
+		}
+		case SOURCE:
+		{
+			NS_ASSERT (m_sendEvent.IsExpired ());
+			ChunkVideo *copy = ChunkSelection(CS_NEW_CHUNK);
+			ChunkHeader chunk (MSG_CHUNK);
+			chunk.GetChunkMessage().SetChunk(*copy);
+			Ptr<Packet> packet = Create<Packet> (m_pktSize);//AAA Here the data
+			packet->AddHeader(chunk);
+			uint32_t payload = copy->c_size+copy->c_attributes_size;//data and attributes already in chunk header;
+			NS_LOG_LOGIC ("Push packet " << *copy<< " UID "<< packet->GetUid() << " Push Size "<< payload);
+			m_txTrace (packet);
+			m_socket->SendTo(packet, 0, m_peer);
+			m_totBytes += payload;
+			m_lastStartTime = Simulator::Now ();
+			m_residualBits = 0;
+			last_chunk = (last_chunk < m_latestChunkID) ? m_latestChunkID : last_chunk;
+			copy->c_tstamp = Simulator::Now().ToInteger(Time::US) - copy->c_tstamp;
+			if(!m_chunks.AddChunk(*copy,CHUNK_RECEIVED_PUSH)){
+				NS_ASSERT (m_duplicates.find(copy->c_id) != m_duplicates.end());
+				m_duplicates.insert(std::pair<uint32_t , uint32_t> (copy->c_id,0));
+				SetChunkDelay(copy->c_id,Seconds(0));
+			}
+			m_latestChunkID++;
+			delete copy;
+			break;
+		}
+		default:
+		{
+			NS_LOG_ERROR("Condition not allowed");
+			break;
+		}
+	}
 }
 
 void VideoPushApplication::SendHello ()
@@ -547,32 +576,7 @@ ChunkVideo* VideoPushApplication::ChunkSelection(){
 	return copy;
 }
 
-void VideoPushApplication::SendPacket ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  NS_ASSERT (m_sendEvent.IsExpired ());
-  ChunkVideo *copy = ChunkSelection();
-  ChunkHeader chunk (CHUNK);
-  chunk.GetChunkMessage().SetChunk(*copy);
-  Ptr<Packet> packet = Create<Packet> (m_pktSize);//AAA Here the data
-  packet->AddHeader(chunk);
-  uint32_t payload = copy->c_size+copy->c_attributes_size;//data and attributes already in chunk header;
-  NS_LOG_LOGIC ("Push packet " << *copy<< " UID "<< packet->GetUid() << " Push Size "<< payload);
-  m_txTrace (packet);
-  m_socket->SendTo(packet, 0, m_peer);
-  m_totBytes += payload;
-  m_lastStartTime = Simulator::Now ();
-  m_residualBits = 0;
-  last_chunk = (last_chunk < m_latestChunkID) ? m_latestChunkID : last_chunk;
-  copy->c_tstamp = Simulator::Now().ToInteger(Time::US) - copy->c_tstamp;
-  if(!m_chunks.AddChunk(*copy)){
-	  if (m_duplicates.find(copy->c_id) == m_duplicates.end())
-	  		m_duplicates.insert(std::pair<uint32_t , uint32_t> (copy->c_id,0));
-		m_duplicates.find(copy->c_id)->second++;
-  }
-//  // NS_LOG_DEBUG ("Source sent "<< m_latestChunkID<< "/"<<m_chunks.GetBufferSize());
-  m_latestChunkID++;
-  delete copy;
 }
 
 void VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)

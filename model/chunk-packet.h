@@ -37,8 +37,8 @@
 
 enum ChunkMessageType
 {
-	PULL,
-	CHUNK
+	MSG_PULL,
+	MSG_CHUNK
 };
 
 namespace ns3 {
@@ -144,11 +144,11 @@ public:
   {
     if (m_type == 0)
       {
-    	m_type = CHUNK;
+    	m_type = MSG_CHUNK;
       }
     else
       {
-        NS_ASSERT (m_type == CHUNK);
+        NS_ASSERT (m_type == MSG_CHUNK);
       }
     return m_chunk_message.chunk;
   }
@@ -157,11 +157,11 @@ public:
   {
     if (m_type == 0)
       {
-    	m_type = PULL;
+    	m_type = MSG_PULL;
       }
     else
       {
-        NS_ASSERT (m_type == PULL);
+        NS_ASSERT (m_type == MSG_PULL);
       }
     return m_chunk_message.pull;
   }
