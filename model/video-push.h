@@ -170,7 +170,7 @@ private:
 	uint32_t        m_maxBytes;     // Limit total number of bytes sent
 	uint32_t        m_totBytes;     // Total bytes sent so far
 	EventId         m_sendEvent;    // Eventid of pending "send packet" event
-	EventId         m_sendTx;    // Eventid of pending "next transmission" event
+	EventId         m_peerLoop;    // Eventid of pending "next transmission" event
 //	bool            m_sending;      // True if currently in sending state
 	TypeId          m_tid;
 	Ptr<Ipv4> 		m_ipv4;

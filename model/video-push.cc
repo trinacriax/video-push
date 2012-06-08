@@ -138,7 +138,7 @@ VideoPushApplication::VideoPushApplication ():
   m_socketList.clear();
   m_duplicates.clear();
   m_sendEvent.Cancel();
-  m_sendTx.Cancel();
+  m_peerLoop.Cancel();
 }
 
 VideoPushApplication::~VideoPushApplication()
@@ -375,6 +375,56 @@ VideoPushApplication::GetLocalAddress ()
 	return Ipv4Address::ConvertFrom(m_localAddress);
 }
 
+void VideoPushApplication::PeerLoop ()
+{
+	NS_LOG_FUNCTION_NOARGS ();
+	switch (m_peerType)
+	{
+		case PEER:
+		{
+			uint32_t missed = m_chunks.GetLeastMissed();
+			uint32_t last = m_chunks.GetLastChunk();
+			NS_LOG_INFO ("Node=" <<m_node->GetId()<< " IP=" << GetLocalAddress() << " Last="<<last<<" Missed="<< missed <<"("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")"<<" TimerRunning="<<(m_pullTimer.IsRunning()?"Yes":"No"));
+			if (missed && !m_pullTimer.IsRunning())
+			{
+				m_pullTimer.Cancel();
+				AddPullRetry(missed);
+				while (missed && GetPullRetry(missed) > GetPullMax())
+				{
+					m_chunks.SetChunkState(missed, CHUNK_SKIPPED);
+					missed = m_chunks.GetLeastMissed();
+				}
+				if (missed)
+				{
+					SendPull (missed);
+					m_pullTimer.Schedule();
+				}
+			}
+			break;
+		}
+		case SOURCE:
+		{
+		  if (m_maxBytes == 0 || m_totBytes < m_maxBytes)
+			{
+			  uint32_t bits = m_pktSize * 8 - m_residualBits;
+			  NS_LOG_LOGIC ("bits = " << bits);
+			  Time nextTime (Seconds (bits / static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
+			  m_sendEvent = Simulator::ScheduleNow (&VideoPushApplication::SendPacket, this);
+			  m_peerLoop = Simulator::Schedule (nextTime, &VideoPushApplication::PeerLoop, this);
+			}
+		  else
+			{ // All done, cancel any pending events
+			  StopApplication ();
+			}
+		  break;
+		}
+		default:
+		{
+		  NS_LOG_ERROR("Condition not allowed");
+		  break;
+		}
+	}
+}
 
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 {
