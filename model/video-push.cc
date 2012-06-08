@@ -551,11 +551,10 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 				  // Update Chunk Buffer START
 				  uint32_t last = m_chunks.GetLastChunk();
 				  uint32_t missed = m_chunks.GetLeastMissed();
-
-				  // INDUCING MISSING CHUNKS START
-
+				  if (m_peerType == SOURCE)
+					  break;
 				  bool duplicated = false;
-#define MISS
+#define MISS // INDUCING MISSING CHUNKS START
 #ifdef MISS
 				  bool missed_chunk;
 				  uint32_t chunktomiss = 1;//Only node 2 misses chunk #1
