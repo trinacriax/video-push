@@ -132,6 +132,7 @@ private:
 	void StartSending ();
 	void StopSending ();
 	void SendPacket ();
+	void SendChunk (uint32_t chunkid, Ipv4Address target);
 	void SendPull (uint32_t chunkid);
 	ChunkVideo* ChunkSelection (ChunkPolicy policy);
 	void SetPullTime (Time pullt);

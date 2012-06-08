@@ -735,7 +735,39 @@ VideoPushApplication::SendPull (uint32_t chunkid)
 }
 
 
+void
+VideoPushApplication::SendChunk (uint32_t chunkid, Ipv4Address target)
 {
+	NS_LOG_FUNCTION_NOARGS ();
+	switch (m_peerType)
+	{
+		case PEER:
+		{
+			if (!IsPending(chunkid)){
+				NS_LOG_DEBUG("Chunk "<< chunkid << " is not pending anymore");
+				break;
+			}
+			ChunkHeader chunk (MSG_CHUNK);
+			ChunkVideo *copy = m_chunks.GetChunk(chunkid);
+			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
+			chunk.GetChunkMessage().SetChunk(*copy);
+			packet->AddHeader(chunk);
+			NS_LOG_LOGIC ("Reply PULL [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
+			m_txTrace (packet);
+			Ipv4Address subnet ("10.255.255.255");
+			m_socket->SendTo (packet, 0, InetSocketAddress(subnet, PUSH_PORT));
+			break;
+		}
+		case SOURCE:
+		{
+			break;
+		}
+		default:
+		{
+			NS_LOG_ERROR("Condition not allowed");
+			break;
+		}
+	}
 }
 
 void VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)
