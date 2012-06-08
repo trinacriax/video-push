@@ -177,6 +177,8 @@ private:
 
 	Time 			m_pullTime;
 	Timer 			m_pullTimer;
+	bool			m_pullActive;
+
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
