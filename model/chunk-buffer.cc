@@ -39,7 +39,8 @@ namespace ns3{
 	{chunk_buffer.clear();}
 
 	ChunkVideo*
-	ChunkBuffer::GetChunk (uint32_t chunkid){
+	ChunkBuffer::GetChunk (uint32_t chunkid)
+	{
 		NS_ASSERT (chunkid>0);
 		ChunkVideo *copy = 0;
 		std::map<uint32_t, ChunkVideo>::iterator const result = chunk_buffer.find(chunkid);
@@ -49,7 +50,8 @@ namespace ns3{
 	}
 
 	bool
-	ChunkBuffer::HasChunk (uint32_t chunkid){
+	ChunkBuffer::HasChunk (uint32_t chunkid)
+	{
 		NS_ASSERT (chunkid>0);
 		std::map<uint32_t, ChunkVideo>::iterator const result = chunk_buffer.find(chunkid);
 		if (result != chunk_buffer.end())
@@ -58,7 +60,8 @@ namespace ns3{
 	}
 
 	bool
-	ChunkBuffer::AddChunk (ChunkVideo chunk, ChunkState state) {
+	ChunkBuffer::AddChunk (ChunkVideo chunk, ChunkState state)
+	{
 		NS_ASSERT (state==CHUNK_RECEIVED_PUSH||state==CHUNK_RECEIVED_PULL);
 		std::map<uint32_t, ChunkVideo>::iterator result = chunk_buffer.find(chunk.c_id);
 		if (result == chunk_buffer.end()){
@@ -74,24 +77,27 @@ namespace ns3{
 	}
 
 	bool
-	ChunkBuffer::DelChunk(uint32_t chunkid) {
+	ChunkBuffer::DelChunk(uint32_t chunkid)
+	{
 		NS_ASSERT (chunkid>0);
 		return chunk_buffer.erase(chunkid);
 	}
 
 	const size_t
-	ChunkBuffer::GetBufferSize (){
+	ChunkBuffer::GetBufferSize ()
+	{
 		return chunk_buffer.size();
 	}
 
 	std::map<uint32_t, ChunkVideo>
-	ChunkBuffer::GetChunkBuffer(){
+	ChunkBuffer::GetChunkBuffer()
+	{
 		return chunk_buffer;
 	}
 
-
 	std::string
-	ChunkBuffer::PrintBuffer(){
+	ChunkBuffer::PrintBuffer()
+	{
 		std::stringstream buf;
 		for(std::map<uint32_t, ChunkVideo>::iterator iter = chunk_buffer.begin();
 			iter != chunk_buffer.end() ; iter++){
@@ -117,7 +123,8 @@ namespace ns3{
 	}
 
 	uint32_t
-	ChunkBuffer::GetLeastMissed (){
+	ChunkBuffer::GetLeastMissed ()
+	{
 		missed = 1;
 		while (missed < last && (HasChunk(missed) || ChunkSkipped (missed)))
 		{
@@ -163,7 +170,8 @@ namespace ns3{
 	}
 
 	ChunkState
-	ChunkBuffer::GetChunkState (uint32_t chunkid){
+	ChunkBuffer::GetChunkState (uint32_t chunkid)
+	{
 		NS_ASSERT (chunkid>0);
 		std::map<uint32_t, ChunkState>::iterator iter = chunk_state.find(chunkid);
 		if (iter == chunk_state.end())
@@ -175,7 +183,8 @@ namespace ns3{
 	}
 
 	uint32_t
-	ChunkBuffer::GetMissed (){
+	ChunkBuffer::GetMissed ()
+	{
 		return missed;
 	}
 }
