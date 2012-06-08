@@ -137,6 +137,9 @@ private:
 	void SetPullTime (Time pullt);
 	Time GetPullTime () const;
 
+	void SetPullMax (uint32_t max);
+	uint32_t GetPullMax () const;
+
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
 	void HandleAccept (Ptr<Socket>, const Address& from);
@@ -176,6 +179,7 @@ private:
 	Timer 			m_pullTimer;
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	ChunkBuffer		m_chunks;			// current chunk buffer
+	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
 	std::map<uint32_t , uint32_t> m_duplicates; // count chunks duplicated
 
 	uint32_t 		m_latestChunkID;	// store the latest chunk identifier

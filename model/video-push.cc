@@ -128,6 +128,7 @@ VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
 		m_connected(false), m_ipv4(0), m_latestChunkID(0), m_socket(0)
 		m_pullTimer (Timer::CANCEL_ON_DESTROY)
+		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
@@ -349,6 +350,18 @@ Time
 VideoPushApplication::GetPullTime () const
 {
 	return m_pullTime;
+}
+
+void
+VideoPushApplication::SetPullMax (uint32_t max)
+{
+	m_pullMax = max;
+}
+
+uint32_t
+VideoPushApplication::GetPullMax () const
+{
+	return m_pullMax;
 }
 
 
