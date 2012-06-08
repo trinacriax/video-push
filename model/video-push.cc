@@ -131,7 +131,7 @@ VideoPushApplication::GetTypeId (void)
 
 VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
-		m_connected(false), m_ipv4(0), m_latestChunkID(0), m_socket(0)
+		m_connected(false), m_ipv4(0), m_latestChunkID(1), m_socket(0),
 		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0)
 {
   NS_LOG_FUNCTION_NOARGS ();
@@ -183,7 +183,7 @@ VideoPushApplication::DoDispose (void)
 {
 //  NS_LOG_FUNCTION_NOARGS ();
   std::map<uint32_t, ChunkVideo> tmp_buffer = m_chunks.GetChunkBuffer();
-  uint32_t last = 0;
+  uint32_t last = 1;
   uint32_t missed = 0;
   uint32_t duplicates = 0;
   Time delay_max;
