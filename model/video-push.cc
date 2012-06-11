@@ -672,6 +672,7 @@ VideoPushApplication::GetPullRetry (uint32_t chunkid)
 void
 VideoPushApplication::AddDuplicate (uint32_t chunkid)
 {
+	NS_ASSERT(chunkid>0);
 	if(m_duplicates.find(chunkid) == m_duplicates.end())
 	{
 	  std::pair<uint32_t, uint32_t> dup(chunkid,0);
@@ -683,6 +684,7 @@ VideoPushApplication::AddDuplicate (uint32_t chunkid)
 uint32_t
 VideoPushApplication::GetDuplicate (uint32_t chunkid)
 {
+	NS_ASSERT(chunkid>0);
 	if(m_duplicates.find(chunkid) == m_duplicates.end())
 		return 0;
 	return m_duplicates.find(chunkid)->second;
@@ -708,6 +710,7 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		default:
 		{
 		  NS_LOG_ERROR("Condition not allowed");
+		  NS_ASSERT(true);
 		  break;
 		}
 	}
@@ -763,6 +766,7 @@ void VideoPushApplication::SendPacket ()
 void
 VideoPushApplication::SendPull (uint32_t chunkid)
 {
+	NS_ASSERT(chunkid>0);
 	ChunkHeader pull (MSG_PULL);
 	pull.GetPullMessage ().SetChunk (chunkid);
 	Ptr<Packet> packet = Create<Packet> ();
@@ -780,6 +784,8 @@ void
 VideoPushApplication::SendChunk (uint32_t chunkid, Ipv4Address target)
 {
 	NS_LOG_FUNCTION_NOARGS ();
+	NS_ASSERT(chunkid>0);
+	NS_ASSERT(target != GetLocalAddress());
 	switch (m_peerType)
 	{
 		case PEER:
