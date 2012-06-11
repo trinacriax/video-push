@@ -564,7 +564,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, Ipv4Addr
 	  << " Received Pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sender);
 	if (hasChunk && m_peerType == PEER)
 	{
-	  Time delay = Time::FromDouble(UniformVariable().GetValue(1,20), Time::MS);
+	  Time delay = Time::FromDouble(UniformVariable().GetValue(50,200000), Time::US);
 	  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
 	  AddPending(chunkid);
 	}
