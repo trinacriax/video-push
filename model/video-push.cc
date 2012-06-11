@@ -38,6 +38,7 @@
 #include "ns3/packet.h"
 #include "ns3/uinteger.h"
 #include "ns3/enum.h"
+#include "ns3/boolean.h"
 #include "ns3/trace-source-accessor.h"
 #include "ns3/udp-socket-factory.h"
 #include "ns3/address-utils.h"
@@ -126,6 +127,11 @@ VideoPushApplication::GetTypeId (void)
 				   MakeUintegerAccessor (&VideoPushApplication::SetPullMax,
 						   	   	   	   	 &VideoPushApplication::GetPullMax),
 				   MakeUintegerChecker<uint32_t> (1))
+	.AddAttribute ("PullActive", "Pull activation.",
+				   BooleanValue (1),
+				   MakeBooleanAccessor (&VideoPushApplication::SetPullActive,
+										&VideoPushApplication::GetPullActive),
+				   MakeBooleanChecker() )
   ;
   return tid;
 }
@@ -546,11 +552,11 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4A
 	}
 	last = m_chunks.GetLastChunk();
 	missed = m_chunks.GetLeastMissed();
-	if (missed && !m_pullTimer.IsRunning())
+	if (missed && !m_pullTimer.IsRunning() && GetPullActive())
 	  Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
 	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":" Received ")
 		  << chunk << "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"<<" from "
-		  << sender << m_totalRx);
+		  << sender << " totalRx="<<m_totalRx);
 }
 
 void
