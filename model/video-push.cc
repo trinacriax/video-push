@@ -551,6 +551,22 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4A
 		  << sender << m_totalRx);
 }
 
+void
+VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, Ipv4Address sender)
+{
+	uint32_t chunkid = pullheader.GetChunk();
+	bool hasChunk = m_chunks.HasChunk (chunkid);
+	NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << GetLocalAddress()
+	  << " Received Pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sender);
+	if (hasChunk && m_peerType == PEER)
+	{
+	  Time delay = Time::FromDouble(UniformVariable().GetValue(1,20), Time::MS);
+	  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
+	  AddPending(chunkid);
+	}
+}
+
+
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 {
   NS_LOG_FUNCTION (this << socket);
@@ -595,16 +611,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 			  }
 			  case MSG_PULL:
 			  {
-				  uint32_t chunkid = chunkH.GetPullMessage().GetChunk();
-				  bool hasChunk = m_chunks.HasChunk (chunkid);
-				  NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << Ipv4Address::ConvertFrom(m_localAddress)
-				  	  << " Received Pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sourceAddr);
-				  if (hasChunk && m_peerType == PEER)
-				  {
-					  Time delay = Time::FromDouble(UniformVariable().GetValue(1,20), Time::MS);
-					  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sourceAddr);
-					  AddPending(chunkid);
-				  }
+				  HandlePull(chunkH.GetPullMessage(), sourceAddr);
 				  break;
 			  }
           }
