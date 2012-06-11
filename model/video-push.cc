@@ -471,14 +471,15 @@ void VideoPushApplication::PeerLoop ()
 			if (missed && !m_pullTimer.IsRunning())
 			{
 				m_pullTimer.Cancel();
-				AddPullRetry(missed);
-				while (missed && GetPullRetry(missed) > GetPullMax())
+				while (missed && GetPullRetry(missed) >= GetPullMax())
 				{
 					m_chunks.SetChunkState(missed, CHUNK_SKIPPED);
+					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " is marking chunk "<< missed <<" as skipped ("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")");
 					missed = m_chunks.GetLeastMissed();
 				}
 				if (missed)
 				{
+					AddPullRetry(missed);
 					SendPull (missed);
 					m_pullTimer.Schedule();
 				}
