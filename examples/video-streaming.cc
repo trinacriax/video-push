@@ -51,7 +51,7 @@ NS_LOG_COMPONENT_DEFINE ("VideoStreaming");
 
 int main(int argc, char **argv) {
 	/// Number of nodes
-	uint32_t size = 2;
+	uint32_t size = 20;
 	/// Simulation time, seconds
 	double totalTime = 50;
 	uint32_t run = 1;
@@ -67,6 +67,7 @@ int main(int argc, char **argv) {
 	double ymax = 100;
 	double pulltime = 1;
 	uint32_t pullmax = 1;
+	bool pullactive = true;
 
 	CommandLine cmd;
 	cmd.AddValue("size", "Number of nodes.", size);
@@ -76,17 +77,19 @@ int main(int argc, char **argv) {
 	cmd.AddValue("ymax", "Grid Y max", ymax);
 	cmd.AddValue("pulltime", "Time between pull in sec.", pulltime);
 	cmd.AddValue("pullmax", "Max number of pull allowed per chunk", pullmax);
+	cmd.AddValue("pullactive", "Pull activation allowed", pullactive);
 	cmd.AddValue("v", "Verbose", verbose);
 	cmd.Parse(argc, argv);
 
 	SeedManager::SetRun (run);
 	SeedManager::SetSeed (seed);
 	Config::SetDefault("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2200"));
-	Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("2200"));
+	Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("1500"));
 	Config::SetDefault("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(log_r));
 	Config::SetDefault("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(log_n));
 	Config::SetDefault("ns3::VideoPushApplication::PullTime", TimeValue(Seconds(pulltime)));
 	Config::SetDefault("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
+	Config::SetDefault("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
 
 	if(verbose==1){
 		LogComponentEnable("VideoStreaming", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
@@ -102,9 +105,9 @@ int main(int argc, char **argv) {
 	}
 
 	/// Video start
-	double sourceStart = ceil(totalTime*.30);//after 25% of simulation
+	double sourceStart = ceil(totalTime*.30);
 	/// Video stop
-	double sourceStop = ceil(totalTime*.80);//after 90% of simulation
+	double sourceStop = ceil(totalTime*.80);
 	/// Client start
 	double clientStart = ceil(totalTime*.20);;
 	/// Client stop
@@ -139,12 +142,9 @@ int main(int argc, char **argv) {
 					"Z",RandomVariableValue(ConstantVariable(0)));
 	mobility.Install(nodes);
 
-	InternetStackHelper fakeStack;
-	fakeStack.Install(fake);
-
-//	AodvHelper aodv;
+	AodvHelper aodv;
 	InternetStackHelper stack;
-//	stack.SetRoutingHelper(aodv);
+	stack.SetRoutingHelper(aodv);
 	stack.Install(nodes);
 
 	Ipv4AddressHelper address;
