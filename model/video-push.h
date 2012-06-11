@@ -155,6 +155,7 @@ private:
 
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
+	void HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4Address sender);
 	void HandleAccept (Ptr<Socket>, const Address& from);
 	void HandlePeerClose (Ptr<Socket>);
 	void HandlePeerError (Ptr<Socket>);

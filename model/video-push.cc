@@ -506,6 +506,51 @@ void VideoPushApplication::PeerLoop ()
 	}
 }
 
+void
+VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4Address sender)
+{
+	ChunkVideo chunk = chunkheader.GetChunk();
+	m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
+	// Update Chunk Buffer START
+	uint32_t last = m_chunks.GetLastChunk();
+	uint32_t missed = m_chunks.GetLeastMissed();
+	if (m_peerType == SOURCE)
+	  return;
+	bool duplicated = false;
+#define MISS // INDUCING MISSING CHUNKS START
+#ifdef MISS
+	bool missed_chunk;
+	uint32_t chunktomiss = 1;//Only node 2 misses chunk #1
+	missed_chunk = (GetNode()->GetId() == 2 && chunk.c_id == chunktomiss && last < chunktomiss);
+	if(missed_chunk)
+	{
+	  NS_LOG_INFO ("Node " << GetLocalAddress() << " missed chunk " <<  chunk.c_id);
+	  return;
+	}
+#endif
+	if (missed == chunk.c_id) 	// INDUCING MISSING CHUNKS END.
+		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk.");
+	duplicated = !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
+	if (duplicated)
+	{
+	  AddDuplicate (chunk.c_id);
+	  duplicated = true;
+	  if(IsPending(chunk.c_id))
+		  RemovePending(chunk.c_id);
+	}
+	else
+	{
+	  SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
+	}
+	last = m_chunks.GetLastChunk();
+	missed = m_chunks.GetLeastMissed();
+	if (missed && !m_pullTimer.IsRunning())
+	  Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
+	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":" Received ")
+		  << chunk << "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"<<" from "
+		  << sender << m_totalRx);
+}
+
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 {
   NS_LOG_FUNCTION (this << socket);
@@ -545,47 +590,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           {
           	  case MSG_CHUNK:
 			  {
-				  ChunkVideo chunk = chunkH.GetChunkMessage().GetChunk();
-				  m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
-				  // Update Chunk Buffer START
-				  uint32_t last = m_chunks.GetLastChunk();
-				  uint32_t missed = m_chunks.GetLeastMissed();
-				  if (m_peerType == SOURCE)
-					  break;
-				  bool duplicated = false;
-#define MISS // INDUCING MISSING CHUNKS START
-#ifdef MISS
-				  bool missed_chunk;
-				  uint32_t chunktomiss = 1;//Only node 2 misses chunk #1
-				  missed_chunk = (GetNode()->GetId() == 2 && chunk.c_id == chunktomiss && last < chunktomiss);
-				  if(missed_chunk)
-				  {
-					  NS_LOG_INFO ("Node " << GetLocalAddress() << " missed chunk " <<  chunk.c_id);
-					  break;
-				  }
-#endif
-				  if (missed == chunk.c_id)
-					  NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk.");
-				  // INDUCING MISSING CHUNKS END.
-				  duplicated = !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
-				  if (duplicated)
-				  {
-					  AddDuplicate (chunk.c_id);
-					  duplicated = true;
-					  if(IsPending(chunk.c_id))
-						  RemovePending(chunk.c_id);
-				  }
-				  else
-				  {
-					  SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
-				  }
-				  last = m_chunks.GetLastChunk();
-				  missed = m_chunks.GetLeastMissed();
-				  if (missed && !m_pullTimer.IsRunning())
-					  Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
-				  NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":" Received ")
-						  << chunk << "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"<<" from "
-						  << sourceAddr << " [" << relayTag.m_sender << "] totalRx " << m_totalRx);
+				  HandleChunk(chunkH.GetChunkMessage(), sourceAddr);
 				  break;
 			  }
 			  case MSG_PULL:
