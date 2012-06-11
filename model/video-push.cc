@@ -766,6 +766,7 @@ void VideoPushApplication::SendPacket ()
 void
 VideoPushApplication::SendPull (uint32_t chunkid)
 {
+	NS_LOG_FUNCTION (this<<chunkid);
 	NS_ASSERT(chunkid>0);
 	ChunkHeader pull (MSG_PULL);
 	pull.GetPullMessage ().SetChunk (chunkid);
@@ -783,7 +784,7 @@ VideoPushApplication::SendPull (uint32_t chunkid)
 void
 VideoPushApplication::SendChunk (uint32_t chunkid, Ipv4Address target)
 {
-	NS_LOG_FUNCTION_NOARGS ();
+	NS_LOG_FUNCTION (this<<chunkid<<target);
 	NS_ASSERT(chunkid>0);
 	NS_ASSERT(target != GetLocalAddress());
 	switch (m_peerType)
