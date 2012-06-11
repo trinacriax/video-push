@@ -19,134 +19,171 @@
  *
  */
 
+#include <iostream>
+#include <fstream>
+#include <cassert>
+#include <string>
+#include <sstream>
+
+#include "ns3/wifi-net-device.h"
+#include "ns3/yans-wifi-channel.h"
+#include "ns3/adhoc-wifi-mac.h"
+#include "ns3/yans-wifi-phy.h"
+#include "ns3/arf-wifi-manager.h"
+#include "ns3/propagation-delay-model.h"
+#include "ns3/propagation-loss-model.h"
+#include "ns3/error-rate-model.h"
+#include "ns3/yans-error-rate-model.h"
+#include "ns3/constant-position-mobility-model.h"
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/internet-module.h"
-#include "ns3/point-to-point-module.h"
-#include "ns3/video-push-module.h"
-#include "ns3/csma-module.h"
-#include "ns3/inet-socket-address.h"
-#include "ns3/video-helper.h"
-#include "ns3/wifi-module.h"
 #include "ns3/mobility-module.h"
+#include "ns3/applications-module.h"
+#include "ns3/video-helper.h"
+#include "ns3/video-push-module.h"
+#include "ns3/wifi-module.h"
+#include "ns3/aodv-helper.h"
+#include "ns3/string.h"
 
 using namespace ns3;
+NS_LOG_COMPONENT_DEFINE ("VideoStreaming");
 
-NS_LOG_COMPONENT_DEFINE ("StreamingFirstExample");
-
-int
-main (int argc, char *argv[])
-{
-	SeedManager::SetSeed(1234);
-	bool verbose = true;
-	uint32_t node = 2;
+int main(int argc, char **argv) {
+	/// Number of nodes
+	uint32_t size = 2;
+	/// Simulation time, seconds
+	double totalTime = 50;
+	uint32_t run = 1;
+	uint32_t seed = 3945244811;
+	/// LogDistance exponent
+	double log_n = 2.0;
+	/// LogDistance reference loss path
+	double log_r = 30;
+	/// Verbose
+	uint32_t verbose = 0;
+	/// Grid xmax
+	double xmax = 100;
+	double ymax = 100;
+	uint32_t rangeMax = 0;
 
 	CommandLine cmd;
-	cmd.AddValue ("nCsma", "Number of \"extra\" CSMA nodes/devices", node);
-	cmd.AddValue ("verbose", "Tell echo applications to log if true", verbose);
+	cmd.AddValue("size", "Number of nodes.", size);
+	cmd.AddValue("time", "Simulation time, s.", totalTime);
+	cmd.AddValue("run", "Run Identifier", run);
+	cmd.AddValue("v", "Verbose", verbose);
+	cmd.Parse(argc, argv);
 
-	cmd.Parse (argc,argv);
+	SeedManager::SetRun (run);
+	SeedManager::SetSeed (seed);
+	Config::SetDefault("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2200"));
+	Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("2200"));
+	Config::SetDefault("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(log_r));
+	Config::SetDefault("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(log_n));
+	Config::SetDefault("ns3::VideoPushApplication::PullTime", TimeValue(Seconds(1)));
+	Config::SetDefault("ns3::VideoPushApplication::PullMax", UintegerValue(1));
 
-	if (verbose)
-	{
-	LogComponentEnable ("StreamingFirstExample",  LogLevel( LOG_LEVEL_ALL | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-	LogComponentEnable ("VideoPushApplication",  LogLevel( LOG_LEVEL_ALL | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("UdpSocketImpl",  LogLevel( LOG_LEVEL_ALL | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("UdpL4Protocol",  LogLevel( LOG_LEVEL_ALL | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("Ipv4EndPointDemux",  LogLevel( LOG_LEVEL_ALL | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("Ipv4L3Protocol",  LogLevel( LOG_LEVEL_ALL | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("Ipv4Interface",  LogLevel( LOG_LEVEL_ALL | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("ArpL3Protocol",  LogLevel( LOG_LEVEL_ALL | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("Socket",  LogLevel( LOG_LEVEL_ALL | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("WifiNetDevice", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("AdhocWifiMac", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("DcaTxop", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("DcaManager", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("WifiMacQueue", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("DcfManager", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("Socket", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("Node", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("MacLow", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("MacRxMiddle", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("YansWifiPhy", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("InterferenceHelper", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("YansWifiChannel", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("Packet", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-//	LogComponentEnable ("DefaultSimulatorImpl", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
+	if(verbose==1){
+		LogComponentEnable("VideoStreaming", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+		LogComponentEnable("VideoPushApplication", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+//		LogComponentEnable("MacLow", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
+//		LogComponentEnable("UdpSocketImpl", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
+//		LogComponentEnable("Socket", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
+//		LogComponentEnable("DefaultSimulatorImpl", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
+//		LogComponentEnable("YansWifiChannel",  LogLevel (LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+//		LogComponentEnable("YansWifiPhy",  LogLevel (LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+//		LogComponentEnable("ChunkBuffer", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+//		LogComponentEnable("Ipv4L3Protocol", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 	}
 
+	/// Video start
+	double sourceStart = ceil(totalTime*.30);//after 25% of simulation
+	/// Video stop
+	double sourceStop = ceil(totalTime*.80);//after 90% of simulation
+	/// Client start
+	double clientStart = ceil(totalTime*.20);;
+	/// Client stop
+	double clientStop = ceil(totalTime*.95);
+
+	NodeContainer fake;
+	fake.Create(1);
 	NodeContainer nodes;
-	nodes.Create(2);
+	nodes.Create(size);
 
-	WifiHelper wifi = WifiHelper::Default ();
-//	wifi.SetStandard (WIFI_PHY_STANDARD_80211g);
+	WifiHelper wifi = WifiHelper::Default();
+	wifi.SetStandard(WIFI_PHY_STANDARD_80211b);
+	wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager"
+			,"DataMode", StringValue("DsssRate11Mbps")
+			,"ControlMode", StringValue ("DsssRate11Mbps")
+			,"NonUnicastMode", StringValue ("DsssRate11Mbps")
+			);
+	YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default();
+	YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default();
+	wifiPhy.SetChannel(wifiChannel.Create());
 
-	NqosWifiMacHelper wifiMac = NqosWifiMacHelper::Default ();
-	wifiMac.SetType ("ns3::AdhocWifiMac");
+	NqosWifiMacHelper wifiMac = NqosWifiMacHelper::Default();
+	wifiMac.SetType("ns3::AdhocWifiMac");
 
-	YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
-
-	YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();;
-	phy.SetChannel (wifiChannel.Create ());
-	NqosWifiMacHelper mac = wifiMac;
+	NetDeviceContainer devices = wifi.Install (wifiPhy, wifiMac, nodes);
 
 	MobilityHelper mobility;
 	mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-	mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
-	  "MinX", DoubleValue (0.0),
-	  "MinY", DoubleValue (0.0),
-	  "DeltaX", DoubleValue (10),
-	  "DeltaY", DoubleValue (10),
-	  "GridWidth", UintegerValue (2),
-	  "LayoutType", StringValue ("RowFirst"));
-
+	mobility.SetPositionAllocator("ns3::RandomBoxPositionAllocator",
+					"X",RandomVariableValue(UniformVariable(0,xmax)),
+					"Y",RandomVariableValue(UniformVariable(0,ymax)),
+					"Z",RandomVariableValue(ConstantVariable(0)));
 	mobility.Install(nodes);
 
-	NetDeviceContainer nodesDevices = wifi.Install(phy, mac, nodes);
+	InternetStackHelper fakeStack;
+	fakeStack.Install(fake);
 
-//	Ipv4StaticRoutingHelper staticRouting;
-//	Ipv4ListRoutingHelper listRouters;
-//	listRouters.Add (staticRouting, 0);
-//
-	InternetStackHelper internetRouters;
-//	internetRouters.SetRoutingHelper (listRouters);
-	internetRouters.Install (nodes);
+//	AodvHelper aodv;
+	InternetStackHelper stack;
+//	stack.SetRoutingHelper(aodv);
+	stack.Install(nodes);
 
 	Ipv4AddressHelper address;
-	address.SetBase ("10.1.1.0", "255.255.255.0");
-	Ipv4InterfaceContainer addresses = address.Assign (nodesDevices);
+	address.SetBase("10.0.0.0", "255.0.0.0");
 
-	Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+	Ipv4InterfaceContainer interfaces;
+	interfaces = address.Assign(devices);
 
-	VideoHelper video = VideoHelper ("ns3::UdpSocketFactory", InetSocketAddress (addresses.GetAddress (1), 9999));
-	video.SetAttribute ("OffTime", RandomVariableValue (ConstantVariable (10.0)));
-	video.SetAttribute ("OnTime", RandomVariableValue (ConstantVariable (1.0)));
-	video.SetAttribute ("DataRate", StringValue ("10kb/s"));
+	//Source streaming rate
+	uint64_t stream = 1000000;
+	Ipv4Address subnet ("10.255.255.255");
+	NS_LOG_INFO ("Create Source");
+	InetSocketAddress dst = InetSocketAddress (subnet, PUSH_PORT);
+	Config::SetDefault ("ns3::UdpSocket::IpMulticastTtl", UintegerValue (1));
+	VideoHelper video = VideoHelper ("ns3::UdpSocketFactory", dst);
+	video.SetAttribute ("DataRate", DataRateValue (DataRate (stream)));
 	video.SetAttribute ("PacketSize", UintegerValue (1200));
 	video.SetAttribute ("PeerType", EnumValue (SOURCE));
-	video.SetAttribute ("Local", AddressValue (addresses.GetAddress(0)));
+	video.SetAttribute ("Local", AddressValue (interfaces.GetAddress(0)));
 	video.SetAttribute ("PeerPolicy", EnumValue (PS_RANDOM));
 	video.SetAttribute ("ChunkPolicy", EnumValue (CS_LATEST));
 
-	ApplicationContainer apps1 = video.Install (nodes.Get(0));
-	apps1.Start (Seconds (1.0));
-	apps1.Stop (Seconds (10.0));
+	ApplicationContainer apps = video.Install (nodes.Get (0));
+	apps.Start (Seconds (sourceStart));
+	apps.Stop (Seconds (sourceStop));
 
-	video = VideoHelper ("ns3::UdpSocketFactory", InetSocketAddress (addresses.GetAddress (0), 9999));
-	video.SetAttribute ("OffTime", RandomVariableValue (ConstantVariable (10.0)));
-	video.SetAttribute ("OnTime", RandomVariableValue (ConstantVariable (1.0)));
+	for(uint32_t n = 1; n < nodes.GetN() ; n++){
+		InetSocketAddress dstC = InetSocketAddress (subnet, PUSH_PORT);
+		Config::SetDefault ("ns3::UdpSocket::IpMulticastTtl", UintegerValue (1));
+		VideoHelper videoC = VideoHelper ("ns3::UdpSocketFactory", dstC);
+		videoC.SetAttribute ("PeerType", EnumValue (PEER));
+		videoC.SetAttribute ("LocalPort", UintegerValue (PUSH_PORT));
+		videoC.SetAttribute ("Local", AddressValue(interfaces.GetAddress(n)));
+		videoC.SetAttribute ("PeerPolicy", EnumValue (PS_RANDOM));
+		videoC.SetAttribute ("ChunkPolicy", EnumValue (CS_LATEST));
 
-	ApplicationContainer apps2 = video.Install (nodes.Get(1));
-	apps2.Start (Seconds (1.0));
-	apps2.Stop (Seconds (10.0));
+		ApplicationContainer appC = videoC.Install (nodes.Get(n));
+		appC.Start (Seconds (clientStart));
+		appC.Stop (Seconds (clientStop));
+	}
 
-	Simulator::Stop (Seconds (10.0));
-
-	Packet::EnablePrinting ();
-
-	NS_LOG_INFO ("Run Simulation.");
-	Simulator::Run ();
-	Simulator::Destroy ();
-	NS_LOG_INFO ("Done.");
+	std::cout << "Starting simulation for " << totalTime << " s ...\n";
+	Simulator::Stop(Seconds(totalTime));
+	Simulator::Run();
+	Simulator::Destroy();
 	return 0;
 }
