@@ -33,10 +33,16 @@ namespace ns3{
 
 	ChunkBuffer::ChunkBuffer () :
 			missed (0), last(0)
-	{chunk_buffer.clear();}
+	{
+		chunk_buffer.clear();
+		chunk_state.clear();
+	}
 
 	ChunkBuffer::~ChunkBuffer ()
-	{chunk_buffer.clear();}
+	{
+		chunk_buffer.clear();
+		chunk_state.clear();
+	}
 
 	ChunkVideo*
 	ChunkBuffer::GetChunk (uint32_t chunkid)
