@@ -108,6 +108,16 @@ public:
 	*/
 	std::list<Ptr<Socket> > GetAcceptedSockets (void) const;
 
+	void AddPullRetry (uint32_t chunkid);
+	uint32_t GetPullRetry (uint32_t chunkid);
+	void SetPullMax (uint32_t max);
+	uint32_t GetPullMax () const;
+
+	void SetPullActive (bool pull);
+	bool GetPullActive () const;
+	void SetChunkDelay (uint32_t chunkid, Time delay);
+	Time GetChunkDelay (uint32_t chunkid);
+
 protected:
 	virtual void DoDispose (void);
 private:
@@ -142,16 +152,6 @@ private:
 	void AddPending (uint32_t chunkid);
 	bool IsPending (uint32_t chunkid);
 	bool RemovePending (uint32_t chunkid);
-
-	void AddPullRetry (uint32_t chunkid);
-	uint32_t GetPullRetry (uint32_t chunkid);
-	void SetPullMax (uint32_t max);
-	uint32_t GetPullMax () const;
-
-	void SetPullActive (bool pull);
-	bool GetPullActive () const;
-	void SetChunkDelay (uint32_t chunkid, Time delay);
-	Time GetChunkDelay (uint32_t chunkid);
 
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
