@@ -15,11 +15,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * This is an example script for MBN-AODV manet routing protocol based on the
- * AODV example written by Pavel Boyko <boyko@iitp.ru>
- *
  * Authors : Alessandro Russo <russo@disi.unitn.it>
- * 			 Pavel Boyko <boyko@iitp.ru>
+ *
  */
 
 #include <iostream>
@@ -51,16 +48,6 @@
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("StreamingPullTest");
-
-/**
- * \brief Test script Local 3-hop BNet connectivity.
- *
- *    1
- *   / \
- *  /   \
- * 2-----3
- *
- */
 
 int main(int argc, char **argv) {
 	/// Number of nodes
