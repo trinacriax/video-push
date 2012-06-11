@@ -64,7 +64,7 @@ NS_LOG_COMPONENT_DEFINE ("StreamingPullTest");
 
 int main(int argc, char **argv) {
 	/// Number of nodes
-	uint32_t size = 3;
+	uint32_t size = 4;
 	/// Simulation time, seconds
 	double totalTime = 50;
 	uint32_t run = 1;
@@ -130,15 +130,17 @@ int main(int argc, char **argv) {
 	channel->SetPropagationDelayModel (propDelay);
 	channel->SetPropagationLossModel (propLoss);
 
-	int NodeSee [3][3] = {
-						{0,1,1},
-						{0,0,1},
-						{0,0,0}};
+	int NodeSee [4][4] = {
+						{0,1,1,1},
+						{0,0,1,1},
+						{0,0,0,1},
+						{0,0,0,0}};
 
 	Vector pos [] = {
-				Vector(150.0, 250.0, 0.0),// u	1
-				Vector(150.0, 150.0, 0.0),// v	2
-				Vector(200.0, 150.0, 0.0),// w	3
+				Vector(150.0, 150.0, 0.0),// Source 1
+				Vector(150.0, 200.0, 0.0),// 2
+				Vector(200.0, 150.0, 0.0),// 3
+				Vector(100.0, 150.0, 0.0) // 4
 	};
 
 	NetDeviceContainer devices;
