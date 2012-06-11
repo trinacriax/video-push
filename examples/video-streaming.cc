@@ -65,12 +65,17 @@ int main(int argc, char **argv) {
 	/// Grid xmax
 	double xmax = 100;
 	double ymax = 100;
-	uint32_t rangeMax = 0;
+	double pulltime = 1;
+	uint32_t pullmax = 1;
 
 	CommandLine cmd;
 	cmd.AddValue("size", "Number of nodes.", size);
 	cmd.AddValue("time", "Simulation time, s.", totalTime);
 	cmd.AddValue("run", "Run Identifier", run);
+	cmd.AddValue("xmax", "Grid X max", xmax);
+	cmd.AddValue("ymax", "Grid Y max", ymax);
+	cmd.AddValue("pulltime", "Time between pull in sec.", pulltime);
+	cmd.AddValue("pullmax", "Max number of pull allowed per chunk", pullmax);
 	cmd.AddValue("v", "Verbose", verbose);
 	cmd.Parse(argc, argv);
 
@@ -80,8 +85,8 @@ int main(int argc, char **argv) {
 	Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("2200"));
 	Config::SetDefault("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(log_r));
 	Config::SetDefault("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(log_n));
-	Config::SetDefault("ns3::VideoPushApplication::PullTime", TimeValue(Seconds(1)));
-	Config::SetDefault("ns3::VideoPushApplication::PullMax", UintegerValue(1));
+	Config::SetDefault("ns3::VideoPushApplication::PullTime", TimeValue(Seconds(pulltime)));
+	Config::SetDefault("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
 
 	if(verbose==1){
 		LogComponentEnable("VideoStreaming", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
