@@ -194,7 +194,7 @@ VideoPushApplication::DoDispose (void)
   double miss;
   double rec;
   double dups;
-  double dev;
+  double sigma;
   uint32_t cnt;
   miss = rec = dups = 0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
@@ -206,26 +206,27 @@ VideoPushApplication::DoDispose (void)
 	  }
 	  duplicates+= GetDuplicate (cid);
 	  NS_ASSERT(m_chunks.HasChunk(cid));
-	  last = cid +1;
 	  Time chunk_timestamp = GetChunkDelay(cid);
 	  delay_max = (delay_max < chunk_timestamp)? chunk_timestamp : delay_max;
 	  delay_min = delay_min==0? delay_max: (delay_min > chunk_timestamp)? chunk_timestamp : delay_min;
 	  delay_avg += chunk_timestamp;
+	  last = cid+1;
 	  NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " Dup("<<cid<<")="<<GetDuplicate (cid)<< " Delay("<<cid<<")="<< chunk_timestamp.GetMicroSeconds()
-			  <<" Max="<<delay_max.GetMicroSeconds()<< " Min="<<delay_min.GetMicroSeconds()<<" Avg="<< delay_avg.GetMicroSeconds());
+			  <<" Max="<<delay_max.GetMicroSeconds()<< " Min="<<delay_min.GetMicroSeconds()<<" Avg="<< delay_avg.GetMicroSeconds()<<" Last="<<last<<" Missed="<<missed);
   }
-  double actual = last-missed;
-  delay_avg = Time::FromDouble(delay_avg.ToDouble(Time::US) / (actual <= 0?1:(actual)), Time::US);
+  double actual = last-missed-1;
+  double avg = delay_avg.ToDouble(Time::US) / (actual <= 0?1:(actual));
+  delay_avg = Time::FromDouble(avg, Time::US);
   cnt = 0;
-  dev = 0;
+  sigma = 0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
   	  double t_dev = ((GetChunkDelay(iter->second.c_id) - delay_avg).ToDouble(Time::US));
-  	  dev += pow(t_dev,2);
+  	sigma += pow(t_dev,2);
   	  cnt++;
   }
   cnt--;
 //  // NS_LOG_DEBUG("Computing std deviation over " <<cnt <<" samples");
-  dev = sqrt(dev/(1.0*cnt));
+  sigma = sqrt(sigma/(1.0*cnt));
   while(last>0 && last < last_chunk){
 	  missed++;
 	  last++;
@@ -245,7 +246,7 @@ VideoPushApplication::DoDispose (void)
 //  char ss[100];
 //  sprintf(ss, " R %.2f M %.2f D %.2f T %d M %lu m %lu A %lu",rec,miss,dups,last,delay_max.ToInteger(Time::NS),delay_min.ToInteger(Time::NS),delay_avg.ToInteger(Time::NS));
   char dd[120];
-  sprintf(dd, " Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us S %.5f",rec,miss,dups,last,delay_max.ToInteger(Time::US),delay_min.ToInteger(Time::US),delay_avg.ToInteger(Time::US), dev);
+  sprintf(dd, " Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f", rec,miss,dups,last,delay_max.ToInteger(Time::US),delay_min.ToInteger(Time::US),delay_avg.ToInteger(Time::US), sigma);
 //  NS_LOG_INFO("Chunks Node " << m_node->GetId() << dd);
   std::cout << "Chunks Node " << m_node->GetId() << dd << "\n";
 
