@@ -123,6 +123,11 @@ VideoPushApplication::GetTypeId (void)
 				 MakeTimeAccessor (&VideoPushApplication::SetPullTime,
 								   &VideoPushApplication::GetPullTime),
 				 MakeTimeChecker ())
+	.AddAttribute ("HelloTime", "Hello Time.",
+				 TimeValue (Seconds (4)),
+				 MakeTimeAccessor (&VideoPushApplication::SetHelloTime,
+								   &VideoPushApplication::GetHelloTime),
+				 MakeTimeChecker ())
 	.AddAttribute ("PullMax", "Max number of pull.",
 				   UintegerValue (1),
 				   MakeUintegerAccessor (&VideoPushApplication::SetPullMax,
