@@ -28,6 +28,7 @@
 #include "neighbor.h"
 #include "ns3/object.h"
 #include "ns3/simulator.h"
+#include "ns3/random-variable.h"
 #include <map>
 
 namespace ns3{
@@ -68,6 +69,7 @@ struct NeighborData{
 	void SetBufferSize (uint32_t size);
 	uint32_t GetLastChunk () const;
 	void SetLastChunk (uint32_t last);
+	void Update (uint32_t size, uint32_t last);
 	};
 
 class NeighborsSet {
