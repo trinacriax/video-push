@@ -309,6 +309,10 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
          MakeCallback (&VideoPushApplication::HandlePeerError, this));
       m_pullTimer.SetDelay(GetPullTime());
       m_pullTimer.SetFunction(&VideoPushApplication::PeerLoop, this);
+      m_helloTimer.SetDelay(GetHelloTime());
+      m_helloTimer.SetFunction(&VideoPushApplication::SendHello, this);
+      Time start = Time::FromDouble (UniformVariable().GetValue (0, 2*GetHelloTime().GetMicroSeconds()), Time::US);
+      Simulator::Schedule (start, &VideoPushApplication::SendHello, this);
     }
   // Insure no pending event
   CancelEvents ();
