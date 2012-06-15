@@ -777,28 +777,35 @@ VideoPushApplication::PeerSelection (PeerPolicy policy)
 	return target;
 }
 
+ChunkVideo*
+VideoPushApplication::ForgeChunk ()
+{
+	uint64_t tstamp = Simulator::Now().ToInteger(Time::US);
+	if (m_chunks.GetBufferSize() == 0 )
+		m_latestChunkID = 1;
+	return new ChunkVideo (m_latestChunkID, tstamp, m_pktSize, 0);
+}
 
 uint32_t
 VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 	NS_LOG_FUNCTION(this<<policy);
+	uint32_t chunkid = 0;
 	switch (policy){
 		case CS_NEW_CHUNK:
 		{
-			uint64_t tstamp = Simulator::Now().ToInteger(Time::US);
-			if (m_chunks.GetBufferSize() == 0 )
-				m_latestChunkID = 1;
-			ChunkVideo cv(m_latestChunkID, tstamp, m_pktSize, 0);
-			if(!m_chunks.AddChunk(cv, CHUNK_RECEIVED_PUSH))
+			ChunkVideo *cv = ForgeChunk();
+			if(!m_chunks.AddChunk(*cv, CHUNK_RECEIVED_PUSH))
 			{
-				AddDuplicate(copy->c_id);
+				AddDuplicate(cv->c_id);
 				NS_ASSERT (true);
 			}
-			NS_ASSERT (m_duplicates.find(copy->c_id) == m_duplicates.end());
+			NS_ASSERT (m_duplicates.find(cv->c_id) == m_duplicates.end());
 			m_latestChunkID++;
 			break;
 		}
 		case CS_LEAST_USEFUL:
 		{
+			chunkid = m_chunks.GetLeastMissed();
 			break;
 		}
 		default:
@@ -808,7 +815,7 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		  break;
 		}
 	}
-	return copy;
+	return chunkid;
 }
 
 void VideoPushApplication::SendPacket ()
