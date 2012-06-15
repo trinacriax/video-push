@@ -522,7 +522,9 @@ void VideoPushApplication::PeerLoop ()
 					AddPullRetry(missed);
 					Ipv4Address target = PeerSelection (PS_RANDOM);
 					NS_ASSERT (target != Ipv4Address::GetAny());
-					SendPull (missed, target);
+					double delayv = rint(UniformVariable().GetValue (10,12000));
+					Time delay = Time::FromDouble(delayv, Time::US);
+					Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, missed, target);
 					m_pullTimer.Schedule();
 				}
 			}
