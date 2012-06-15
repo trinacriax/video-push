@@ -78,9 +78,12 @@ public:
 	bool DelNeighbor (Neighbor neighbor);
 	bool IsNeighbor (const Neighbor neighbor);
 	int GetSize();
+	void SetExpire (Time time);
+	Time GetExpire () const;
 
 protected:
 	std::map<Neighbor, NeighborData> m_neighbor_set;
+	Time m_expire;
 };
 }
 #endif

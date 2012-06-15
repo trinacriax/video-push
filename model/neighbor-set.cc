@@ -154,6 +154,18 @@ NeighborsSet::AddNeighbor (Neighbor neighbor){
 	return test.second;
 }
 
+void
+NeighborsSet::SetExpire (Time time)
+{
+	m_expire = time;
+}
+
+Time
+NeighborsSet::GetExpire () const
+{
+	return m_expire;
+}
+
 bool
 NeighborsSet::DelNeighbor (Ipv4Address n_addr, uint32_t n_port){
 	Neighbor *n = new Neighbor(n_addr, n_port);
