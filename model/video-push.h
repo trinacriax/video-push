@@ -111,6 +111,8 @@ public:
 	bool GetPullActive () const;
 	void SetChunkDelay (uint32_t chunkid, Time delay);
 	Time GetChunkDelay (uint32_t chunkid);
+	void SetHelloTime (Time time);
+	Time GetHelloTime () const;
 
 protected:
 	virtual void DoDispose (void);
@@ -191,6 +193,7 @@ private:
 	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
 
 	NeighborsSet 	m_neighbors;		// collect neighbors
+	Time 			m_helloTime;
 
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	std::map<uint32_t, uint32_t> m_duplicates; // count chunks duplicated

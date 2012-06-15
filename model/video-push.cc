@@ -428,6 +428,18 @@ VideoPushApplication::GetPullTime () const
 }
 
 void
+VideoPushApplication::SetHelloTime (Time pullt)
+{
+	m_helloTime = pullt;
+}
+
+Time
+VideoPushApplication::GetHelloTime () const
+{
+	return m_helloTime;
+}
+
+void
 VideoPushApplication::SetPullMax (uint32_t max)
 {
 	m_pullMax = max;
