@@ -765,6 +765,17 @@ VideoPushApplication::GetDuplicate (uint32_t chunkid)
 	return m_duplicates.find(chunkid)->second;
 }
 
+
+Ipv4Address
+VideoPushApplication::PeerSelection (PeerPolicy policy)
+{
+	NS_LOG_FUNCTION (this);
+	Ipv4Address target = m_neighbors.SelectNeighbor(policy).GetAddress();
+	NS_ASSERT (target != Ipv4Address() && target != Ipv4Address::GetAny());
+	return target;
+}
+
+
 ChunkVideo*
 VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 	NS_LOG_FUNCTION(this<<policy);
