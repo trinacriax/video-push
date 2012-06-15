@@ -848,7 +848,6 @@ void VideoPushApplication::SendPacket ()
 			SetChunkDelay(new_chunk, Seconds(0));
 			NS_LOG_LOGIC ("Node " << GetNode()->GetId() << " push packet " << *copy<< " Dup="<<GetDuplicate(copy->c_id)
 					<< " Delay="<<GetChunkDelay(copy->c_id)<< " UID="<< packet->GetUid() << " Size="<< payload);
-			delete copy;
 			break;
 		}
 		default:
