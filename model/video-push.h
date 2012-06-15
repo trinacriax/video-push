@@ -117,6 +117,8 @@ public:
 	Time GetHelloTime () const;
 	void SetHelloLoss (uint32_t loss);
 	uint32_t GetHelloLoss () const;
+	void SetSource (Ipv4Address source);
+	Ipv4Address GetSource () const;
 
 protected:
 	virtual void DoDispose (void);
