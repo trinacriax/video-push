@@ -51,7 +51,7 @@ NS_LOG_COMPONENT_DEFINE ("VideoStreaming");
 
 int main(int argc, char **argv) {
 	/// Number of nodes
-	uint32_t size = 20;
+	uint32_t size = 100;
 	/// Simulation time, seconds
 	double totalTime = 50;
 	uint32_t run = 1;
@@ -63,10 +63,12 @@ int main(int argc, char **argv) {
 	/// Verbose
 	uint32_t verbose = 0;
 	/// Grid xmax
-	double xmax = 100;
-	double ymax = 100;
-	double pulltime = 1;
+	double xmax = 80;
+	double ymax = 80;
+	double pulltime = 0.040;//100ms
+	double hellotime = 4;
 	uint32_t pullmax = 1;
+	uint32_t helloloss = 1;
 	bool pullactive = true;
 
 	CommandLine cmd;
@@ -78,18 +80,23 @@ int main(int argc, char **argv) {
 	cmd.AddValue("pulltime", "Time between pull in sec.", pulltime);
 	cmd.AddValue("pullmax", "Max number of pull allowed per chunk", pullmax);
 	cmd.AddValue("pullactive", "Pull activation allowed", pullactive);
+	cmd.AddValue("hellotime", "Hello time", hellotime);
+	cmd.AddValue("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
 	cmd.AddValue("v", "Verbose", verbose);
 	cmd.Parse(argc, argv);
 
 	SeedManager::SetRun (run);
 	SeedManager::SetSeed (seed);
 	Config::SetDefault("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2200"));
-	Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("1500"));
+	Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("1600"));
 	Config::SetDefault("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(log_r));
 	Config::SetDefault("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(log_n));
 	Config::SetDefault("ns3::VideoPushApplication::PullTime", TimeValue(Seconds(pulltime)));
+	Config::SetDefault("ns3::VideoPushApplication::HelloTime", TimeValue(Seconds(hellotime)));
 	Config::SetDefault("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
+	Config::SetDefault("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
 	Config::SetDefault("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
+	Config::SetDefault("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
 
 	if(verbose==1){
 		LogComponentEnable("VideoStreaming", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
@@ -119,12 +126,18 @@ int main(int argc, char **argv) {
 	nodes.Create(size);
 
 	WifiHelper wifi = WifiHelper::Default();
-	wifi.SetStandard(WIFI_PHY_STANDARD_80211b);
-	wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager"
-			,"DataMode", StringValue("DsssRate11Mbps")
-			,"ControlMode", StringValue ("DsssRate11Mbps")
-			,"NonUnicastMode", StringValue ("DsssRate11Mbps")
-			);
+//	wifi.SetStandard(WIFI_PHY_STANDARD_80211b);
+//	wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager"
+//			,"DataMode", StringValue("DsssRate11Mbps")
+//			,"ControlMode", StringValue ("DsssRate5_5Mbps")
+//			,"NonUnicastMode", StringValue ("DsssRate5_5Mbps")
+//			);
+	wifi.SetStandard(WIFI_PHY_STANDARD_80211g);
+		wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager"
+				,"DataMode", StringValue("ErpOfdmRate54Mbps")
+				,"ControlMode", StringValue("ErpOfdmRate54Mbps")
+				,"NonUnicastMode", StringValue("ErpOfdmRate6Mbps")
+				);
 	YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default();
 	YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default();
 	wifiPhy.SetChannel(wifiChannel.Create());
@@ -161,7 +174,7 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::UdpSocket::IpMulticastTtl", UintegerValue (1));
 	VideoHelper video = VideoHelper ("ns3::UdpSocketFactory", dst);
 	video.SetAttribute ("DataRate", DataRateValue (DataRate (stream)));
-	video.SetAttribute ("PacketSize", UintegerValue (1200));
+	video.SetAttribute ("PacketSize", UintegerValue (1500));
 	video.SetAttribute ("PeerType", EnumValue (SOURCE));
 	video.SetAttribute ("Local", AddressValue (interfaces.GetAddress(0)));
 	video.SetAttribute ("PeerPolicy", EnumValue (PS_RANDOM));
