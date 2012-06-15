@@ -583,7 +583,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4A
 	if (duplicated)
 	{
 	  AddDuplicate (chunk.c_id);
-	  duplicated = true;
 	  if(IsPending(chunk.c_id))
 		  RemovePending(chunk.c_id);
 	}
