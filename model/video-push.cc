@@ -566,7 +566,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4A
 #ifdef MISS
 	bool missed_chunk;
 	uint32_t chunktomiss = 10;//Only node 2 misses chunk #1
-	missed_chunk = (GetNode()->GetId() == 2 && chunk.c_id%chunktomiss == 0);
+	missed_chunk = (chunk.c_id>last && GetNode()->GetId() == 2 && chunk.c_id%chunktomiss == 0);
 	if(missed_chunk)
 	{
 	  NS_LOG_INFO ("Node " << GetLocalAddress() << " missed chunk " <<  chunk.c_id);
