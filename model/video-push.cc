@@ -608,7 +608,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, Ipv4Addr
 			<< " Received Pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sender);
 	if (hasChunk)
 	{
-	  double delayv = rint(UniformVariable().GetValue (10,20000));
+	  double delayv = rint(UniformVariable().GetValue (10,12000));
 	  NS_ASSERT (delayv > 1);
 	  Time delay = Time::FromDouble (delayv, Time::US);
 	  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
