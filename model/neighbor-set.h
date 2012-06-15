@@ -77,7 +77,7 @@ public:
 	bool DelNeighbor (Ipv4Address n_addr, uint32_t n_iface);
 	bool DelNeighbor (Neighbor neighbor);
 	bool IsNeighbor (const Neighbor neighbor);
-	int GetSize();
+	size_t GetSize();
 	void SetExpire (Time time);
 	Time GetExpire () const;
 

@@ -115,6 +115,12 @@ NeighborsSet::~NeighborsSet () {
 	m_neighbor_set.clear();
 }
 
+size_t
+NeighborsSet::GetSize()
+{
+	return m_neighbor_set.size();
+}
+
 NeighborData*
 NeighborsSet::GetNeighbor (Ipv4Address n_addr, uint32_t n_port){
 	Neighbor *n = new Neighbor(n_addr, n_port);
