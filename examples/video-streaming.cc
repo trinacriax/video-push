@@ -112,11 +112,11 @@ int main(int argc, char **argv) {
 	}
 
 	/// Video start
-	double sourceStart = ceil(totalTime*.30);
+	double sourceStart = ceil(totalTime*.10);
 	/// Video stop
 	double sourceStop = ceil(totalTime*.80);
 	/// Client start
-	double clientStart = ceil(totalTime*.20);;
+	double clientStart = ceil(totalTime*.05);;
 	/// Client stop
 	double clientStop = ceil(totalTime*.95);
 
