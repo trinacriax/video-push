@@ -24,12 +24,6 @@
  *
  */
 
-/*
- *
- *#define NS_LOG_APPEND_CONTEXT                                   \
- * 	if (GetObject<Node> ()) { std::clog << "[node " << GetObject<Node> ()->GetId () << "] "; }
- */
-
 #include "neighbor-set.h"
 #include "ns3/simulator.h"
 
