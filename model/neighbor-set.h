@@ -60,6 +60,8 @@ struct NeighborData{
 	enum PeerState n_state;
 	uint32_t n_bufferSize;
 	uint32_t n_latestChunk;
+	Time GetLastContact () const;
+	void SetLastContact (Time contact);
 	};
 
 class NeighborsSet {
