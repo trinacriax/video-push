@@ -784,6 +784,8 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		case CS_NEW_CHUNK:
 		{
 			uint64_t tstamp = Simulator::Now().ToInteger(Time::US);
+			if (m_chunks.GetBufferSize() == 0 )
+				m_latestChunkID = 1;
 			ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,0);
 			copy = cv.Copy();
 			break;
