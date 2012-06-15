@@ -503,7 +503,7 @@ void VideoPushApplication::PeerLoop ()
 		{
 			uint32_t missed = m_chunks.GetLeastMissed();
 			uint32_t last = m_chunks.GetLastChunk();
-			NS_LOG_INFO ("Node=" <<m_node->GetId()<< " IP=" << GetLocalAddress() << " Last="<<last<<" Missed="<< missed <<"("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")"<<" TimerRunning="<<(m_pullTimer.IsRunning()?"Yes":"No"));
+			NS_LOG_INFO ("Node=" <<m_node->GetId()<< " IP=" << GetLocalAddress() << " Last="<<last<<" Missed="<< missed <<" ("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")"<<" TimerRunning="<<(m_pullTimer.IsRunning()?"Yes":"No"));
 			if (missed && !m_pullTimer.IsRunning())
 			{
 				m_pullTimer.Cancel();
@@ -588,7 +588,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4A
 	  Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
 	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":" Received ")
 		  << chunk << "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"<<" from "
-		  << sender << " totalRx="<<m_totalRx);
+		  << sender << " totalRx="<<m_totalRx<<" Timer "<< m_pullTimer.IsRunning()<<" Neighbors "<< m_neighbors.GetSize());
 }
 
 void
@@ -892,7 +892,7 @@ VideoPushApplication::SendChunk (uint32_t chunkid, Ipv4Address target)
 			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
 			chunk.GetChunkMessage().SetChunk(*copy);
 			packet->AddHeader(chunk);
-			NS_LOG_LOGIC ("Reply PULL [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
+			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies PULL to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
 			m_txTrace (packet);
 			Ipv4Address subnet ("10.255.255.255");
 			m_socket->SendTo (packet, 0, InetSocketAddress(subnet, PUSH_PORT));
