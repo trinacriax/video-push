@@ -31,8 +31,81 @@
  */
 
 #include "neighbor-set.h"
+#include "ns3/simulator.h"
 
 namespace ns3{
+
+Time
+NeighborData::GetLastContact () const
+{
+return n_contact;
+}
+
+void NeighborData::SetLastContact (Time contact)
+{
+	n_contact = contact;
+}
+
+PeerState
+NeighborData::GetPeerState () const
+{
+	return n_state;
+}
+
+void
+NeighborData::SetPeerState (PeerState state)
+{
+	n_state = state;
+}
+
+uint32_t
+NeighborData::GetBufferSize () const
+{
+	return n_bufferSize;
+}
+
+void
+NeighborData::SetBufferSize (uint32_t size)
+{
+	NS_ASSERT (size >= 0);
+	n_bufferSize = size;
+}
+
+uint32_t
+NeighborData::GetLastChunk () const
+{
+	return n_latestChunk;
+}
+
+void
+NeighborData::SetLastChunk (uint32_t last)
+{
+	NS_ASSERT (last >= 0);
+	n_latestChunk = last;
+}
+
+void
+NeighborData::Update (uint32_t size, uint32_t last)
+{
+	NS_ASSERT (size >= 0);
+	NS_ASSERT (last >= 0);
+	SetLastContact (Simulator::Now());
+	SetBufferSize (size);
+	SetLastChunk (last);
+}
+
+Ipv4Address
+Neighbor::GetAddress ()
+{
+return n_address;
+}
+
+uint32_t
+Neighbor::GetPort ()
+{
+return n_port;
+}
+
 
 NeighborsSet::NeighborsSet () {
 		m_neighbor_set.clear();
