@@ -70,8 +70,6 @@ namespace streaming{
 		{
 			NS_ASSERT (cid>0);
 			NS_ASSERT (ctstamp>=0 && ctstamp<=ULONG_LONG_MAX);
-			NS_ASSERT (csize>=0 && csize<=USHRT_MAX);
-			NS_ASSERT (cattributes_size>=0 && cattributes_size<=USHRT_MAX);
 //			c_data = 0;
 //			c_attributes = 0;
 		}
