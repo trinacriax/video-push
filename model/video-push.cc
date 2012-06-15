@@ -795,6 +795,7 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		case CS_NEW_CHUNK:
 		{
 			ChunkVideo *cv = ForgeChunk();
+			chunkid = m_latestChunkID;
 			if(!m_chunks.AddChunk(*cv, CHUNK_RECEIVED_PUSH))
 			{
 				AddDuplicate(cv->c_id);
