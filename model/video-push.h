@@ -194,6 +194,7 @@ private:
 
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	Time 			m_helloTime;
+	Timer 			m_helloTimer;
 
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	std::map<uint32_t, uint32_t> m_duplicates; // count chunks duplicated
