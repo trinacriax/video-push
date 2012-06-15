@@ -605,10 +605,14 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, Ipv4Addr
 	uint32_t chunkid = pullheader.GetChunk();
 	bool hasChunk = m_chunks.HasChunk (chunkid);
 	NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << GetLocalAddress()
-	  << " Received Pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sender);
-	if (hasChunk && m_peerType == PEER)
+			<< " Received Pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sender);
+//	if (m_peerType != PEER) return; // source does not reply
+	if (hasChunk)
 	{
-	  Time delay = Time::FromDouble(UniformVariable().GetValue(50,200000), Time::US);
+//	  double rangeM = rint(m_pullTime.GetMicroSeconds()*.010), rangem = rint (rangeM*.001);
+	  double rangeM = rint(UniformVariable().GetValue (100,10000));
+	  NS_ASSERT (rangeM > 1);
+	  Time delay = Time::FromDouble (rangeM, Time::US);
 	  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
 	  AddPending(chunkid);
 	}
