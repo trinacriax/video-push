@@ -66,6 +66,8 @@ struct NeighborData{
 	void SetPeerState (PeerState state);
 	uint32_t GetBufferSize () const;
 	void SetBufferSize (uint32_t size);
+	uint32_t GetLastChunk () const;
+	void SetLastChunk (uint32_t last);
 	};
 
 class NeighborsSet {
