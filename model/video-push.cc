@@ -868,6 +868,20 @@ VideoPushApplication::SendPull (uint32_t chunkid)
 	m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
 }
 
+void VideoPushApplication::SendHello ()
+{
+	NS_LOG_FUNCTION (this);
+	ChunkHeader hello (MSG_HELLO);
+	hello.GetHelloMessage().SetLastChunk (m_chunks.GetLastChunk());
+	hello.GetHelloMessage().SetChunksReceived (m_chunks.GetBufferSize());
+	Ptr<Packet> packet = Create<Packet> ();
+	packet->AddHeader(hello);
+	m_txTrace (packet);
+	Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask ("255.0.0.0"));
+	NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
+	m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
+	m_helloTimer.Schedule();
+}
 
 void
 VideoPushApplication::SendChunk (uint32_t chunkid, Ipv4Address target)
