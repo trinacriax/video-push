@@ -37,7 +37,6 @@ ChunkBufferTestCase::DoRun (void)
 	{
 		if(!m_chunks.HasChunk(i))continue;
 		ChunkVideo *cv = m_chunks.GetChunk(i);
-		NS_TEST_ASSERT_MSG_NE(cv,NULL,"ChunkValid");
 		NS_TEST_ASSERT_MSG_EQ(cv->c_id, i,"ChunkID");
 		NS_TEST_ASSERT_MSG_EQ(cv->c_tstamp, i*1000,"ChunkTS");
 		NS_TEST_ASSERT_MSG_EQ(cv->c_size, i+1200,"ChunkSz");
