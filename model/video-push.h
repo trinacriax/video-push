@@ -151,8 +151,7 @@ private:
 	void SendHello ();
 	ChunkVideo* ChunkSelection (ChunkPolicy policy);
 	Ipv4Address PeerSelection (PeerPolicy policy);
-	void SetPullTime (Time pullt);
-	Time GetPullTime () const;
+
 	void AddPending (uint32_t chunkid);
 	bool IsPending (uint32_t chunkid);
 	bool RemovePending (uint32_t chunkid);
