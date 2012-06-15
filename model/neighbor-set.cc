@@ -197,6 +197,39 @@ NeighborsSet::SelectRandom ()
 //	std::cout << "Selected:"<<index<<" Peer "<< iter->first.n_address<<"\n";
 	return iter->first;
 }
+
+Neighbor
+NeighborsSet::SelectNeighbor (PeerPolicy policy)
+{
+	NS_ASSERT (policy>=PS_RANDOM && policy <= PS_ROUNDROBIN);
+	Purge();
+	Neighbor target;
+	switch (policy)
+	{
+		case PS_RANDOM:
+		{
+			target = SelectRandom();
+			break;
+		}
+		case PS_DELAY:
+		{
+			NS_ASSERT_MSG (false, "SelectNeighbor: Not yet implemented.");
+			break;
+		}
+		case PS_ROUNDROBIN:
+		{
+			NS_ASSERT_MSG (false, "SelectNeighbor: Not yet implemented.");
+			break;
+		}
+		default:
+		{
+			NS_ASSERT_MSG (false, "SelectNeighbor: invalid.");
+			break;
+		}
+	}
+	return target;
+}
+
 void
 NeighborsSet::Purge ()
 {
