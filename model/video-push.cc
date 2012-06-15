@@ -340,7 +340,6 @@ void VideoPushApplication::StopApplication () // Called at time specified by Sto
     {
       NS_LOG_WARN ("VideoPush found null socket to close in StopApplication");
     }
-//    // NS_LOG_DEBUG("Chunks: " << m_chunks.PrintBuffer());
 }
 
 Ptr<Ipv4Route>
@@ -394,7 +393,6 @@ void VideoPushApplication::CancelEvents ()
   Simulator::Cancel (m_peerLoop);
 }
 
-// Event handlers
 void VideoPushApplication::StartSending ()
 {
   NS_LOG_FUNCTION_NOARGS ();
@@ -406,7 +404,6 @@ void VideoPushApplication::StopSending ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   CancelEvents ();
-
 }
 
 void
