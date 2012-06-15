@@ -145,7 +145,8 @@ VideoPushApplication::GetTypeId (void)
 				   MakeUintegerChecker<uint32_t> (1))
 	.AddAttribute ("Source", "Source IP.",
 				   Ipv4AddressValue (Ipv4Address::GetAny()),
-				   MakeIpv4AddressAccessor (&VideoPushApplication::SetSource),
+				   MakeIpv4AddressAccessor (&VideoPushApplication::SetSource,
+						   	   	   	   	    &VideoPushApplication::GetSource),
 				   MakeIpv4AddressChecker())
   ;
   return tid;
