@@ -71,7 +71,7 @@ public:
 	static TypeId GetTypeId (void);
 	VideoPushApplication ();
 	virtual ~VideoPushApplication ();
-	void SetGateway (Ipv4Address gateway);
+	void SetGateway (Ipv4Address &gateway);
 
 	/**
 	* \param maxBytes the total number of bytes to send
@@ -159,14 +159,14 @@ private:
 
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
-	void HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4Address sender);
-	void HandlePull (ChunkHeader::PullMessage &pullheader, Ipv4Address sender);
-	void HandleHello (ChunkHeader::HelloMessage &helloheader, Ipv4Address sender);
+	void HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4Address &sender);
+	void HandlePull (ChunkHeader::PullMessage &pullheader, Ipv4Address &sender);
+	void HandleHello (ChunkHeader::HelloMessage &helloheader, Ipv4Address &sender);
 	void HandleAccept (Ptr<Socket>, const Address& from);
 	void HandlePeerClose (Ptr<Socket>);
 	void HandlePeerError (Ptr<Socket>);
-	Ptr<Ipv4Route> GetRoute (Ipv4Address local, Ipv4Address destination);
-	Ipv4Address GetNextHop (Ipv4Address destination);
+	Ptr<Ipv4Route> GetRoute (Ipv4Address &local, Ipv4Address &destination);
+	Ipv4Address GetNextHop (Ipv4Address &destination);
 
 	void ConnectionSucceeded (Ptr<Socket>);
 	void ConnectionFailed (Ptr<Socket>);

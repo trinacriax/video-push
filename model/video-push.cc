@@ -344,7 +344,7 @@ void VideoPushApplication::StopApplication () // Called at time specified by Sto
 }
 
 Ptr<Ipv4Route>
-VideoPushApplication::GetRoute(Ipv4Address local, Ipv4Address destination) {
+VideoPushApplication::GetRoute(Ipv4Address &local, Ipv4Address &destination) {
 	Ptr<Packet> receivedPacket = Create<Packet> (100);
 	Ipv4Header hdr;
 	hdr.SetDestination(destination);
@@ -356,7 +356,7 @@ VideoPushApplication::GetRoute(Ipv4Address local, Ipv4Address destination) {
 }
 
 Ipv4Address
-VideoPushApplication::GetNextHop (Ipv4Address destination) {
+VideoPushApplication::GetNextHop (Ipv4Address &destination) {
 	Ipv4Address local = Ipv4Address::ConvertFrom(m_localAddress);
 	Ptr<Ipv4Route> route = GetRoute (local, destination);
 	return (route == NULL ? m_gateway: route->GetGateway());
@@ -552,7 +552,7 @@ void VideoPushApplication::PeerLoop ()
 }
 
 void
-VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4Address sender)
+VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4Address &sender)
 {
 	if (m_peerType == SOURCE)
 	  return;
@@ -599,7 +599,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4A
 }
 
 void
-VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, Ipv4Address sender)
+VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, Ipv4Address &sender)
 {
 	uint32_t chunkid = pullheader.GetChunk();
 	bool hasChunk = m_chunks.HasChunk (chunkid);
@@ -616,7 +616,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, Ipv4Addr
 }
 
 void
-VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, Ipv4Address sender)
+VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, Ipv4Address &sender)
 {
 	uint32_t last = helloheader.GetLastChunk();
 	uint32_t chunks = helloheader.GetChunksReceived();
@@ -948,7 +948,7 @@ void VideoPushApplication::ConnectionFailed (Ptr<Socket>)
   cout << "VideoPush, Connection Failed" << endl;
 }
 
-void VideoPushApplication::SetGateway (Ipv4Address gateway)
+void VideoPushApplication::SetGateway (Ipv4Address &gateway)
 {
 	m_gateway = gateway;
 }
