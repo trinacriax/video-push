@@ -189,9 +189,9 @@ private:
 	bool			m_pullActive;
 
 	NeighborsSet 	m_neighbors;		// collect neighbors
-	ChunkBuffer		m_chunks;			// current chunk buffer
 	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
 
+	ChunkBuffer		m_chunks;			// current chunk buffer
 	std::map<uint32_t, uint32_t> m_duplicates; // count chunks duplicated
 	std::map<uint32_t, uint64_t> m_chunk_delay; // count chunk delay
 	std::map<uint32_t, uint32_t> m_pendingPull; // count pending pulls
