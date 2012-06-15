@@ -572,8 +572,12 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4A
 	  return;
 	}
 #endif
-	if (missed == chunk.c_id) 	// INDUCING MISSING CHUNKS END.
-		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk.");
+	// INDUCING MISSING CHUNKS END.
+	if (missed == chunk.c_id)
+	{
+		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< missed);
+		m_pullTimer.Cancel();
+	}
 	duplicated = !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
 	if (duplicated)
 	{
