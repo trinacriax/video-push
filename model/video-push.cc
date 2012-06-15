@@ -613,6 +613,19 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, Ipv4Addr
 	}
 }
 
+void
+VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, Ipv4Address sender)
+{
+	uint32_t last = helloheader.GetLastChunk();
+	uint32_t chunks = helloheader.GetChunksReceived();
+	NS_LOG_INFO ("Node " << GetLocalAddress() << " Received hello from "
+			<< sender << " with "<< chunks << " chunks.");
+	Neighbor nt (sender, PUSH_PORT);
+	if(!m_neighbors.IsNeighbor (nt))
+		m_neighbors.AddNeighbor (nt);
+	NeighborData* neighbor = m_neighbors.GetNeighbor(nt);
+	neighbor->Update(last, chunks);
+}
 
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 {
@@ -659,6 +672,11 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 			  case MSG_PULL:
 			  {
 				  HandlePull(chunkH.GetPullMessage(), sourceAddr);
+				  break;
+			  }
+			  case MSG_HELLO:
+			  {
+				  HandleHello(chunkH.GetHelloMessage(), sourceAddr);
 				  break;
 			  }
           }
