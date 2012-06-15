@@ -138,6 +138,11 @@ VideoPushApplication::GetTypeId (void)
 				   MakeBooleanAccessor (&VideoPushApplication::SetPullActive,
 										&VideoPushApplication::GetPullActive),
 				   MakeBooleanChecker() )
+	.AddAttribute ("HelloLoss", "Number of allowed hello loss.",
+				   UintegerValue (1),
+				   MakeUintegerAccessor (&VideoPushApplication::SetHelloLoss,
+										 &VideoPushApplication::GetHelloLoss),
+				   MakeUintegerChecker<uint32_t> (1))
 	.AddAttribute ("Source", "Source IP.",
 				   Ipv4AddressValue (Ipv4Address::GetAny()),
 				   MakeIpv4AddressAccessor (&VideoPushApplication::SetSource),
@@ -475,6 +480,18 @@ VideoPushApplication::GetChunkDelay (uint32_t chunkid)
 	NS_ASSERT (m_chunks.HasChunk(chunkid));
 	NS_ASSERT (m_chunk_delay.find(chunkid) != m_chunk_delay.end());
 	return Time::FromInteger(m_chunk_delay.find(chunkid)->second, Time::US);
+}
+
+void
+VideoPushApplication::SetHelloLoss (uint32_t loss)
+{
+	m_helloLoss = loss;
+}
+
+uint32_t
+VideoPushApplication::GetHelloLoss () const
+{
+	return m_helloLoss;
 }
 
 

@@ -113,6 +113,8 @@ public:
 	Time GetChunkDelay (uint32_t chunkid);
 	void SetHelloTime (Time time);
 	Time GetHelloTime () const;
+	void SetHelloLoss (uint32_t loss);
+	uint32_t GetHelloLoss () const;
 
 protected:
 	virtual void DoDispose (void);
@@ -195,6 +197,7 @@ private:
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	Time 			m_helloTime;
 	Timer 			m_helloTimer;
+	uint32_t		m_helloLoss;
 
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	std::map<uint32_t, uint32_t> m_duplicates; // count chunks duplicated
