@@ -72,6 +72,7 @@ public:
 public:
 	NeighborData* GetNeighbor (Ipv4Address n_addr, uint32_t n_iface);
 	NeighborData* GetNeighbor (Neighbor neighbor);
+	Neighbor SelectRandom ();
 	bool AddNeighbor (const Neighbor neighbor, NeighborData data);
 	bool AddNeighbor (Neighbor neighbor);
 	bool DelNeighbor (Ipv4Address n_addr, uint32_t n_iface);

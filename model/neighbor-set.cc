@@ -184,6 +184,19 @@ NeighborsSet::DelNeighbor (Neighbor neighbor){
 		return false;
 	return (m_neighbor_set.erase(neighbor) == 1 );
 }
+
+Neighbor
+NeighborsSet::SelectRandom ()
+{
+	Neighbor nt;
+	if (GetSize() == 0) return nt;
+	uint32_t index = UniformVariable().GetInteger(0, GetSize()-1);
+	std::map<Neighbor, NeighborData>::iterator iter = m_neighbor_set.begin();
+	for (; iter != m_neighbor_set.end() && index>0; iter++, index--);
+//		std::cout << "I:"<<index<<" Peer "<< iter->first.n_address<<"\n";
+//	std::cout << "Selected:"<<index<<" Peer "<< iter->first.n_address<<"\n";
+	return iter->first;
+}
 void
 NeighborsSet::Purge ()
 {
