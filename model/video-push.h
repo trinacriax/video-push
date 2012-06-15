@@ -183,6 +183,7 @@ private:
 	TypeId          m_tid;
 	Ptr<Ipv4> 		m_ipv4;
 	Ipv4Address		m_gateway;
+	Ipv4Address		m_source;
 
 	Time 			m_pullTime;
 	Timer 			m_pullTimer;

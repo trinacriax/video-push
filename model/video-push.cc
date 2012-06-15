@@ -133,6 +133,10 @@ VideoPushApplication::GetTypeId (void)
 				   MakeBooleanAccessor (&VideoPushApplication::SetPullActive,
 										&VideoPushApplication::GetPullActive),
 				   MakeBooleanChecker() )
+	.AddAttribute ("Source", "Source IP.",
+				   Ipv4AddressValue (Ipv4Address::GetAny()),
+				   MakeIpv4AddressAccessor (&VideoPushApplication::SetSource),
+				   MakeIpv4AddressChecker())
   ;
   return tid;
 }
@@ -655,6 +659,19 @@ VideoPushApplication::RemovePending (uint32_t chunkid)
 	m_pendingPull.erase(chunkid);
 	NS_ASSERT (m_pendingPull.find(chunkid) == m_pendingPull.end());
 	return true;
+}
+
+void
+VideoPushApplication::SetSource (Ipv4Address source)
+{
+	NS_ASSERT (source != Ipv4Address() && source != Ipv4Address::GetAny());
+	m_source = source;
+}
+
+Ipv4Address
+VideoPushApplication::GetSource () const
+{
+	return m_source;
 }
 
 void
