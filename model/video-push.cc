@@ -205,15 +205,16 @@ VideoPushApplication::GetAcceptedSockets (void) const
 void
 VideoPushApplication::DoDispose (void)
 {
-//  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION_NOARGS ();
   std::map<uint32_t, ChunkVideo> tmp_buffer = m_chunks.GetChunkBuffer();
-  uint32_t received = 1, missed = 0, duplicates = 0, cnt = 0;
+  uint32_t received = 1, missed = 0, duplicates = 0, cnt = 0, cid = 0;
   Time delay_max, delay_min, delay_avg;
   double miss =0.0, rec = 0.0, dups = 0.0, sigma =0.0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
-	  uint32_t cid = iter->first;
+	  cid = iter->first;
 	  while (received < cid){
-//		  NS_LOG_DEBUG ("Missed chunk "<< received << "-"<<m_chunks.GetChunk(received));
+		NS_LOG_DEBUG ("Missed chunk "<< received << "-"<<m_chunks.GetChunk(received));
+		NS_ASSERT(!m_chunks.HasChunk(received));
 		missed++;
 		received++;
 	  }
@@ -223,9 +224,9 @@ VideoPushApplication::DoDispose (void)
 	  delay_max = (delay_max < chunk_timestamp)? chunk_timestamp : delay_max;
 	  delay_min = delay_min==0? delay_max: (delay_min > chunk_timestamp)? chunk_timestamp : delay_min;
 	  delay_avg += chunk_timestamp;
+	  NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " Dup("<<cid<<")="<<GetDuplicate (cid)<< " Delay("<<cid<<")="<< chunk_timestamp.GetMicroSeconds()
+			  <<" Max="<<delay_max.GetMicroSeconds()<< " Min="<<delay_min.GetMicroSeconds()<<" Avg="<< delay_avg.GetMicroSeconds()<<" Last="<<received<<" Missed="<<missed);
 	  received = cid+1;
-//	  NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " Dup("<<cid<<")="<<GetDuplicate (cid)<< " Delay("<<cid<<")="<< chunk_timestamp.GetMicroSeconds()
-//			  <<" Max="<<delay_max.GetMicroSeconds()<< " Min="<<delay_min.GetMicroSeconds()<<" Avg="<< delay_avg.GetMicroSeconds()<<" Last="<<last<<" Missed="<<missed);
   }
   while (received < m_latestChunkID)
 	  missed++;
@@ -238,13 +239,13 @@ VideoPushApplication::DoDispose (void)
   	  cnt++;
   }
   cnt--;
-//  // NS_LOG_DEBUG("Computing std deviation over " <<cnt <<" samples");
+  NS_LOG_DEBUG("Computing std deviation over " <<cnt <<" samples");
   sigma = sqrt(sigma/(1.0*cnt));
   while(received>0 && received < last_chunk){
 	  missed++;
 	  received++;
   }
-//  // NS_LOG_DEBUG("done " <<last<<","<<missed<<","<<duplicates);
+  NS_LOG_DEBUG("done " <<received<<","<<missed<<","<<duplicates);
   if (received == 0) {
 	  miss = 1;
 	  rec = dups = 0;
