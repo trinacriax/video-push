@@ -39,16 +39,18 @@ struct Neighbor{
 			n_address (n), n_port (i){}
 	Ipv4Address n_address;
 	uint32_t n_port;
+	Ipv4Address GetAddress ();
+	uint32_t GetPort ();
 };
 
-	static inline bool
-	operator == (const Neighbor &a, const Neighbor &b){
-		return (a.n_address == b.n_address )&& (a.n_port == b.n_port);
-	}
+static inline bool
+operator == (const Neighbor &a, const Neighbor &b){
+	return (a.n_address == b.n_address )&& (a.n_port == b.n_port);
+}
 
-	static inline bool
-	operator < (const Neighbor &a, const Neighbor &b){
-		return (a.n_address < b.n_address );
-	}
+static inline bool
+operator < (const Neighbor &a, const Neighbor &b){
+	return (a.n_address < b.n_address );
+}
 }
 #endif /* __NEIGHBOR_H__ */
