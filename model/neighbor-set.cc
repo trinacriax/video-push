@@ -184,6 +184,24 @@ NeighborsSet::DelNeighbor (Neighbor neighbor){
 		return false;
 	return (m_neighbor_set.erase(neighbor) == 1 );
 }
+void
+NeighborsSet::Purge ()
+{
+//	std::map<Neighbor, NeighborData> newset;
+	for (std::map<Neighbor, NeighborData>::iterator iter = m_neighbor_set.begin();
+		iter != m_neighbor_set.end(); iter++)
+		{
+//			std::cout << "Node "<< iter->first.n_address << " Last "<< iter->second.GetLastContact() << "\n";
+			if (Simulator::Now() - iter->second.GetLastContact() > m_expire)
+			{
+				std::map<Neighbor, NeighborData>::iterator iter2 = iter;
+				m_neighbor_set.erase (iter2);
+//				newset.insert (*iter);
+			}
+		}
+//	m_neighbor_set = newset;
+}
+
 }
 
 
