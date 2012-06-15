@@ -778,23 +778,27 @@ VideoPushApplication::PeerSelection (PeerPolicy policy)
 }
 
 
-ChunkVideo*
+uint32_t
 VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 	NS_LOG_FUNCTION(this<<policy);
-	ChunkVideo *copy;
 	switch (policy){
 		case CS_NEW_CHUNK:
 		{
 			uint64_t tstamp = Simulator::Now().ToInteger(Time::US);
 			if (m_chunks.GetBufferSize() == 0 )
 				m_latestChunkID = 1;
-			ChunkVideo cv(m_latestChunkID,tstamp,m_pktSize,0);
-			copy = cv.Copy();
+			ChunkVideo cv(m_latestChunkID, tstamp, m_pktSize, 0);
+			if(!m_chunks.AddChunk(cv, CHUNK_RECEIVED_PUSH))
+			{
+				AddDuplicate(copy->c_id);
+				NS_ASSERT (true);
+			}
+			NS_ASSERT (m_duplicates.find(copy->c_id) == m_duplicates.end());
+			m_latestChunkID++;
 			break;
 		}
 		case CS_LEAST_USEFUL:
 		{
-
 			break;
 		}
 		default:
@@ -819,7 +823,8 @@ void VideoPushApplication::SendPacket ()
 		case SOURCE:
 		{
 			NS_ASSERT (m_sendEvent.IsExpired ());
-			ChunkVideo *copy = ChunkSelection(CS_NEW_CHUNK);
+			uint32_t new_chunk = ChunkSelection(CS_NEW_CHUNK);
+			ChunkVideo *copy = m_chunks.GetChunk(new_chunk);
 			ChunkHeader chunk (MSG_CHUNK);
 			chunk.GetChunkMessage().SetChunk(*copy);
 			Ptr<Packet> packet = Create<Packet> (m_pktSize);//AAA Here the data
@@ -831,17 +836,10 @@ void VideoPushApplication::SendPacket ()
 			m_lastStartTime = Simulator::Now ();
 			m_residualBits = 0;
 			last_chunk = (last_chunk < m_latestChunkID) ? m_latestChunkID : last_chunk;
-			if(!m_chunks.AddChunk(*copy,CHUNK_RECEIVED_PUSH))
-			{
-				AddDuplicate(copy->c_id);
-				NS_ASSERT (true);
-			}
-			NS_ASSERT (copy->c_id == m_chunks.GetLastChunk());
-			SetChunkDelay(copy->c_id, Seconds(0));
+			NS_ASSERT (new_chunk == m_chunks.GetLastChunk());
+			SetChunkDelay(new_chunk, Seconds(0));
 			NS_LOG_LOGIC ("Node " << GetNode()->GetId() << " push packet " << *copy<< " Dup="<<GetDuplicate(copy->c_id)
 					<< " Delay="<<GetChunkDelay(copy->c_id)<< " UID="<< packet->GetUid() << " Size="<< payload);
-			NS_ASSERT (m_duplicates.find(copy->c_id) == m_duplicates.end());
-			m_latestChunkID++;
 			delete copy;
 			break;
 		}
