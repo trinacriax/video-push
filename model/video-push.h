@@ -187,9 +187,9 @@ private:
 	Time 			m_pullTime;
 	Timer 			m_pullTimer;
 	bool			m_pullActive;
+	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
 
 	NeighborsSet 	m_neighbors;		// collect neighbors
-	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
 
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	std::map<uint32_t, uint32_t> m_duplicates; // count chunks duplicated
