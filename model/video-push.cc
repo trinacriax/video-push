@@ -54,6 +54,7 @@
 NS_LOG_COMPONENT_DEFINE ("VideoPushApplication");
 
 uint32_t last_chunk;
+static uint32_t m_latestChunkID;
 
 using namespace std;
 
@@ -139,7 +140,7 @@ VideoPushApplication::GetTypeId (void)
 
 VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
-		m_connected(false), m_ipv4(0), m_latestChunkID(1), m_socket(0),
+		m_connected(false), m_ipv4(0), m_socket(0),
 		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0)
 {
   NS_LOG_FUNCTION_NOARGS ();

@@ -197,7 +197,6 @@ private:
 	std::map<uint32_t, uint32_t> m_pendingPull; // count pending pulls
 	std::map<uint32_t, uint32_t> m_pullRetries; // count chunks duplicated
 
-	uint32_t 		m_latestChunkID;	// store the latest chunk identifier
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm
 	enum ChunkPolicy m_chunkSelection; // Chunk selection algorithm
 	TracedCallback<Ptr<const Packet> > m_txTrace;
