@@ -176,7 +176,7 @@ bool
 NeighborsSet::DelNeighbor (Neighbor neighbor){
 	if(!IsNeighbor(neighbor))
 		return false;
-	return (m_neighbor_set.erase(neighbor) ==1 );
+	return (m_neighbor_set.erase(neighbor) == 1 );
 }
 }
 
