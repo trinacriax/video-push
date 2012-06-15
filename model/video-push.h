@@ -111,6 +111,8 @@ public:
 	bool GetPullActive () const;
 	void SetChunkDelay (uint32_t chunkid, Time delay);
 	Time GetChunkDelay (uint32_t chunkid);
+	void SetPullTime (Time time);
+	Time GetPullTime () const;
 	void SetHelloTime (Time time);
 	Time GetHelloTime () const;
 	void SetHelloLoss (uint32_t loss);
