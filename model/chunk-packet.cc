@@ -44,7 +44,7 @@ ChunkHeader::ChunkHeader (ChunkMessageType type) :
 		m_type (type)
 {}
 ChunkHeader::ChunkHeader () :
-		m_type (MSG_CHUNK)
+		m_type (MSG_HELLO)
 {}
 
 ChunkHeader::~ChunkHeader ()
@@ -117,6 +117,11 @@ ChunkHeader::GetSerializedSize (void) const
 		  size += m_chunk_message.chunk.GetSerializedSize();
 		  break;
 	  }
+	  case MSG_HELLO:
+	  {
+		  size += m_chunk_message.hello.GetSerializedSize();
+		  break;
+	  }
 	  default:
 	  {
 		  NS_ASSERT (false);
@@ -152,6 +157,11 @@ ChunkHeader::Serialize (Buffer::Iterator start) const
 		  m_chunk_message.chunk.Serialize(i);
 		  break;
 	  }
+	  case MSG_HELLO:
+	  {
+		  m_chunk_message.hello.Serialize(i);
+		  break;
+	  }
 	  default:
 	  {
 		  NS_ASSERT (false);
@@ -183,6 +193,11 @@ ChunkHeader::Deserialize (Buffer::Iterator start)
 		  size += m_chunk_message.chunk.Deserialize (i);
 		  break;
 	  }
+	  case MSG_HELLO:
+	  {
+		  size += m_chunk_message.hello.Deserialize (i);
+		  break;
+	  }
 	  default:
 	  {
 		  NS_ASSERT (false);
@@ -212,7 +227,7 @@ ChunkHeader::Deserialize (Buffer::Iterator start)
 uint32_t
 ChunkHeader::ChunkMessage::GetSerializedSize (void) const
 {
-  uint32_t size = CHUNK_SIZE;
+  uint32_t size = MSG_CHUNK_SIZE;
   return size;
 }
 
@@ -285,14 +300,14 @@ ChunkHeader::ChunkMessage::SetChunk (ChunkVideo chunk)
 uint32_t
 ChunkHeader::PullMessage::GetSerializedSize (void) const
 {
-  uint32_t size = CHUNK_ID_SIZE;
+  uint32_t size = MSG_PULL_SIZE;
   return size;
 }
 
 void
 ChunkHeader::PullMessage::Print (std::ostream &os) const
 {
-  os<< "ChunkHeader "<< m_chunkID <<"\n";
+  os<< "Pull chunk: "<< m_chunkID <<"\n";
 }
 
 void
@@ -306,7 +321,7 @@ uint32_t
 ChunkHeader::PullMessage::Deserialize (Buffer::Iterator start)
 {
   Buffer::Iterator i = start;
-  uint32_t size = CHUNK_ID_SIZE;
+  uint32_t size = MSG_PULL_SIZE;
   m_chunkID = i.ReadNtohU32();
   return size;
 }
@@ -320,8 +335,71 @@ ChunkHeader::PullMessage::GetChunk ()
 void
 ChunkHeader::PullMessage::SetChunk (uint32_t chunk)
 {
+	NS_ASSERT (chunk>0);
 	m_chunkID = chunk;
 }
 
+//	0               1               2               3
+//	0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                      Chunks Received							|
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+uint32_t
+ChunkHeader::HelloMessage::GetSerializedSize (void) const
+{
+  uint32_t size = MSG_HELLO_SIZE;
+  return size;
+}
+
+void
+ChunkHeader::HelloMessage::Print (std::ostream &os) const
+{
+  os<< "Last Chunk: " << m_lastChunk<< " chunks Received: "<< m_chunksRec <<"\n";
+}
+
+void
+ChunkHeader::HelloMessage::Serialize (Buffer::Iterator start) const
+{
+  Buffer::Iterator i = start;
+  i.WriteHtonU32 (m_lastChunk);
+  i.WriteHtonU32 (m_chunksRec);
+}
+
+uint32_t
+ChunkHeader::HelloMessage::Deserialize (Buffer::Iterator start)
+{
+  Buffer::Iterator i = start;
+  uint32_t size = MSG_HELLO_SIZE;
+  m_lastChunk = i.ReadNtohU32();
+  m_chunksRec = i.ReadNtohU32();
+  return size;
+}
+
+uint32_t
+ChunkHeader::HelloMessage::GetLastChunk ()
+{
+	return m_lastChunk;
+}
+
+void
+ChunkHeader::HelloMessage::SetLastChunk (uint32_t last)
+{
+	NS_ASSERT (last>=0);
+	m_lastChunk = last;
+}
+
+uint32_t
+ChunkHeader::HelloMessage::GetChunksReceived ()
+{
+	return m_chunksRec;
+}
+
+void
+ChunkHeader::HelloMessage::SetChunksReceived (uint32_t chunks)
+{
+	NS_ASSERT (chunks>=0);
+	m_chunksRec = chunks;
+}
 } // namespace pidm
 } // namespace ns3

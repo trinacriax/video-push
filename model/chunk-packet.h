@@ -32,13 +32,15 @@
 #include <iostream>
 
 #define CHUNK_HEADER_SIZE 4
-#define CHUNK_SIZE (4 + 4 + 1 + 8 + 4)
-#define CHUNK_ID_SIZE 4
+#define MSG_CHUNK_SIZE (4 + 4 + 1 + 8 + 4)
+#define MSG_PULL_SIZE 4
+#define MSG_HELLO_SIZE 8
 
 enum ChunkMessageType
 {
 	MSG_PULL,
-	MSG_CHUNK
+	MSG_CHUNK,
+	MSG_HELLO
 };
 
 namespace ns3 {
@@ -131,10 +133,31 @@ public:
 	  virtual void SetChunk (uint32_t chunkid);
   };
 
+  //	0               1               2               3
+  //	0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+  //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  //	|                      Chunks Received							|
+  //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+  struct HelloMessage
+    {
+  	  uint32_t m_lastChunk; // Chunks received
+  	  uint32_t m_chunksRec; // Chunks received
+  	  virtual void Print (std::ostream &os) const;
+  	  virtual uint32_t GetSerializedSize (void) const;
+  	  virtual void Serialize (Buffer::Iterator start) const;
+  	  virtual uint32_t Deserialize (Buffer::Iterator start);
+  	  virtual uint32_t GetLastChunk ();
+	  virtual void SetLastChunk (uint32_t last);
+  	  virtual uint32_t GetChunksReceived ();
+  	  virtual void SetChunksReceived (uint32_t chunksRec);
+    };
+
 private:
 	struct{
 		ChunkMessage chunk;
 		PullMessage pull;
+		HelloMessage hello;
 	} m_chunk_message;
 
 
@@ -166,6 +189,18 @@ public:
     return m_chunk_message.pull;
   }
 
+  HelloMessage& GetHelloMessage ()
+  {
+    if (m_type == 0)
+      {
+    	m_type = MSG_HELLO;
+      }
+    else
+      {
+        NS_ASSERT (m_type == MSG_HELLO);
+      }
+    return m_chunk_message.hello;
+  }
 
 };
 

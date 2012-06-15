@@ -126,7 +126,7 @@ public:
 };
 
 PullTestCase::PullTestCase ()
-  : TestCase ("Check PullMessages")
+  : TestCase ("Check PullMessage")
 {}
 void
 PullTestCase::DoRun (void)
@@ -159,6 +159,47 @@ PullTestCase::DoRun (void)
 	  }
 }
 
+class HelloTestCase : public TestCase {
+public:
+	HelloTestCase ();
+  virtual void DoRun (void);
+};
+
+HelloTestCase::HelloTestCase ()
+  : TestCase ("Check HelloMessage")
+{}
+void
+HelloTestCase::DoRun (void)
+{
+	  Packet packet;
+	  streaming::ChunkHeader msgIn;
+	  msgIn.SetType(MSG_HELLO);
+	  msgIn.SetReserved(2);
+	  msgIn.SetChecksum(65534);
+	  msgIn.Print(std::cout);
+	  {
+	    streaming::ChunkHeader::HelloMessage &chunkIn = msgIn.GetHelloMessage ();
+	    chunkIn.SetLastChunk (1223);
+	    chunkIn.SetChunksReceived (1023);
+	    chunkIn.Print(std::cout);
+	  }
+	  packet.AddHeader(msgIn);
+
+	  streaming::ChunkHeader msgOut;
+	  packet.RemoveHeader (msgOut);
+	  msgOut.Print(std::cout);
+	  {
+	  NS_TEST_ASSERT_MSG_EQ(msgOut.GetType(),MSG_HELLO,"ChunkHeader Type");
+	  NS_TEST_ASSERT_MSG_EQ(msgOut.GetReserved(),2,"Reserved");
+	  NS_TEST_ASSERT_MSG_EQ(msgOut.GetChecksum(),65534,"Checksum");
+	  streaming::ChunkHeader::HelloMessage &chunkOut = msgIn.GetHelloMessage ();
+	  {
+		  NS_TEST_ASSERT_MSG_EQ (chunkOut.GetLastChunk(), 1223, "Last Chunk");
+		  NS_TEST_ASSERT_MSG_EQ (chunkOut.GetChunksReceived(), 1023, "Chunks Received");
+		  chunkOut.Print(std::cout);
+	  }
+	  }
+}
 static class ChunkTestSuite : public TestSuite
 {
 public:
@@ -172,6 +213,7 @@ ChunkTestSuite::ChunkTestSuite()
   AddTestCase(new ChunkHeaderTestCase());
   AddTestCase(new ChunkTestCase());
   AddTestCase(new PullTestCase());
+  AddTestCase(new HelloTestCase());
 }
 
 } // namespace ns3
