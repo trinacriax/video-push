@@ -515,8 +515,12 @@ void VideoPushApplication::PeerLoop ()
 				}
 				if (missed)
 				{
+					m_neighbors.Purge();
+					if (m_neighbors.GetSize() == 0) break;
 					AddPullRetry(missed);
-					SendPull (missed);
+					Ipv4Address target = PeerSelection (PS_RANDOM);
+					NS_ASSERT (target != Ipv4Address::GetAny());
+					SendPull (missed, target);
 					m_pullTimer.Schedule();
 				}
 			}
