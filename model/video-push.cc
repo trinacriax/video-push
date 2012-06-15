@@ -906,12 +906,23 @@ VideoPushApplication::SendChunk (uint32_t chunkid, Ipv4Address target)
 			packet->AddHeader(chunk);
 			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies PULL to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
 			m_txTrace (packet);
-			Ipv4Address subnet ("10.255.255.255");
-			m_socket->SendTo (packet, 0, InetSocketAddress(subnet, PUSH_PORT));
+			m_socket->SendTo (packet, 0, InetSocketAddress(target, PUSH_PORT));
 			break;
 		}
 		case SOURCE:
 		{
+			if (!IsPending(chunkid)){
+				NS_LOG_DEBUG("Chunk "<< chunkid << " is not pending anymore");
+				break;
+			}
+			ChunkHeader chunk (MSG_CHUNK);
+			ChunkVideo *copy = m_chunks.GetChunk(chunkid);
+			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
+			chunk.GetChunkMessage().SetChunk(*copy);
+			packet->AddHeader(chunk);
+			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies PULL to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
+			m_txTrace (packet);
+			m_socket->SendTo (packet, 0, InetSocketAddress(target, PUSH_PORT));
 			break;
 		}
 		default:
