@@ -54,12 +54,6 @@ enum PeerType {
 	SOURCE
 };
 
-enum PeerPolicy {
-	PS_RANDOM,
-	PS_DELAY,
-	PS_ROUNDROBIN
-};
-
 enum ChunkPolicy {
 	CS_NEW_CHUNK,
 	//

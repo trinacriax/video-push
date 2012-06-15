@@ -33,6 +33,13 @@
 namespace ns3{
 
 using namespace streaming;
+
+enum PeerPolicy {
+	PS_RANDOM,
+	PS_DELAY,
+	PS_ROUNDROBIN
+};
+
 enum PeerState {
 	UNKNOWN, ACTIVE, INACTIVE
 };
