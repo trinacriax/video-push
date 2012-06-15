@@ -554,13 +554,13 @@ void VideoPushApplication::PeerLoop ()
 void
 VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4Address sender)
 {
+	if (m_peerType == SOURCE)
+	  return;
 	ChunkVideo chunk = chunkheader.GetChunk();
 	m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
 	// Update Chunk Buffer START
 	uint32_t last = m_chunks.GetLastChunk();
 	uint32_t missed = m_chunks.GetLeastMissed();
-	if (m_peerType == SOURCE)
-	  return;
 	bool duplicated = false;
 #define MISS // INDUCING MISSING CHUNKS START
 #ifdef MISS
