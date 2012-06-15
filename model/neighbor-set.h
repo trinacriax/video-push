@@ -46,17 +46,19 @@ enum PeerState {
 
 struct NeighborData{
 	NeighborData () :
-		n_contact (Simulator::Now()), n_active (ACTIVE), n_latestChunk(1)
+		n_contact (Simulator::Now()), n_state (ACTIVE),
+		n_bufferSize (0), n_latestChunk(0)
 	{}
-	NeighborData (Time start, PeerState state, uint32_t c_id):
-		n_contact (start), n_active (state), n_latestChunk(c_id)
+	NeighborData (Time start, PeerState state, uint32_t size, uint32_t c_id):
+		n_contact (start), n_state (state), n_bufferSize (size), n_latestChunk(c_id)
 	{}
 	Time n_contact;
 	//bitmap
 	//bitmap last time
 	//chunk buffer size;
 	//bandwidth capacity
-	enum PeerState n_active;
+	enum PeerState n_state;
+	uint32_t n_bufferSize;
 	uint32_t n_latestChunk;
 	};
 
