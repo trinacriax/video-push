@@ -340,7 +340,7 @@ void VideoPushApplication::StopApplication () // Called at time specified by Sto
 }
 
 Ptr<Ipv4Route>
-VideoPushApplication::GetRoute(Ipv4Address &local, Ipv4Address &destination) {
+VideoPushApplication::GetRoute(const Ipv4Address &local, const Ipv4Address &destination) {
 	Ptr<Packet> receivedPacket = Create<Packet> (100);
 	Ipv4Header hdr;
 	hdr.SetDestination(destination);

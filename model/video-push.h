@@ -165,7 +165,7 @@ private:
 	void HandleAccept (Ptr<Socket>, const Address& from);
 	void HandlePeerClose (Ptr<Socket>);
 	void HandlePeerError (Ptr<Socket>);
-	Ptr<Ipv4Route> GetRoute (Ipv4Address &local, Ipv4Address &destination);
+	Ptr<Ipv4Route> GetRoute (const Ipv4Address &local, const Ipv4Address &destination);
 	Ipv4Address GetNextHop (Ipv4Address &destination);
 
 	void ConnectionSucceeded (Ptr<Socket>);
