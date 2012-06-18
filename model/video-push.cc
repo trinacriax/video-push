@@ -550,7 +550,7 @@ void VideoPushApplication::PeerLoop ()
 }
 
 void
-VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, Ipv4Address &sender)
+VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const Ipv4Address &sender)
 {
 	if (m_peerType == SOURCE)
 	  return;
