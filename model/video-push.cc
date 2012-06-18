@@ -206,52 +206,55 @@ VideoPushApplication::DoDispose (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
   std::map<uint32_t, ChunkVideo> tmp_buffer = m_chunks.GetChunkBuffer();
-  uint32_t received = 1, missed = 0, duplicates = 0, cnt = 0, cid = 0;
+  uint32_t received = 1, missed = 0, duplicates = 0, cnt = 0, cid = 0, current = 1;
   Time delay_max, delay_min, delay_avg;
   double miss =0.0, rec = 0.0, dups = 0.0, sigma =0.0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
 	  cid = iter->first;
-	  while (received < cid){
-		NS_LOG_DEBUG ("Missed chunk "<< received << "-"<<m_chunks.GetChunk(received));
-		NS_ASSERT(!m_chunks.HasChunk(received));
+	  current = received + missed;
+	  while (current < cid){
+//		NS_LOG_DEBUG ("Missed chunk "<< received << "-"<<m_chunks.GetChunk(received));
+		NS_ASSERT(!m_chunks.HasChunk(current));
 		missed++;
-		received++;
+		current = received + missed;
 	  }
-	  duplicates+= GetDuplicate (cid);
-	  NS_ASSERT(m_chunks.HasChunk(cid));
-	  Time chunk_timestamp = GetChunkDelay(cid);
-	  delay_max = (delay_max < chunk_timestamp)? chunk_timestamp : delay_max;
-	  delay_min = delay_min==0? delay_max: (delay_min > chunk_timestamp)? chunk_timestamp : delay_min;
-	  delay_avg += chunk_timestamp;
-	  NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " Dup("<<cid<<")="<<GetDuplicate (cid)<< " Delay("<<cid<<")="<< chunk_timestamp.GetMicroSeconds()
-			  <<" Max="<<delay_max.GetMicroSeconds()<< " Min="<<delay_min.GetMicroSeconds()<<" Avg="<< delay_avg.GetMicroSeconds()<<" Last="<<received<<" Missed="<<missed);
-	  received = cid+1;
+	  duplicates+= GetDuplicate (current);
+	  NS_ASSERT(m_chunks.HasChunk(current));
+	  uint64_t chunk_timestamp = GetChunkDelay(current).GetMicroSeconds();
+	  delaymax = (chunk_timestamp > delaymax)? chunk_timestamp : delaymax;
+	  delaymin = (chunk_timestamp < delaymin)? chunk_timestamp : delaymin;
+	  delayavg += chunk_timestamp;
+//	  NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " Dup("<<current<<")="<<GetDuplicate (current)<< " Delay("<<current<<")="<< chunk_timestamp
+//			  <<" Max="<<delay_max.GetMicroSeconds()<< " Min="<<delay_min.GetMicroSeconds()<<" Avg="<< delay_avg.GetMicroSeconds()<<" Rec="<<received<<" Mis="<<missed);
+	  received++;
   }
-  while (received < m_latestChunkID)
+  delay_max = Time::FromInteger(delaymax, Time::US);
+  delay_min = Time::FromInteger(delaymin, Time::US);
+  current = received + missed;
+  while ((current = received + missed) < m_latestChunkID) //OCIO QUI ANDAVA IN LOOP, devo distinguire received dai ricevuti e dai totali.
 	  missed++;
   double actual = received-missed-1;
-  double avg = delay_avg.ToDouble(Time::US) / (actual <= 0?1:(actual));
+  actual = (actual <= 0?1:(actual));
+  double avg = delayavg/(1.0*actual);
   delay_avg = Time::FromDouble(avg, Time::US);
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
   	  double t_dev = ((GetChunkDelay(iter->second.c_id) - delay_avg).ToDouble(Time::US));
-  	sigma += pow(t_dev,2);
+  	  sigma += pow(t_dev,2);
   	  cnt++;
   }
   cnt--;
-  NS_LOG_DEBUG("Computing std deviation over " <<cnt <<" samples");
   sigma = sqrt(sigma/(1.0*cnt));
-  NS_LOG_DEBUG("done " <<received<<","<<missed<<","<<duplicates);
   if (received == 0) {
 	  miss = 1;
 	  rec = dups = 0;
   }
   else
   {
-	  miss = (missed/(1.0*received));
-	  double diff = received-missed ;
-	  rec = diff == 0? 0 : (diff/received);
-	  dups = duplicates==0?0:duplicates/diff;
+	  miss = (missed/(1.0*m_latestChunkID));
+	  rec = (received/(1.0*m_latestChunkID));
+	  dups = (duplicates==0?0:duplicates/received);
   }
+  NS_ASSERT (m_latestChunkID==received+missed);
   double tstudent = 1.96; // alpha = 0.025, degree of freedom = infinite
   double confidence = tstudent * (sigma/sqrt(received));
   char buffer [1024];
