@@ -951,7 +951,7 @@ void VideoPushApplication::ConnectionFailed (Ptr<Socket>)
   cout << "VideoPush, Connection Failed" << endl;
 }
 
-void VideoPushApplication::SetGateway (Ipv4Address &gateway)
+void VideoPushApplication::SetGateway (const Ipv4Address &gateway)
 {
 	m_gateway = gateway;
 }

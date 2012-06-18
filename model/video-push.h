@@ -71,7 +71,7 @@ public:
 	static TypeId GetTypeId (void);
 	VideoPushApplication ();
 	virtual ~VideoPushApplication ();
-	void SetGateway (Ipv4Address &gateway);
+	void SetGateway (const Ipv4Address &gateway);
 
 	/**
 	* \param maxBytes the total number of bytes to send
