@@ -147,7 +147,7 @@ private:
 	void StopSending ();
 	void SendPacket ();
 	void SendChunk (uint32_t chunkid, const Ipv4Address target);
-	void SendPull (uint32_t chunkid, Ipv4Address target);
+	void SendPull (uint32_t chunkid, const Ipv4Address target);
 	void SendHello ();
 	ChunkVideo* ForgeChunk ();
 	uint32_t ChunkSelection (ChunkPolicy policy);
