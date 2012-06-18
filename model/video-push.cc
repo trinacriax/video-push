@@ -614,7 +614,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 }
 
 void
-VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, Ipv4Address &sender)
+VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const Ipv4Address &sender)
 {
 	uint32_t last = helloheader.GetLastChunk();
 	uint32_t chunks = helloheader.GetChunksReceived();

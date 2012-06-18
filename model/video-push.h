@@ -161,7 +161,7 @@ private:
 	void HandleReceive (Ptr<Socket>);
 	void HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const Ipv4Address &sender);
 	void HandlePull (ChunkHeader::PullMessage &pullheader, const Ipv4Address &sender);
-	void HandleHello (ChunkHeader::HelloMessage &helloheader, Ipv4Address &sender);
+	void HandleHello (ChunkHeader::HelloMessage &helloheader, const Ipv4Address &sender);
 	void HandleAccept (Ptr<Socket>, const Address& from);
 	void HandlePeerClose (Ptr<Socket>);
 	void HandlePeerError (Ptr<Socket>);
