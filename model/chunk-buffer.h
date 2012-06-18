@@ -42,7 +42,7 @@ public:
 
 	ChunkVideo* GetChunk (uint32_t index);
 	bool HasChunk (uint32_t index);
-	bool AddChunk (ChunkVideo &chunk, ChunkState state);
+	bool AddChunk (const ChunkVideo &chunk, ChunkState state);
 	bool DelChunk (uint32_t index);
 
 	const size_t GetBufferSize ();

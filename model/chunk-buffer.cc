@@ -66,7 +66,7 @@ namespace ns3{
 	}
 
 	bool
-	ChunkBuffer::AddChunk (ChunkVideo &chunk, ChunkState state)
+	ChunkBuffer::AddChunk (const ChunkVideo &chunk, ChunkState state)
 	{
 		NS_ASSERT (state==CHUNK_RECEIVED_PUSH||state==CHUNK_RECEIVED_PULL);
 		std::map<uint32_t, ChunkVideo>::iterator result = chunk_buffer.find(chunk.c_id);
