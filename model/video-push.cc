@@ -891,7 +891,7 @@ void VideoPushApplication::SendHello ()
 }
 
 void
-VideoPushApplication::SendChunk (uint32_t chunkid, Ipv4Address target)
+VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
 {
 	NS_LOG_FUNCTION (this<<chunkid<<target);
 	NS_ASSERT(chunkid>0);
