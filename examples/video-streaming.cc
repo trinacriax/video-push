@@ -44,9 +44,11 @@
 #include "ns3/video-push-module.h"
 #include "ns3/wifi-module.h"
 #include "ns3/aodv-helper.h"
+#include "ns3/mbn-aodv-helper.h"
 #include "ns3/string.h"
 
 using namespace ns3;
+
 NS_LOG_COMPONENT_DEFINE ("VideoStreaming");
 
 /// Verbose
@@ -275,11 +277,29 @@ int main(int argc, char **argv) {
 					"Z",RandomVariableValue(ConstantVariable(0)));
 	mobility.Install(nodes);
 
-	AodvHelper aodv;
 	InternetStackHelper stack;
-	stack.SetRoutingHelper(aodv);
+	switch (routing)
+	{
+		case 1:
+		{
+			AodvHelper aodv;
+			stack.SetRoutingHelper(aodv);
+			break;
+		}
+		case 2:
+		{
+			MbnAodvHelper mbnaodv;
+			stack.SetRoutingHelper(mbnaodv);
+			break;
+		}
+		default:
+		{
+			AodvHelper aodv;
+			stack.SetRoutingHelper(aodv);
+			break;
+		}
+	}
 	stack.Install(nodes);
-
 	Ipv4AddressHelper address;
 	address.SetBase("10.0.0.0", "255.0.0.0");
 
