@@ -206,7 +206,8 @@ VideoPushApplication::DoDispose (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
   std::map<uint32_t, ChunkVideo> tmp_buffer = m_chunks.GetChunkBuffer();
-  uint32_t received = 1, missed = 0, duplicates = 0, cnt = 0, cid = 0, current = 1;
+  uint32_t received = 1, missed = 0, duplicates = 0, cnt = 0, cid = 0, current = 1, late = 0;
+  uint64_t delay = 0, dlate = 0, delaymax = GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds(), delaymin = GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds(), delayavg = 0;
   Time delay_max, delay_min, delay_avg;
   double miss =0.0, rec = 0.0, dups = 0.0, sigma =0.0;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
@@ -215,6 +216,11 @@ VideoPushApplication::DoDispose (void)
 	  while (current < cid){
 //		NS_LOG_DEBUG ("Missed chunk "<< received << "-"<<m_chunks.GetChunk(received));
 		NS_ASSERT(!m_chunks.HasChunk(current));
+		if (m_chunks.GetChunkState(current) == CHUNK_SKIPPED)
+		{
+			dlate += GetChunkDelay(current).GetMicroSeconds();
+			late++;
+		}
 		missed++;
 		current = received + missed;
 	  }
@@ -258,8 +264,8 @@ VideoPushApplication::DoDispose (void)
   double tstudent = 1.96; // alpha = 0.025, degree of freedom = infinite
   double confidence = tstudent * (sigma/sqrt(received));
   char buffer [1024];
-  sprintf(buffer, " Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f",
-		  	  	  	   rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence);
+  sprintf(buffer, " Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f",
+		  	  	  	   rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence, (dlate/(1.0*late)));
   std::cout << "Chunks Node " << m_node->GetId() << buffer << "\n";
 
   m_socket = 0;
@@ -458,7 +464,7 @@ void
 VideoPushApplication::SetChunkDelay (uint32_t chunkid, Time delay)
 {
 	NS_ASSERT (chunkid>0);
-	NS_ASSERT (m_chunks.HasChunk(chunkid));
+	NS_ASSERT (m_chunks.HasChunk(chunkid)||m_chunks.GetChunkState(chunkid) == CHUNK_SKIPPED);
 	uint64_t udelay = delay.GetMicroSeconds();
 	if (m_chunk_delay.find(chunkid) == m_chunk_delay.end())
 		m_chunk_delay.insert(std::pair<uint32_t, uint64_t>(chunkid,udelay));
@@ -470,7 +476,7 @@ Time
 VideoPushApplication::GetChunkDelay (uint32_t chunkid)
 {
 	NS_ASSERT (chunkid>0);
-	NS_ASSERT (m_chunks.HasChunk(chunkid));
+	NS_ASSERT (m_chunks.HasChunk(chunkid)||m_chunks.GetChunkState(chunkid) == CHUNK_SKIPPED);
 	NS_ASSERT (m_chunk_delay.find(chunkid) != m_chunk_delay.end());
 	return Time::FromInteger(m_chunk_delay.find(chunkid)->second, Time::US);
 }
@@ -563,6 +569,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	uint32_t last = m_chunks.GetLastChunk();
 	uint32_t missed = m_chunks.GetLeastMissed();
 	bool duplicated = false;
+	bool toolate = false;
 #define MISS // INDUCING MISSING CHUNKS START
 #ifdef MISS
 	bool missed_chunk;
@@ -580,21 +587,22 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< missed);
 		m_pullTimer.Cancel();
 	}
-	duplicated = !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
+	toolate = (m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED);
+	duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
 	if (duplicated)
 	{
 	  AddDuplicate (chunk.c_id);
 	  if(IsPending(chunk.c_id))
 		  RemovePending(chunk.c_id);
 	}
-	else
+	if (toolate || !duplicated)
 	{
 	  SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
 	}
 	missed = m_chunks.GetLeastMissed();
 	if (missed && !m_pullTimer.IsRunning() && GetPullActive())
 	  Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
-	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":" Received ")
+	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate":" Received "))
 		  << chunk << "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"<<" from "
 		  << sender << " totalRx="<<m_totalRx<<" Timer "<< m_pullTimer.IsRunning()<<" Neighbors "<< m_neighbors.GetSize());
 }
