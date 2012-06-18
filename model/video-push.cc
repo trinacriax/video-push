@@ -253,19 +253,21 @@ VideoPushApplication::DoDispose (void)
   if (received == 0) {
 	  miss = 1;
 	  rec = dups = 0;
+	  dlate = 0;
   }
   else
   {
 	  miss = (missed/(1.0*m_latestChunkID));
 	  rec = (received/(1.0*m_latestChunkID));
 	  dups = (duplicates==0?0:duplicates/received);
+	  dlate = (late==0?0: dlate/(1.0*late));
   }
   NS_ASSERT (m_latestChunkID==received+missed);
   double tstudent = 1.96; // alpha = 0.025, degree of freedom = infinite
   double confidence = tstudent * (sigma/sqrt(received));
   char buffer [1024];
   sprintf(buffer, " Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f",
-		  	  	  	   rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence, (dlate/(1.0*late)));
+		  	  	  	   rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence, dlate);
   std::cout << "Chunks Node " << m_node->GetId() << buffer << "\n";
 
   m_socket = 0;
@@ -618,7 +620,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 	uint32_t chunkid = pullheader.GetChunk();
 	bool hasChunk = m_chunks.HasChunk (chunkid);
 	NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << GetLocalAddress()
-			<< " Received Pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sender);
+			<< " Received pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sender);
 	if (hasChunk)
 	{
 	  double delayv = rint(UniformVariable().GetValue (10,12000));
@@ -881,7 +883,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 	Ptr<Packet> packet = Create<Packet> ();
 	packet->AddHeader(pull);
 	m_txTrace (packet);
-	NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends PULL to "<< target << " for chunk "<< chunkid);
+	NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
 	m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
 }
 
@@ -919,7 +921,7 @@ VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
 			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
 			chunk.GetChunkMessage().SetChunk(*copy);
 			packet->AddHeader(chunk);
-			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies PULL to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
+			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies pull to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
 			m_txTrace (packet);
 			m_socket->SendTo (packet, 0, InetSocketAddress(target, PUSH_PORT));
 			break;
@@ -935,7 +937,7 @@ VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
 			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
 			chunk.GetChunkMessage().SetChunk(*copy);
 			packet->AddHeader(chunk);
-			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies PULL to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
+			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies pull to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
 			m_txTrace (packet);
 			m_socket->SendTo (packet, 0, InetSocketAddress(target, PUSH_PORT));
 			break;
