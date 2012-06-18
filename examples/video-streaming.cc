@@ -317,7 +317,7 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::UdpSocket::IpMulticastTtl", UintegerValue (1));
 	VideoHelper video = VideoHelper ("ns3::UdpSocketFactory", dst);
 	video.SetAttribute ("DataRate", DataRateValue (DataRate (stream)));
-	video.SetAttribute ("PacketSize", UintegerValue (1500));
+	video.SetAttribute ("PacketSize", UintegerValue (2304));
 	video.SetAttribute ("PeerType", EnumValue (SOURCE));
 	video.SetAttribute ("Local", AddressValue (interfaces.GetAddress(0)));
 	video.SetAttribute ("PeerPolicy", EnumValue (PS_RANDOM));
