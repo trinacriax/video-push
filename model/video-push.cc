@@ -597,7 +597,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 }
 
 void
-VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, Ipv4Address &sender)
+VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ipv4Address &sender)
 {
 	uint32_t chunkid = pullheader.GetChunk();
 	bool hasChunk = m_chunks.HasChunk (chunkid);
