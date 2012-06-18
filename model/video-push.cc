@@ -352,7 +352,7 @@ VideoPushApplication::GetRoute(const Ipv4Address &local, const Ipv4Address &dest
 }
 
 Ipv4Address
-VideoPushApplication::GetNextHop (Ipv4Address &destination) {
+VideoPushApplication::GetNextHop (const Ipv4Address &destination) {
 	Ipv4Address local = Ipv4Address::ConvertFrom(m_localAddress);
 	Ptr<Ipv4Route> route = GetRoute (local, destination);
 	return (route == NULL ? m_gateway: route->GetGateway());
