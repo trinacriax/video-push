@@ -131,26 +131,35 @@ static void ArpDiscard (std::string context, Ptr<const Packet> p)
 int main(int argc, char **argv) {
 	/// Number of nodes
 	uint32_t size = 100;
-	/// Simulation time, seconds
+	/// Simulation time in seconds
 	double totalTime = 50;
 	uint32_t run = 1;
+	// Simulation seed
 	uint32_t seed = 3945244811;
 	/// Grid xmax
 	double xmax = 80;
+	/// Grid ymax
 	double ymax = 80;
-	double pulltime = 0.040;//100ms
-	double hellotime = 4;
+	// Period between pull
+	double pulltime = 150;//100ms
+	// max number of pull to retrieve a chunk
 	uint32_t pullmax = 1;
+	// Time in seconds between hellos
+	double hellotime = 4;
+	// max number of hello loss before removing a neighbor
 	uint32_t helloloss = 1;
+	// Activate pull as recovery mechanism
 	bool pullactive = true;
+	// Unicast routing protocol to use
+	uint32_t routing = 1;
 	// reference loss
 	double PLref = 30.0;
 	// loss exponent
 	double PLexp = 3.5;
 	// Tx power start
-	double TxStart = 16.0;
+	double TxStart = 18.0;
 	// Tx power end
-	double TxEnd = 16.0;
+	double TxEnd = 18.0;
 	// Tx power levels
 	uint32_t TxLevels = 1;
 	// Energy detection threshold
@@ -158,18 +167,19 @@ int main(int argc, char **argv) {
 	// CCA mode 1
 	double CCAMode1 = -62.0;
 
+
 	CommandLine cmd;
 	cmd.AddValue("size", "Number of nodes.", size);
 	cmd.AddValue("time", "Simulation time, s.", totalTime);
 	cmd.AddValue("run", "Run Identifier", run);
 	cmd.AddValue("xmax", "Grid X max", xmax);
 	cmd.AddValue("ymax", "Grid Y max", ymax);
-	cmd.AddValue("pulltime", "Time between pull in sec.", pulltime);
-	cmd.AddValue("pullmax", "Max number of pull allowed per chunk", pullmax);
-	cmd.AddValue("pullactive", "Pull activation allowed", pullactive);
+	cmd.AddValue("routing", "Unicast Routing Protocol (1 - AODV, 2 - MBN) ", routing);
 	cmd.AddValue("hellotime", "Hello time", hellotime);
 	cmd.AddValue("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
-	cmd.AddValue("v", "Verbose", verbose);
+	cmd.AddValue("pulltime", "Time between pull in sec. (e.g., 0.100 sec = 100ms)", pulltime);
+	cmd.AddValue("pullmax", "Max number of pull allowed per chunk", pullmax);
+	cmd.AddValue("pullactive", "Pull activation allowed", pullactive);
 	cmd.AddValue ("PLref", "Reference path loss dB.", PLref);
 	cmd.AddValue ("PLexp", "Path loss exponent.", PLexp);
 	cmd.AddValue ("TxStart", "Transmission power start dBm.", TxStart);
@@ -177,6 +187,7 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("TxLevels", "Transmission power levels.", TxLevels);
 	cmd.AddValue ("EnergyDet", "Energy detection threshold dBm.", EnergyDet);
 	cmd.AddValue ("CCAMode1", "CCA mode 1 threshold dBm.", CCAMode1);
+	cmd.AddValue("v", "Verbose", verbose);
 	cmd.Parse(argc, argv);
 
 	SeedManager::SetRun (run);
