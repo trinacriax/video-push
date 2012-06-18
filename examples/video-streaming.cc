@@ -56,10 +56,6 @@ int main(int argc, char **argv) {
 	double totalTime = 50;
 	uint32_t run = 1;
 	uint32_t seed = 3945244811;
-	/// LogDistance exponent
-	double log_n = 2.0;
-	/// LogDistance reference loss path
-	double log_r = 30;
 	/// Verbose
 	uint32_t verbose = 0;
 	/// Grid xmax
@@ -70,6 +66,20 @@ int main(int argc, char **argv) {
 	uint32_t pullmax = 1;
 	uint32_t helloloss = 1;
 	bool pullactive = true;
+	// reference loss
+	double PLref = 30.0;
+	// loss exponent
+	double PLexp = 3.5;
+	// Tx power start
+	double TxStart = 16.0;
+	// Tx power end
+	double TxEnd = 16.0;
+	// Tx power levels
+	uint32_t TxLevels = 1;
+	// Energy detection threshold
+	double EnergyDet= -95.0;
+	// CCA mode 1
+	double CCAMode1 = -62.0;
 
 	CommandLine cmd;
 	cmd.AddValue("size", "Number of nodes.", size);
@@ -83,20 +93,34 @@ int main(int argc, char **argv) {
 	cmd.AddValue("hellotime", "Hello time", hellotime);
 	cmd.AddValue("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
 	cmd.AddValue("v", "Verbose", verbose);
+	cmd.AddValue ("PLref", "Reference path loss dB.", PLref);
+	cmd.AddValue ("PLexp", "Path loss exponent.", PLexp);
+	cmd.AddValue ("TxStart", "Transmission power start dBm.", TxStart);
+	cmd.AddValue ("TxEnd", "Transmission power end dBm.", TxEnd);
+	cmd.AddValue ("TxLevels", "Transmission power levels.", TxLevels);
+	cmd.AddValue ("EnergyDet", "Energy detection threshold dBm.", EnergyDet);
+	cmd.AddValue ("CCAMode1", "CCA mode 1 threshold dBm.", CCAMode1);
 	cmd.Parse(argc, argv);
 
 	SeedManager::SetRun (run);
 	SeedManager::SetSeed (seed);
 	Config::SetDefault("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2200"));
 	Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("1600"));
-	Config::SetDefault("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(log_r));
-	Config::SetDefault("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(log_n));
-	Config::SetDefault("ns3::VideoPushApplication::PullTime", TimeValue(Seconds(pulltime)));
+	Config::SetDefault("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(PLref));
+	Config::SetDefault("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(PLexp));
+	Config::SetDefault("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
 	Config::SetDefault("ns3::VideoPushApplication::HelloTime", TimeValue(Seconds(hellotime)));
 	Config::SetDefault("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
 	Config::SetDefault("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
 	Config::SetDefault("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
 	Config::SetDefault("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
+	Config::SetDefault("ns3::YansWifiPhy::TxGain",DoubleValue(0.0));
+	Config::SetDefault("ns3::YansWifiPhy::RxGain",DoubleValue(0.0));
+	Config::SetDefault("ns3::YansWifiPhy::TxPowerStart",DoubleValue(TxStart));
+	Config::SetDefault("ns3::YansWifiPhy::TxPowerEnd",DoubleValue(TxEnd));
+	Config::SetDefault("ns3::YansWifiPhy::TxPowerLevels",UintegerValue(TxLevels));
+	Config::SetDefault("ns3::YansWifiPhy::EnergyDetectionThreshold",DoubleValue(EnergyDet));///17.3.10.1 Receiver minimum input sensitivity
+	Config::SetDefault("ns3::YansWifiPhy::CcaMode1Threshold",DoubleValue(CCAMode1));///17.3.10.5 CCA sensitivity
 
 	if(verbose==1){
 		LogComponentEnable("VideoStreaming", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
@@ -135,7 +159,7 @@ int main(int argc, char **argv) {
 	wifi.SetStandard(WIFI_PHY_STANDARD_80211g);
 		wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager"
 				,"DataMode", StringValue("ErpOfdmRate54Mbps")
-				,"ControlMode", StringValue("ErpOfdmRate54Mbps")
+				,"ControlMode", StringValue("ErpOfdmRate6Mbps")
 				,"NonUnicastMode", StringValue("ErpOfdmRate6Mbps")
 				);
 	YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default();
