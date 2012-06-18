@@ -216,7 +216,7 @@ VideoPushApplication::DoDispose (void)
 	  while (current < cid){
 //		NS_LOG_DEBUG ("Missed chunk "<< received << "-"<<m_chunks.GetChunk(received));
 		NS_ASSERT(!m_chunks.HasChunk(current));
-		if (m_chunks.GetChunkState(current) == CHUNK_SKIPPED)
+		if (m_chunks.GetChunkState(current) == CHUNK_DELAYED)
 		{
 			dlate += GetChunkDelay(current).GetMicroSeconds();
 			late++;
@@ -464,7 +464,7 @@ void
 VideoPushApplication::SetChunkDelay (uint32_t chunkid, Time delay)
 {
 	NS_ASSERT (chunkid>0);
-	NS_ASSERT (m_chunks.HasChunk(chunkid)||m_chunks.GetChunkState(chunkid) == CHUNK_SKIPPED);
+	NS_ASSERT (m_chunks.HasChunk(chunkid)||m_chunks.GetChunkState(chunkid) == CHUNK_DELAYED);
 	uint64_t udelay = delay.GetMicroSeconds();
 	if (m_chunk_delay.find(chunkid) == m_chunk_delay.end())
 		m_chunk_delay.insert(std::pair<uint32_t, uint64_t>(chunkid,udelay));
@@ -476,7 +476,7 @@ Time
 VideoPushApplication::GetChunkDelay (uint32_t chunkid)
 {
 	NS_ASSERT (chunkid>0);
-	NS_ASSERT (m_chunks.HasChunk(chunkid)||m_chunks.GetChunkState(chunkid) == CHUNK_SKIPPED);
+	NS_ASSERT (m_chunks.HasChunk(chunkid)||m_chunks.GetChunkState(chunkid) == CHUNK_DELAYED);
 	NS_ASSERT (m_chunk_delay.find(chunkid) != m_chunk_delay.end());
 	return Time::FromInteger(m_chunk_delay.find(chunkid)->second, Time::US);
 }
@@ -587,15 +587,20 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< missed);
 		m_pullTimer.Cancel();
 	}
-	toolate = (m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED);
+	toolate = m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED;
 	duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
-	if (duplicated)
+	if (toolate) // Chunk was pulled and received to late
+	{
+		m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
+		SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
+	}
+	else if (duplicated) // Duplicated chunk
 	{
 	  AddDuplicate (chunk.c_id);
 	  if(IsPending(chunk.c_id))
 		  RemovePending(chunk.c_id);
 	}
-	if (toolate || !duplicated)
+	else //chunk received correctly
 	{
 	  SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
 	}
