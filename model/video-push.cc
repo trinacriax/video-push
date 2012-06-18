@@ -206,10 +206,10 @@ VideoPushApplication::DoDispose (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
   std::map<uint32_t, ChunkVideo> tmp_buffer = m_chunks.GetChunkBuffer();
-  uint32_t received = 1, missed = 0, duplicates = 0, cnt = 0, cid = 0, current = 1, late = 0;
-  uint64_t delay = 0, dlate = 0, delaymax = GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds(), delaymin = GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds(), delayavg = 0;
+  uint32_t received = 1, missed = 0, duplicates = 0, cnt = 0, cid = 0, current = 1, late = 0, split = 0;
+  uint64_t delay = 0, delaylate = 0, delaymax = GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds(), delaymin = GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds(), delayavg = 0;
   Time delay_max, delay_min, delay_avg;
-  double miss =0.0, rec = 0.0, dups = 0.0, sigma =0.0;
+  double miss =0.0, rec = 0.0, dups = 0.0, sigma = 0.0, delayavgB = 0.0, dlate = 0.0 ;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
 	  cid = iter->first;
 	  current = received + missed;
@@ -218,7 +218,7 @@ VideoPushApplication::DoDispose (void)
 		NS_ASSERT(!m_chunks.HasChunk(current));
 		if (m_chunks.GetChunkState(current) == CHUNK_DELAYED)
 		{
-			dlate += GetChunkDelay(current).GetMicroSeconds();
+			delaylate += GetChunkDelay(current).GetMicroSeconds();
 			late++;
 		}
 		missed++;
@@ -230,10 +230,18 @@ VideoPushApplication::DoDispose (void)
 	  delaymax = (chunk_timestamp > delaymax)? chunk_timestamp : delaymax;
 	  delaymin = (chunk_timestamp < delaymin)? chunk_timestamp : delaymin;
 	  delayavg += chunk_timestamp;
+	  if ( received % 1000 == 0)
+	  {
+		  delayavgB += (delayavg/1000.0);
+		  split++;
+		  delayavg = 0;
+	  }
 //	  NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " Dup("<<current<<")="<<GetDuplicate (current)<< " Delay("<<current<<")="<< chunk_timestamp
 //			  <<" Max="<<delay_max.GetMicroSeconds()<< " Min="<<delay_min.GetMicroSeconds()<<" Avg="<< delay_avg.GetMicroSeconds()<<" Rec="<<received<<" Mis="<<missed);
+
 	  received++;
   }
+  double avg = (delayavgB/(1.0*split)) + (received%1000==0?0:((1.0*delayavg)/(received%1000)));
   delay_max = Time::FromInteger(delaymax, Time::US);
   delay_min = Time::FromInteger(delaymin, Time::US);
   current = received + missed;
@@ -241,7 +249,7 @@ VideoPushApplication::DoDispose (void)
 	  missed++;
   double actual = received-missed-1;
   actual = (actual <= 0?1:(actual));
-  double avg = delayavg/(1.0*actual);
+//  double avg = delayavg/(1.0*actual);
   delay_avg = Time::FromDouble(avg, Time::US);
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
   	  double t_dev = ((GetChunkDelay(iter->second.c_id) - delay_avg).ToDouble(Time::US));
@@ -253,14 +261,14 @@ VideoPushApplication::DoDispose (void)
   if (received == 0) {
 	  miss = 1;
 	  rec = dups = 0;
-	  dlate = 0;
+	  delaylate = 0;
   }
   else
   {
 	  miss = (missed/(1.0*m_latestChunkID));
 	  rec = (received/(1.0*m_latestChunkID));
 	  dups = (duplicates==0?0:duplicates/received);
-	  dlate = (late==0?0: dlate/(1.0*late));
+	  dlate = (late==0?0: delaylate/(1.0*late));
   }
   NS_ASSERT (m_latestChunkID==received+missed);
   double tstudent = 1.96; // alpha = 0.025, degree of freedom = infinite
