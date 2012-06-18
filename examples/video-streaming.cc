@@ -49,6 +49,85 @@
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("VideoStreaming");
 
+/// Verbose
+uint32_t verbose = 0;
+
+struct mycontext{
+	uint32_t id;
+	std::string callback;
+};
+
+struct mycontext GetContextInfo (std::string context){
+	struct mycontext mcontext;
+	int p2 = context.find("/");
+	int p1 = context.find("/",p2+1);
+	p2 = context.find("/",p1+1);
+	mcontext.id = atoi(context.substr(p1+1, (p2-p1)-1).c_str());
+//	std::cout<<"P1 = "<<p1<< " P2 = "<< p2 << " ID: " <<mcontext.id;
+	p1 = context.find_last_of("/");
+	p2 = context.length() - p2;
+	mcontext.callback = context.substr(p1+1, p2).c_str();
+//	std::cout<<"; P1 = "<<p1<< " P2 = "<< p2<< " CALL: "<< mcontext.callback<<"\n";
+	return mcontext;
+}
+
+static void PhyTxDrop (Ptr<const Packet> p)
+{
+std::cout << Simulator::Now() <<" Phy Drop Packet "<< p->GetSize() << " bytes " << std::endl;
+}
+
+void
+DevTxTrace (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<< p->GetUid() << std::endl;
+}
+void
+DevRxTrace (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " " << p->GetUid() << std::endl;
+}
+void
+PhyRxOkTrace (std::string context, Ptr<const Packet> packet, double
+snr, WifiMode mode, enum WifiPreamble preamble)
+{
+	struct mycontext mc = GetContextInfo (context);
+	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " PHYRXOK mode=" << mode << " snr=" << snr << " " <<
+*packet << std::endl;
+}
+
+void
+PhyRxErrorTrace (std::string context, Ptr<const Packet> packet, double
+snr)
+{
+	struct mycontext mc = GetContextInfo (context);
+	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " PHYRXERROR snr=" << snr << " " << *packet <<
+std::endl;
+}
+void
+PhyTxTrace (std::string context, Ptr<const Packet> packet, WifiMode
+mode, WifiPreamble preamble, uint8_t txPower)
+{
+	struct mycontext mc = GetContextInfo (context);
+	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " PHYTX mode=" << mode << " " << *packet <<
+std::endl;
+}
+
+void
+PhyStateTrace (std::string context, Time start, Time duration, enum
+WifiPhy::State state)
+{
+	struct mycontext mc = GetContextInfo (context);
+	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " state=" << state << " start=" << start << " duration=" << duration << std::endl;
+}
+
+static void ArpDiscard (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<< " Arp discards packet "<< p->GetUid() << " of "<<p->GetSize() << " bytes " << std::endl;
+}
+
 int main(int argc, char **argv) {
 	/// Number of nodes
 	uint32_t size = 100;
@@ -56,8 +135,6 @@ int main(int argc, char **argv) {
 	double totalTime = 50;
 	uint32_t run = 1;
 	uint32_t seed = 3945244811;
-	/// Verbose
-	uint32_t verbose = 0;
 	/// Grid xmax
 	double xmax = 80;
 	double ymax = 80;
@@ -133,6 +210,14 @@ int main(int argc, char **argv) {
 //		LogComponentEnable("YansWifiPhy",  LogLevel (LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 //		LogComponentEnable("ChunkBuffer", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 //		LogComponentEnable("Ipv4L3Protocol", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+		Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/$ns3::YansWifiPhy/PhyTxDrop",MakeCallback (&PhyTxDrop));
+		Config::Connect ("/NodeList/*/DeviceList/*/Mac/MacTx", MakeCallback (&DevTxTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/Mac/MacRx",	MakeCallback (&DevRxTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/RxOk",	MakeCallback (&PhyRxOkTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/RxError",	MakeCallback (&PhyRxErrorTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/Tx",	MakeCallback (&PhyTxTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/State", MakeCallback (&PhyStateTrace));
+		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/Drop", MakeCallback (&ArpDiscard));
 	}
 
 	/// Video start
