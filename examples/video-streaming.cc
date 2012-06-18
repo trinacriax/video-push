@@ -255,11 +255,14 @@ int main(int argc, char **argv) {
 //			,"NonUnicastMode", StringValue ("DsssRate5_5Mbps")
 //			);
 	wifi.SetStandard(WIFI_PHY_STANDARD_80211g);
-		wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager"
-				,"DataMode", StringValue("ErpOfdmRate54Mbps")
-				,"ControlMode", StringValue("ErpOfdmRate6Mbps")
-				,"NonUnicastMode", StringValue("ErpOfdmRate6Mbps")
-				);
+	wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager"
+			,"DataMode", StringValue("ErpOfdmRate54Mbps")
+			,"ControlMode", StringValue("ErpOfdmRate6Mbps")
+			,"NonUnicastMode", StringValue("ErpOfdmRate6Mbps")
+			);
+//	wifi.SetRemoteStationManager ("ns3::AarfWifiManager"
+//			,"NonUnicastMode", StringValue("ErpOfdmRate6Mbps")
+//			);
 	YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default();
 	YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default();
 	wifiPhy.SetChannel(wifiChannel.Create());
