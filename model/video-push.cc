@@ -53,7 +53,6 @@
 
 NS_LOG_COMPONENT_DEFINE ("VideoPushApplication");
 
-uint32_t last_chunk;
 static uint32_t m_latestChunkID;
 
 using namespace std;
@@ -241,10 +240,6 @@ VideoPushApplication::DoDispose (void)
   cnt--;
   NS_LOG_DEBUG("Computing std deviation over " <<cnt <<" samples");
   sigma = sqrt(sigma/(1.0*cnt));
-  while(received>0 && received < last_chunk){
-	  missed++;
-	  received++;
-  }
   NS_LOG_DEBUG("done " <<received<<","<<missed<<","<<duplicates);
   if (received == 0) {
 	  miss = 1;
@@ -846,7 +841,6 @@ void VideoPushApplication::SendPacket ()
 			m_totBytes += payload;
 			m_lastStartTime = Simulator::Now ();
 			m_residualBits = 0;
-			last_chunk = (last_chunk < m_latestChunkID) ? m_latestChunkID : last_chunk;
 			NS_ASSERT (new_chunk == m_chunks.GetLastChunk());
 			SetChunkDelay(new_chunk, Seconds(0));
 			NS_LOG_LOGIC ("Node " << GetNode()->GetId() << " push packet " << *copy<< " Dup="<<GetDuplicate(copy->c_id)
