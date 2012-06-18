@@ -51,15 +51,14 @@ public:
 	ChunkState GetChunkState (uint32_t index);
 	void SetChunkState (uint32_t chunkid, ChunkState state);
 	bool ChunkMissed (uint32_t chunkid);
+	bool ChunkDelayed (uint32_t chunkid);
 	bool ChunkSkipped (uint32_t chunkid);
 	uint32_t GetLeastMissed ();
 	uint32_t GetLastChunk ();
-	uint32_t GetMissed ();
 
 protected:
 	std::map<uint32_t, ChunkVideo> chunk_buffer;
 	std::map<uint32_t, ChunkState> chunk_state;
-	uint32_t missed;
 	uint32_t last;
 
 };

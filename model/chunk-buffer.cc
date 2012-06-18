@@ -32,7 +32,7 @@ namespace ns3{
 
 
 	ChunkBuffer::ChunkBuffer () :
-			missed (0), last(0)
+			last(0)
 	{
 		chunk_buffer.clear();
 		chunk_state.clear();
@@ -131,7 +131,7 @@ namespace ns3{
 	uint32_t
 	ChunkBuffer::GetLeastMissed ()
 	{
-		missed = 1;
+		uint32_t missed = 1;
 		while (missed < last && (HasChunk(missed) || ChunkSkipped (missed)))
 		{
 			missed++;
@@ -188,11 +188,6 @@ namespace ns3{
 			return iter->second;
 	}
 
-	uint32_t
-	ChunkBuffer::GetMissed ()
-	{
-		return missed;
-	}
 }
 
 
