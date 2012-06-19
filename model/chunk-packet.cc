@@ -243,8 +243,8 @@ ChunkHeader::ChunkMessage::Serialize (Buffer::Iterator start) const
   Buffer::Iterator i = start;
   i.WriteHtonU32 (m_chunk.c_id);
   i.WriteHtonU64 (m_chunk.c_tstamp);
-  i.WriteHtonU32 (m_chunk.c_size);
-  i.WriteHtonU32 (m_chunk.c_attributes_size);
+  i.WriteHtonU16 (m_chunk.c_size);
+  i.WriteHtonU16 (m_chunk.c_attributes_size);
 //  for(uint32_t s = 0; s < m_chunk.c_size ; s++){
 //  	  i.WriteU8(m_chunk.c_data[s]);
 //    }
@@ -262,10 +262,10 @@ ChunkHeader::ChunkMessage::Deserialize (Buffer::Iterator start)
   size +=4;
   m_chunk.c_tstamp = i.ReadNtohU64();
   size +=8;
-  m_chunk.c_size = i.ReadNtohU32();
-  size +=4;
-  m_chunk.c_attributes_size = i.ReadNtohU32();
-  size +=4;
+  m_chunk.c_size = i.ReadNtohU16();
+  size +=2;
+  m_chunk.c_attributes_size = i.ReadNtohU16();
+  size +=2;
 //  m_chunk.c_data = (uint8_t*)calloc(m_chunk.c_size, sizeof(uint8_t));
 //  for(uint32_t s = 0; s < m_chunk.c_size ; s++){
 //	m_chunk.c_data[s] = i.ReadU8();

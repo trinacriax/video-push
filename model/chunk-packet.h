@@ -32,7 +32,7 @@
 #include <iostream>
 
 #define CHUNK_HEADER_SIZE 4
-#define MSG_CHUNK_SIZE (4 + 4 + 1 + 8 + 4)
+#define MSG_CHUNK_SIZE (4 + 8 + 2 + 2)
 #define MSG_PULL_SIZE 4
 #define MSG_HELLO_SIZE 8
 
