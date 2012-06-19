@@ -132,7 +132,7 @@ static void ArpDiscard (std::string context, Ptr<const Packet> p)
 
 int main(int argc, char **argv) {
 	/// Number of nodes
-	uint32_t size = 100;
+	uint32_t size = 5;
 	/// Simulation time in seconds
 	double totalTime = 50;
 	uint32_t run = 1;
@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
 	// max number of hello loss before removing a neighbor
 	uint32_t helloloss = 1;
 	// Activate pull as recovery mechanism
-	bool pullactive = true;
+	bool pullactive = false;
 	// Unicast routing protocol to use
 	uint32_t routing = 0;
 	// reference loss
@@ -194,15 +194,15 @@ int main(int argc, char **argv) {
 
 	SeedManager::SetRun (run);
 	SeedManager::SetSeed (seed);
-	Config::SetDefault("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2200"));
-	Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("1600"));
+	Config::SetDefault("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2346"));
+	Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("2346"));
 	Config::SetDefault("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(PLref));
 	Config::SetDefault("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(PLexp));
+	Config::SetDefault("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
 	Config::SetDefault("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
-	Config::SetDefault("ns3::VideoPushApplication::HelloTime", TimeValue(Seconds(hellotime)));
+	Config::SetDefault("ns3::VideoPushApplication::HelloTime", TimeValue(Time::FromDouble(hellotime,Time::S)));
 	Config::SetDefault("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
 	Config::SetDefault("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
-	Config::SetDefault("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
 	Config::SetDefault("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
 	Config::SetDefault("ns3::YansWifiPhy::TxGain",DoubleValue(0.0));
 	Config::SetDefault("ns3::YansWifiPhy::RxGain",DoubleValue(0.0));
@@ -315,7 +315,7 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::UdpSocket::IpMulticastTtl", UintegerValue (1));
 	VideoHelper video = VideoHelper ("ns3::UdpSocketFactory", dst);
 	video.SetAttribute ("DataRate", DataRateValue (DataRate (stream)));
-	video.SetAttribute ("PacketSize", UintegerValue (2304));
+	video.SetAttribute ("PacketSize", UintegerValue (2100));
 	video.SetAttribute ("PeerType", EnumValue (SOURCE));
 	video.SetAttribute ("Local", AddressValue (interfaces.GetAddress(0)));
 	video.SetAttribute ("PeerPolicy", EnumValue (PS_RANDOM));
