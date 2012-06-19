@@ -44,7 +44,7 @@
 #include "ns3/video-push-module.h"
 #include "ns3/wifi-module.h"
 #include "ns3/aodv-helper.h"
-#include "ns3/mbn-aodv-helper.h"
+#include "ns3/mbn-aodv-module.h"
 #include "ns3/string.h"
 
 using namespace ns3;
@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
 	// Activate pull as recovery mechanism
 	bool pullactive = true;
 	// Unicast routing protocol to use
-	uint32_t routing = 1;
+	uint32_t routing = 0;
 	// reference loss
 	double PLref = 30.0;
 	// loss exponent
@@ -281,24 +281,22 @@ int main(int argc, char **argv) {
 	mobility.Install(nodes);
 
 	InternetStackHelper stack;
+	MbnAodvHelper mbnaodv;
+	AodvHelper aodv;
 	switch (routing)
 	{
 		case 1:
 		{
-			AodvHelper aodv;
 			stack.SetRoutingHelper(aodv);
 			break;
 		}
 		case 2:
 		{
-			MbnAodvHelper mbnaodv;
 			stack.SetRoutingHelper(mbnaodv);
 			break;
 		}
 		default:
 		{
-			AodvHelper aodv;
-			stack.SetRoutingHelper(aodv);
 			break;
 		}
 	}
