@@ -73,6 +73,13 @@ struct mycontext GetContextInfo (std::string context){
 	return mcontext;
 }
 
+static void GenericPacketTrace (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+//	controls
+	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " " << p->GetSize() << " UID "<< p->GetUid() << " TRACING"<< std::endl;
+}
+
 static void PhyTxDrop (Ptr<const Packet> p)
 {
 std::cout << Simulator::Now() <<" Phy Drop Packet "<< p->GetSize() << " bytes " << std::endl;
