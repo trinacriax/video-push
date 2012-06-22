@@ -235,6 +235,8 @@ int main(int argc, char **argv) {
 		Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/Tx",	MakeCallback (&PhyTxTrace));
 		Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/State", MakeCallback (&PhyStateTrace));
 		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/Drop", MakeCallback (&ArpDiscard));
+		Config::Connect ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficSent", MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficReceived", MakeCallback (&GenericPacketTrace));
 	}
 
 	/// Video start
