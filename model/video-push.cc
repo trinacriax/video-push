@@ -535,7 +535,10 @@ void VideoPushApplication::PeerLoop ()
 				if (missed)
 				{
 					m_neighbors.Purge();
-					if (m_neighbors.GetSize() == 0) break;
+					if (m_neighbors.GetSize() == 0)
+					{
+						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " has no neighbors to pull chunk "<< missed);
+					}
 					AddPullRetry(missed);
 					Ipv4Address target = PeerSelection (PS_RANDOM);
 					NS_ASSERT (target != Ipv4Address::GetAny());
