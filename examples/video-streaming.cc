@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
 	/// Grid ymax
 	double ymax = 80;
 	// Period between pull
-	double pulltime = 150;//100ms
+	double pulltime = 150;//in ms
 	// max number of pull to retrieve a chunk
 	uint32_t pullmax = 1;
 	// Time in seconds between hellos
@@ -174,14 +174,6 @@ int main(int argc, char **argv) {
 	cmd.AddValue("size", "Number of nodes.", size);
 	cmd.AddValue("time", "Simulation time, s.", totalTime);
 	cmd.AddValue("run", "Run Identifier", run);
-	cmd.AddValue("xmax", "Grid X max", xmax);
-	cmd.AddValue("ymax", "Grid Y max", ymax);
-	cmd.AddValue("routing", "Unicast Routing Protocol (1 - AODV, 2 - MBN) ", routing);
-	cmd.AddValue("hellotime", "Hello time", hellotime);
-	cmd.AddValue("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
-	cmd.AddValue("pulltime", "Time between pull in sec. (e.g., 0.100 sec = 100ms)", pulltime);
-	cmd.AddValue("pullmax", "Max number of pull allowed per chunk", pullmax);
-	cmd.AddValue("pullactive", "Pull activation allowed", pullactive);
 	cmd.AddValue ("PLref", "Reference path loss dB.", PLref);
 	cmd.AddValue ("PLexp", "Path loss exponent.", PLexp);
 	cmd.AddValue ("TxStart", "Transmission power start dBm.", TxStart);
@@ -189,6 +181,14 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("TxLevels", "Transmission power levels.", TxLevels);
 	cmd.AddValue ("EnergyDet", "Energy detection threshold dBm.", EnergyDet);
 	cmd.AddValue ("CCAMode1", "CCA mode 1 threshold dBm.", CCAMode1);
+	cmd.AddValue("xmax", "Grid X max", xmax);
+	cmd.AddValue("ymax", "Grid Y max", ymax);
+	cmd.AddValue("routing", "Unicast Routing Protocol (1 - AODV, 2 - MBN) ", routing);
+	cmd.AddValue("hellotime", "Hello time", hellotime);
+	cmd.AddValue("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
+	cmd.AddValue("pullactive", "Pull activation allowed", pullactive);
+	cmd.AddValue("pullmax", "Max number of pull allowed per chunk", pullmax);
+	cmd.AddValue("pulltime", "Time between pull in sec. (e.g., 0.100 sec = 100ms)", pulltime);
 	cmd.AddValue("v", "Verbose", verbose);
 	cmd.Parse(argc, argv);
 
