@@ -416,7 +416,18 @@ void VideoPushApplication::StartSending ()
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_lastStartTime = Simulator::Now ();
-  Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
+  switch (m_peerType)
+  {
+	case PEER:
+	{
+		break;
+	}
+	case SOURCE:
+	{
+		Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
+		break;
+	}
+  }
 }
 
 void VideoPushApplication::StopSending ()
@@ -523,6 +534,7 @@ void VideoPushApplication::PeerLoop ()
 			uint32_t missed = m_chunks.GetLeastMissed();
 			uint32_t last = m_chunks.GetLastChunk();
 			NS_LOG_INFO ("Node=" <<m_node->GetId()<< " IP=" << GetLocalAddress() << " Last="<<last<<" Missed="<< missed <<" ("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")"<<" TimerRunning="<<(m_pullTimer.IsRunning()?"Yes":"No"));
+			NS_ASSERT (GetPullActive());
 			if (missed && !m_pullTimer.IsRunning())
 			{
 				m_pullTimer.Cancel();
