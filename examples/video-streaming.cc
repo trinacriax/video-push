@@ -204,6 +204,8 @@ int main(int argc, char **argv) {
 	Config::SetDefault("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
 	Config::SetDefault("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
 	Config::SetDefault("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
+	Config::SetDefault("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
+	Config::SetDefault("ns3::Ipv4::IpForward", BooleanValue (false));
 	Config::SetDefault("ns3::YansWifiPhy::TxGain",DoubleValue(0.0));
 	Config::SetDefault("ns3::YansWifiPhy::RxGain",DoubleValue(0.0));
 	Config::SetDefault("ns3::YansWifiPhy::TxPowerStart",DoubleValue(TxStart));
