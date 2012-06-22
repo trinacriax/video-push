@@ -48,9 +48,10 @@
 #include "ns3/internet-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/applications-module.h"
-//#include "ns3/video-push-module.h"
-//#include "ns3/mbn-aodv-module.h"
-//#include "ns3/string.h"
+#include "ns3/video-push-module.h"
+#include "ns3/mbn-aodv-module.h"
+#include "ns3/string.h"
+#include "ns3/video-helper.h"
 
 using namespace ns3;
 
@@ -471,16 +472,15 @@ int main(int argc, char **argv) {
 
 	// Later, we add IP addresses.
 	NS_LOG_INFO ("Assign IP Addresses.");
-	Ipv4AddressHelper ipv4;
-	Ipv4Address base = Ipv4Address("10.1.2.0");
-	Ipv4Mask mask = Ipv4Mask("255.255.255.0");
-	ipv4.SetBase (base, mask);
-	Ipv4InterfaceContainer ipRouter = ipv4.Assign (routersNetDev);
-	Ipv4InterfaceContainer ipClient = ipv4.Assign (clientsNetDev);
 
-	base = Ipv4Address("10.1.1.0");
-	ipv4.SetBase (base, mask);
-	Ipv4InterfaceContainer ipSource = ipv4.Assign (ds0dr0);
+	Ipv4AddressHelper address;
+	address.SetBase("10.0.0.0", "255.0.0.0");
+
+	Ipv4InterfaceContainer ipRouter = address.Assign (routersNetDev);
+	Ipv4InterfaceContainer ipClient = address.Assign (clientsNetDev);
+
+	address.SetBase ("11.0.0.0", "255.0.0.0");
+	Ipv4InterfaceContainer ipSource = address.Assign (ds0dr0);
 	Ipv4Address multicastSource = ipSource.GetAddress(0);
 
 	NS_LOG_INFO ("Configure multicasting.");
