@@ -536,7 +536,7 @@ void VideoPushApplication::PeerLoop ()
 					AddPullRetry(missed);
 					Ipv4Address target = PeerSelection (PS_RANDOM);
 					NS_ASSERT (target != Ipv4Address::GetAny());
-					double delayv = rint(UniformVariable().GetValue (10,12000));
+					double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.15));
 					Time delay = Time::FromDouble(delayv, Time::US);
 					Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, missed, target);
 					m_pullTimer.Schedule();
@@ -631,7 +631,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 			<< " Received pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sender);
 	if (hasChunk)
 	{
-	  double delayv = rint(UniformVariable().GetValue (10,12000));
+	  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.15));
 	  NS_ASSERT (delayv > 1);
 	  Time delay = Time::FromDouble (delayv, Time::US);
 	  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
