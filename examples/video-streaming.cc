@@ -295,6 +295,17 @@ int main(int argc, char **argv) {
 		}
 		case 2:
 		{
+//			Config::SetDefault("ns3::mbn::RoutingProtocol::EnableHello", BooleanValue(false));
+			Config::SetDefault("ns3::mbn::RoutingProtocol::EnableBroadcast", BooleanValue(false));
+			/// Short Timer
+			uint32_t short_t = 2, long_t = 6, rule1 = 1, rule2 = 1;
+			Config::SetDefault("ns3::mbn::RoutingProtocol::HelloInterval", TimeValue(Seconds(short_t)));
+			Config::SetDefault("ns3::mbn::RoutingProtocol::ShortInterval", TimeValue(Seconds(short_t)));
+			Config::SetDefault("ns3::mbn::RoutingProtocol::LongInterval", TimeValue(Seconds(long_t)));
+			Config::SetDefault("ns3::mbn::RoutingProtocol::Rule1", BooleanValue(rule1==1));
+			Config::SetDefault("ns3::mbn::RoutingProtocol::Rule2", BooleanValue(rule2==1));
+			Config::SetDefault("ns3::mbn::RoutingProtocol::localWeightFunction", EnumValue(mbn::W_NODE_DEGREE));
+			Config::SetDefault("ns3::mbn::RoutingProtocol::AllowedHelloLoss", UintegerValue(1));
 			stack.SetRoutingHelper(mbnaodv);
 			break;
 		}
