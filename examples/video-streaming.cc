@@ -287,6 +287,9 @@ int main(int argc, char **argv) {
 	{
 		case 1:
 		{
+//			Config::SetDefault("ns3::aodv::RoutingProtocol::EnableHello", BooleanValue(false));
+			Config::SetDefault("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
+			Config::SetDefault("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(2)));
 			stack.SetRoutingHelper(aodv);
 			break;
 		}
