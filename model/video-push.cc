@@ -922,8 +922,9 @@ void VideoPushApplication::SendHello ()
 	Ptr<Packet> packet = Create<Packet> ();
 	packet->AddHeader(hello);
 	m_txTrace (packet);
-//	Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask ("255.0.0.0"));
-	Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask ("255.255.255.0"));
+	Ipv4Mask mask ("255.0.0.0");
+//	Ipv4Mask mask ("255.255.255.0");
+	Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask (mask));
 	NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
 	NS_ASSERT (GetPullActive());
 	m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
