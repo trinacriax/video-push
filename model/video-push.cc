@@ -215,7 +215,7 @@ VideoPushApplication::DoDispose (void)
 	  current = received + missed;
 	  while (current < cid){
 //		NS_LOG_DEBUG ("Missed chunk "<< received << "-"<<m_chunks.GetChunk(received));
-		NS_ASSERT(!m_chunks.HasChunk(current));
+		NS_ASSERT (!m_chunks.HasChunk(current));
 		if (m_chunks.GetChunkState(current) == CHUNK_DELAYED)
 		{
 			delaylate += GetChunkDelay(current).GetMicroSeconds();
@@ -225,7 +225,7 @@ VideoPushApplication::DoDispose (void)
 		current = received + missed;
 	  }
 	  duplicates+= GetDuplicate (current);
-	  NS_ASSERT(m_chunks.HasChunk(current));
+	  NS_ASSERT (m_chunks.HasChunk(current));
 	  uint64_t chunk_timestamp = GetChunkDelay(current).GetMicroSeconds();
 	  delaymax = (chunk_timestamp > delaymax)? chunk_timestamp : delaymax;
 	  delaymin = (chunk_timestamp < delaymin)? chunk_timestamp : delaymin;
@@ -761,7 +761,7 @@ VideoPushApplication::GetSource () const
 void
 VideoPushApplication::AddPullRetry (uint32_t chunkid)
 {
-	NS_ASSERT(chunkid>0);
+	NS_ASSERT (chunkid>0);
 	if (m_pullRetries.find(chunkid) == m_pullRetries.end())
 		m_pullRetries.insert(std::pair<uint32_t, uint32_t>(chunkid,0));
 	m_pullRetries.find(chunkid)->second++;
@@ -770,7 +770,7 @@ VideoPushApplication::AddPullRetry (uint32_t chunkid)
 uint32_t
 VideoPushApplication::GetPullRetry (uint32_t chunkid)
 {
-	NS_ASSERT(chunkid>0);
+	NS_ASSERT (chunkid>0);
 	if (m_pullRetries.find(chunkid) == m_pullRetries.end())
 			return 0;
 	return m_pullRetries.find(chunkid)->second;
@@ -779,7 +779,7 @@ VideoPushApplication::GetPullRetry (uint32_t chunkid)
 void
 VideoPushApplication::AddDuplicate (uint32_t chunkid)
 {
-	NS_ASSERT(chunkid>0);
+	NS_ASSERT (chunkid>0);
 	if(m_duplicates.find(chunkid) == m_duplicates.end())
 	{
 	  std::pair<uint32_t, uint32_t> dup(chunkid,0);
@@ -791,7 +791,7 @@ VideoPushApplication::AddDuplicate (uint32_t chunkid)
 uint32_t
 VideoPushApplication::GetDuplicate (uint32_t chunkid)
 {
-	NS_ASSERT(chunkid>0);
+	NS_ASSERT (chunkid>0);
 	if(m_duplicates.find(chunkid) == m_duplicates.end())
 		return 0;
 	return m_duplicates.find(chunkid)->second;
@@ -842,7 +842,7 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		default:
 		{
 		  NS_LOG_ERROR("Condition not allowed");
-		  NS_ASSERT(true);
+		  NS_ASSERT (true);
 		  break;
 		}
 	}
@@ -891,7 +891,7 @@ void
 VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 {
 	NS_LOG_FUNCTION (this<<chunkid);
-	NS_ASSERT(chunkid>0);
+	NS_ASSERT (chunkid>0);
 	ChunkHeader pull (MSG_PULL);
 	pull.GetPullMessage ().SetChunk (chunkid);
 	Ptr<Packet> packet = Create<Packet> ();
@@ -913,6 +913,7 @@ void VideoPushApplication::SendHello ()
 //	Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask ("255.0.0.0"));
 	Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask ("255.255.255.0"));
 	NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
+	NS_ASSERT (GetPullActive());
 	m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
 	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 100)), Time::MS);
 	m_helloTimer.Schedule (m_helloTime - t);
@@ -922,8 +923,9 @@ void
 VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
 {
 	NS_LOG_FUNCTION (this<<chunkid<<target);
-	NS_ASSERT(chunkid>0);
-	NS_ASSERT(target != GetLocalAddress());
+	NS_ASSERT (chunkid>0);
+	NS_ASSERT (target != GetLocalAddress());
+	NS_ASSERT (GetPullActive());
 	switch (m_peerType)
 	{
 		case PEER:
