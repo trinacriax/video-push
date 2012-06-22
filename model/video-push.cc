@@ -907,7 +907,8 @@ void VideoPushApplication::SendHello ()
 	Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask ("255.0.0.0"));
 	NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
 	m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
-	m_helloTimer.Schedule();
+	Time t = Time (MilliSeconds (0.01 * UniformVariable ().GetInteger (0, 100)));
+	m_helloTimer.Schedule (m_helloTime - t);
 }
 
 void
