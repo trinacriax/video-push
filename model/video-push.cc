@@ -328,7 +328,10 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_helloTimer.SetDelay(GetHelloTime());
       m_helloTimer.SetFunction(&VideoPushApplication::SendHello, this);
       Time start = Time::FromDouble (UniformVariable().GetValue (0, 2*GetHelloTime().GetMicroSeconds()), Time::US);
-      Simulator::Schedule (start, &VideoPushApplication::SendHello, this);
+      if (GetPullActive())
+      {
+    	  Simulator::Schedule (start, &VideoPushApplication::SendHello, this);
+      }
       m_neighbors.SetExpire (Time::FromDouble (GetHelloTime().GetMicroSeconds() * (1 + GetHelloLoss()), Time::US));
     }
   // Insure no pending event
