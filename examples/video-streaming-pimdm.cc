@@ -497,7 +497,7 @@ int main(int argc, char **argv) {
 
 	address.SetBase ("11.0.0.0", "255.0.0.0");
 	Ipv4InterfaceContainer ipSource = address.Assign (ds0dr0);
-	Ipv4Address multicastSource = ipSource.GetAddress(0);
+	Ipv4Address multicastSource ("11.0.0.1");
 
 	NS_LOG_INFO ("Configure multicasting.");
 
@@ -556,7 +556,7 @@ int main(int argc, char **argv) {
 	video.SetAttribute ("DataRate", DataRateValue (DataRate (stream)));
 	video.SetAttribute ("PacketSize", UintegerValue (1200));
 	video.SetAttribute ("PeerType", EnumValue (SOURCE));
-	video.SetAttribute ("Local", AddressValue (ipSource.GetAddress(0)));
+	video.SetAttribute ("Local", AddressValue (multicastSource));
 	video.SetAttribute ("PeerPolicy", EnumValue (PS_RANDOM));
 	video.SetAttribute ("ChunkPolicy", EnumValue (CS_LATEST));
 
