@@ -228,8 +228,8 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("sizeRouter", "Number of router nodes.", sizeRouter);
 	cmd.AddValue ("sizeClient", "Number of clients.", sizeClient);
 	cmd.AddValue ("sizeSource", "Number of sources.", sizeSource);
-	cmd.AddValue("time", "Simulation time, s.", totalTime);
-	cmd.AddValue("run", "Run Identifier", run);
+	cmd.AddValue ("time", "Simulation time, s.", totalTime);
+	cmd.AddValue ("run", "Run Identifier", run);
 	cmd.AddValue ("PLref", "Reference path loss dB.", PLref);
 	cmd.AddValue ("PLexp", "Path loss exponent.", PLexp);
 	cmd.AddValue ("TxStart", "Transmission power start dBm.", TxStart);
@@ -237,16 +237,16 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("TxLevels", "Transmission power levels.", TxLevels);
 	cmd.AddValue ("EnergyDet", "Energy detection threshold dBm.", EnergyDet);
 	cmd.AddValue ("CCAMode1", "CCA mode 1 threshold dBm.", CCAMode1);
-	cmd.AddValue("xmax", "Grid X max", xmax);
-	cmd.AddValue("ymax", "Grid Y max", ymax);
-	cmd.AddValue("routing", "Unicast Routing Protocol (1 - AODV, 2 - MBN) ", routing);
-	cmd.AddValue("hellotime", "Hello time", hellotime);
-	cmd.AddValue("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
-	cmd.AddValue("pullactive", "Pull activation allowed", pullactive);
-	cmd.AddValue("pullmax", "Max number of pull allowed per chunk", pullmax);
-	cmd.AddValue("pulltime", "Time between pull in sec. (e.g., 0.100 sec = 100ms)", pulltime);
+	cmd.AddValue ("xmax", "Grid X max", xmax);
+	cmd.AddValue ("ymax", "Grid Y max", ymax);
+	cmd.AddValue ("routing", "Unicast Routing Protocol (1 - AODV, 2 - MBN) ", routing);
+	cmd.AddValue ("hellotime", "Hello time", hellotime);
+	cmd.AddValue ("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
+	cmd.AddValue ("pullactive", "Pull activation allowed", pullactive);
+	cmd.AddValue ("pullmax", "Max number of pull allowed per chunk", pullmax);
+	cmd.AddValue ("pulltime", "Time between pull in sec. (e.g., 0.100 sec = 100ms)", pulltime);
 	cmd.AddValue ("stream", "Source streaming rate in bps", stream);
-	cmd.AddValue("v", "Verbose", verbose);
+	cmd.AddValue ("v", "Verbose", verbose);
 	cmd.Parse(argc, argv);
 
 	NS_LOG_DEBUG("Seed " << seed << " run "<< run << " sizeRouter "<< sizeRouter << " sizeClient " << sizeClient <<
@@ -284,17 +284,17 @@ int main(int argc, char **argv) {
 	if(verbose==1){
 		LogComponentEnable("VideoStreamingPIMDM", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 		LogComponentEnable("VideoPushApplication", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
-		LogComponentEnable("CsmaChannel", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
-		LogComponentEnable("CsmaNetDevice", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
-		LogComponentEnable("AodvRoutingProtocol", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
-		LogComponentEnable("PIMDMMulticastRouting", LogLevel(LOG_INFO| LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
-		LogComponentEnable("IGMPXRoutingProtocol", LogLevel(LOG_LEVEL_ALL| LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+//		LogComponentEnable("CsmaChannel", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+//		LogComponentEnable("CsmaNetDevice", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+//		LogComponentEnable("AodvRoutingProtocol", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+//		LogComponentEnable("PIMDMMulticastRouting", LogLevel(LOG_INFO| LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+//		LogComponentEnable("IGMPXRoutingProtocol", LogLevel(LOG_LEVEL_ALL| LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 //		LogComponentEnable("UdpSocketImpl", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
 //		LogComponentEnable("Ipv4L3Protocol", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 //		LogComponentEnable("Socket", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-		LogComponentEnable("MacLow", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-		LogComponentEnable("YansWifiChannel",  LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-		LogComponentEnable("YansWifiPhy",  LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
+//		LogComponentEnable("MacLow", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
+//		LogComponentEnable("YansWifiChannel",  LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
+//		LogComponentEnable("YansWifiPhy",  LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
 //		LogComponentEnable("ArpL3Protocol", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
 //		LogComponentEnable("Node", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
 
