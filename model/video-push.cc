@@ -207,7 +207,8 @@ VideoPushApplication::DoDispose (void)
   NS_LOG_FUNCTION_NOARGS ();
   std::map<uint32_t, ChunkVideo> tmp_buffer = m_chunks.GetChunkBuffer();
   uint32_t received = 1, missed = 0, duplicates = 0, cnt = 0, cid = 0, current = 1, late = 0, split = 0;
-  uint64_t delay = 0, delaylate = 0, delaymax = GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds(), delaymin = GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds(), delayavg = 0;
+  uint64_t delay = 0, delaylate = 0, delayavg = 0;
+  uint64_t delaymax = (tmp_buffer.empty() ? 0: GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds()), delaymin = (tmp_buffer.empty()?0:GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds());
   Time delay_max, delay_min, delay_avg;
   double miss =0.0, rec = 0.0, dups = 0.0, sigma = 0.0, delayavgB = 0.0, dlate = 0.0 ;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
