@@ -261,25 +261,25 @@ int main(int argc, char **argv) {
 	g_verbose = (verbose==1);
 	SeedManager::SetRun (run);
 	SeedManager::SetSeed (seed);
-	Config::SetDefault("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2346"));
-	Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("2346"));
-	Config::SetDefault("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(PLref));
-	Config::SetDefault("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(PLexp));
-	Config::SetDefault("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
-	Config::SetDefault("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
-	Config::SetDefault("ns3::VideoPushApplication::HelloTime", TimeValue(Time::FromDouble(hellotime,Time::S)));
-	Config::SetDefault("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
-	Config::SetDefault("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
-	Config::SetDefault("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
-	Config::SetDefault("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
-	Config::SetDefault("ns3::Ipv4::IpForward", BooleanValue (false));
-	Config::SetDefault("ns3::YansWifiPhy::TxGain",DoubleValue(0.0));
-	Config::SetDefault("ns3::YansWifiPhy::RxGain",DoubleValue(0.0));
-	Config::SetDefault("ns3::YansWifiPhy::TxPowerStart",DoubleValue(TxStart));
-	Config::SetDefault("ns3::YansWifiPhy::TxPowerEnd",DoubleValue(TxEnd));
-	Config::SetDefault("ns3::YansWifiPhy::TxPowerLevels",UintegerValue(TxLevels));
-	Config::SetDefault("ns3::YansWifiPhy::EnergyDetectionThreshold",DoubleValue(EnergyDet));///17.3.10.1 Receiver minimum input sensitivity
-	Config::SetDefault("ns3::YansWifiPhy::CcaMode1Threshold",DoubleValue(CCAMode1));///17.3.10.5 CCA sensitivity
+	Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2346"));
+	Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("2346"));
+	Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(PLref));
+	Config::SetDefault ("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(PLexp));
+	Config::SetDefault ("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
+	Config::SetDefault ("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
+	Config::SetDefault ("ns3::VideoPushApplication::HelloTime", TimeValue(Time::FromDouble(hellotime,Time::S)));
+	Config::SetDefault ("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
+	Config::SetDefault ("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
+	Config::SetDefault ("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
+	Config::SetDefault ("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
+	Config::SetDefault ("ns3::Ipv4::IpForward", BooleanValue (false));
+	Config::SetDefault ("ns3::YansWifiPhy::TxGain",DoubleValue(0.0));
+	Config::SetDefault ("ns3::YansWifiPhy::RxGain",DoubleValue(0.0));
+	Config::SetDefault ("ns3::YansWifiPhy::TxPowerStart",DoubleValue(TxStart));
+	Config::SetDefault ("ns3::YansWifiPhy::TxPowerEnd",DoubleValue(TxEnd));
+	Config::SetDefault ("ns3::YansWifiPhy::TxPowerLevels",UintegerValue(TxLevels));
+	Config::SetDefault ("ns3::YansWifiPhy::EnergyDetectionThreshold",DoubleValue(EnergyDet));///17.3.10.1 Receiver minimum input sensitivity
+	Config::SetDefault ("ns3::YansWifiPhy::CcaMode1Threshold",DoubleValue(CCAMode1));///17.3.10.5 CCA sensitivity
 
 	if(verbose==1){
 		LogComponentEnable("VideoStreamingPIMDM", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
@@ -391,25 +391,25 @@ int main(int argc, char **argv) {
 	{
 		case 1:
 		{
-//			Config::SetDefault("ns3::aodv::RoutingProtocol::EnableHello", BooleanValue(false));
-			Config::SetDefault("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
-			Config::SetDefault("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(2)));
+//			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableHello", BooleanValue(false));
+			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
+			Config::SetDefault ("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(2)));
 			listRouters.Add (aodvStack, 10);
 			break;
 		}
 		case 2:
 		{
-//			Config::SetDefault("ns3::mbn::RoutingProtocol::EnableHello", BooleanValue(false));
-			Config::SetDefault("ns3::mbn::RoutingProtocol::EnableBroadcast", BooleanValue(false));
+//			Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableHello", BooleanValue(false));
+			Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableBroadcast", BooleanValue(false));
 			/// Short Timer
 			uint32_t short_t = 2, long_t = 6, rule1 = 1, rule2 = 1;
-			Config::SetDefault("ns3::mbn::RoutingProtocol::HelloInterval", TimeValue(Seconds(short_t)));
-			Config::SetDefault("ns3::mbn::RoutingProtocol::ShortInterval", TimeValue(Seconds(short_t)));
-			Config::SetDefault("ns3::mbn::RoutingProtocol::LongInterval", TimeValue(Seconds(long_t)));
-			Config::SetDefault("ns3::mbn::RoutingProtocol::Rule1", BooleanValue(rule1==1));
-			Config::SetDefault("ns3::mbn::RoutingProtocol::Rule2", BooleanValue(rule2==1));
-			Config::SetDefault("ns3::mbn::RoutingProtocol::localWeightFunction", EnumValue(mbn::W_NODE_DEGREE));
-			Config::SetDefault("ns3::mbn::RoutingProtocol::AllowedHelloLoss", UintegerValue(1));
+			Config::SetDefault ("ns3::mbn::RoutingProtocol::HelloInterval", TimeValue(Seconds(short_t)));
+			Config::SetDefault ("ns3::mbn::RoutingProtocol::ShortInterval", TimeValue(Seconds(short_t)));
+			Config::SetDefault ("ns3::mbn::RoutingProtocol::LongInterval", TimeValue(Seconds(long_t)));
+			Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule1", BooleanValue(rule1==1));
+			Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule2", BooleanValue(rule2==1));
+			Config::SetDefault ("ns3::mbn::RoutingProtocol::localWeightFunction", EnumValue(mbn::W_NODE_DEGREE));
+			Config::SetDefault ("ns3::mbn::RoutingProtocol::AllowedHelloLoss", UintegerValue(1));
 			listRouters.Add (mbnStack, 10);
 			break;
 		}
@@ -437,25 +437,25 @@ int main(int argc, char **argv) {
 		{
 			case 1:
 			{
-	//			Config::SetDefault("ns3::aodv::RoutingProtocol::EnableHello", BooleanValue(false));
-				Config::SetDefault("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
-				Config::SetDefault("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(2)));
+	//			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableHello", BooleanValue(false));
+				Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
+				Config::SetDefault ("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(2)));
 				listSource.Add (aodvStack, 10);
 				break;
 			}
 			case 2:
 			{
-	//			Config::SetDefault("ns3::mbn::RoutingProtocol::EnableHello", BooleanValue(false));
-				Config::SetDefault("ns3::mbn::RoutingProtocol::EnableBroadcast", BooleanValue(false));
+	//			Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableHello", BooleanValue(false));
+				Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableBroadcast", BooleanValue(false));
 				/// Short Timer
 				uint32_t short_t = 2, long_t = 6, rule1 = 1, rule2 = 1;
-				Config::SetDefault("ns3::mbn::RoutingProtocol::HelloInterval", TimeValue(Seconds(short_t)));
-				Config::SetDefault("ns3::mbn::RoutingProtocol::ShortInterval", TimeValue(Seconds(short_t)));
-				Config::SetDefault("ns3::mbn::RoutingProtocol::LongInterval", TimeValue(Seconds(long_t)));
-				Config::SetDefault("ns3::mbn::RoutingProtocol::Rule1", BooleanValue(rule1==1));
-				Config::SetDefault("ns3::mbn::RoutingProtocol::Rule2", BooleanValue(rule2==1));
-				Config::SetDefault("ns3::mbn::RoutingProtocol::localWeightFunction", EnumValue(mbn::W_NODE_DEGREE));
-				Config::SetDefault("ns3::mbn::RoutingProtocol::AllowedHelloLoss", UintegerValue(1));
+				Config::SetDefault ("ns3::mbn::RoutingProtocol::HelloInterval", TimeValue(Seconds(short_t)));
+				Config::SetDefault ("ns3::mbn::RoutingProtocol::ShortInterval", TimeValue(Seconds(short_t)));
+				Config::SetDefault ("ns3::mbn::RoutingProtocol::LongInterval", TimeValue(Seconds(long_t)));
+				Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule1", BooleanValue(rule1==1));
+				Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule2", BooleanValue(rule2==1));
+				Config::SetDefault ("ns3::mbn::RoutingProtocol::localWeightFunction", EnumValue(mbn::W_NODE_DEGREE));
+				Config::SetDefault ("ns3::mbn::RoutingProtocol::AllowedHelloLoss", UintegerValue(1));
 				listSource.Add (mbnStack, 10);
 				break;
 			}
