@@ -311,6 +311,22 @@ int main(int argc, char **argv) {
 		Config::Connect ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficReceived", MakeCallback (&GenericPacketTrace));
 	}
 
+	Gnuplot g_Topology = Gnuplot("Topology.png");
+	g_Topology.SetLegend("PosX","PosY");
+	g_Topology.AppendExtra("set key out top center horizontal");
+	Gnuplot2dDataset s_Topology ("Sources");
+	s_Topology.SetStyle (Gnuplot2dDataset::POINTS);
+	s_Topology.SetExtra("pointtype 2 pointsize 2");
+	Gnuplot2dDataset r_Topology ("PIM-Routers");
+	r_Topology.SetStyle (Gnuplot2dDataset::POINTS);
+	r_Topology.SetExtra("pointtype 4 pointsize 2");
+	Gnuplot2dDataset c_Topology ("PIM-Clients");
+	c_Topology.SetExtra("pointtype 6 pointsize 2");
+	c_Topology.SetStyle (Gnuplot2dDataset::POINTS);
+	Gnuplot2dDataset a_Topology ("Nodes");
+	a_Topology.SetExtra("pointtype 1 pointsize 2");
+	a_Topology.SetStyle (Gnuplot2dDataset::POINTS);
+
 	/// Video start
 	double sourceStart = ceil(totalTime*.10);
 	/// Video stop
@@ -599,9 +615,20 @@ int main(int argc, char **argv) {
 	for(uint32_t i = 0; i < allNodes.GetN(); i++){
 		  Ptr<MobilityModel> mobility = allNodes.Get(i)->GetObject<MobilityModel> ();
 	      Vector pos = mobility->GetPosition (); // Get position
+	      if (i<sizeSource)
+	    	  s_Topology.Add (pos.x,pos.y);
+	      else if (i < (sizeSource+sizeRouter))
+	    	  r_Topology.Add (pos.x,pos.y);
+	      else
+	    	  c_Topology.Add (pos.x,pos.y);
+	      a_Topology.Add (pos.x,pos.y);
 	      NS_LOG_INFO("Position Node ["<<i<<"] = ("<< pos.x << ", " << pos.y<<", "<<pos.z<<")");
 	}
-
+	g_Topology.AddDataset (a_Topology);
+	g_Topology.AddDataset (s_Topology);
+	g_Topology.AddDataset (r_Topology);
+	g_Topology.AddDataset (c_Topology);
+	g_Topology.GenerateOutput (std::cout);
 	std::cout << "Starting simulation for " << totalTime << " s ...\n";
 	Simulator::Stop(Seconds(totalTime));
 	Simulator::Run();
