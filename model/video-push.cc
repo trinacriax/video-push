@@ -689,7 +689,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
       Ipv4Address sourceAddr = address.GetIpv4 ();
       uint32_t port = address.GetPort();
       Ipv4Address gateway = GetNextHop(sourceAddr);
-      Ipv4Mask mask ("255.255.255.0");
+      Ipv4Mask mask ("255.0.0.0");
       Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(mask);
       NS_LOG_DEBUG("Node " << GetLocalAddress() <<  " receives packet from "<< sourceAddr << " gw " << gateway<< " Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast());
       if(rtag && subnet != relayTag.m_receiver)
