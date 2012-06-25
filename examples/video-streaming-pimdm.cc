@@ -401,8 +401,7 @@ int main(int argc, char **argv) {
 	listRouters.Add (staticRouting, 0);
 	listRouters.Add (igmpxStack, 1);
 	listRouters.Add (pimdmStack, 11);
-	MbnAodvHelper mbnaodv;
-	AodvHelper aodv;
+
 	switch (routing)
 	{
 		case 1:
