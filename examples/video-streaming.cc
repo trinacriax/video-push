@@ -198,7 +198,7 @@ int main(int argc, char **argv) {
 	cmd.AddValue("helloactive", "Hello activation", helloactive);
 	cmd.AddValue("pullactive", "Pull activation allowed", pullactive);
 	cmd.AddValue("pullmax", "Max number of pull allowed per chunk", pullmax);
-	cmd.AddValue("pulltime", "Time between pull in sec. (e.g., 0.100 sec = 100ms)", pulltime);
+	cmd.AddValue("pulltime", "Time between pull in ms. (e.g., 100 = 0.1sec)", pulltime);
 	cmd.AddValue("v", "Verbose", verbose);
 	cmd.Parse(argc, argv);
 
@@ -210,8 +210,9 @@ int main(int argc, char **argv) {
 	Config::SetDefault("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(PLexp));
 	Config::SetDefault("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
 	Config::SetDefault("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
-	Config::SetDefault("ns3::VideoPushApplication::HelloTime", TimeValue(Time::FromDouble(hellotime,Time::S)));
 	Config::SetDefault("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
+	Config::SetDefault("ns3::VideoPushApplication::HelloActive", BooleanValue(helloactive));
+	Config::SetDefault("ns3::VideoPushApplication::HelloTime", TimeValue(Time::FromDouble(hellotime,Time::S)));
 	Config::SetDefault("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
 	Config::SetDefault("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
 	Config::SetDefault("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
