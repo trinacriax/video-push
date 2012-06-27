@@ -133,7 +133,7 @@ VideoPushApplication::GetTypeId (void)
 						   	   	   	   	 &VideoPushApplication::GetPullMax),
 				   MakeUintegerChecker<uint32_t> (1))
 	.AddAttribute ("PullActive", "Pull activation.",
-				   BooleanValue (1),
+				   BooleanValue (true),
 				   MakeBooleanAccessor (&VideoPushApplication::SetPullActive,
 										&VideoPushApplication::GetPullActive),
 				   MakeBooleanChecker() )
