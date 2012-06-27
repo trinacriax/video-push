@@ -109,6 +109,8 @@ public:
 
 	void SetPullActive (bool pull);
 	bool GetPullActive () const;
+	void SetHelloActive (bool hello);
+	bool GetHelloActive () const;
 	void SetChunkDelay (uint32_t chunkid, Time delay);
 	Time GetChunkDelay (uint32_t chunkid);
 	void SetPullTime (Time time);
@@ -205,6 +207,7 @@ private:
 	Time 			m_helloTime;
 	Timer 			m_helloTimer;
 	uint32_t		m_helloLoss;
+	bool			m_helloActive;
 
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	std::map<uint32_t, uint32_t> m_duplicates; // count chunks duplicated

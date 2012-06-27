@@ -147,6 +147,11 @@ VideoPushApplication::GetTypeId (void)
 				   MakeIpv4AddressAccessor (&VideoPushApplication::SetSource,
 						   	   	   	   	    &VideoPushApplication::GetSource),
 				   MakeIpv4AddressChecker())
+	.AddAttribute ("HelloActive", "Hello activation.",
+				   BooleanValue (true),
+				   MakeBooleanAccessor (&VideoPushApplication::SetHelloActive,
+										&VideoPushApplication::GetHelloActive),
+				   MakeBooleanChecker() )
   ;
   return tid;
 }
@@ -329,7 +334,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_helloTimer.SetDelay(GetHelloTime());
       m_helloTimer.SetFunction(&VideoPushApplication::SendHello, this);
       Time start = Time::FromDouble (UniformVariable().GetValue (0, 2*GetHelloTime().GetMicroSeconds()), Time::US);
-      if (GetPullActive())
+      if (GetHelloActive())
       {
     	  Simulator::Schedule (start, &VideoPushApplication::SendHello, this);
       }
@@ -447,6 +452,18 @@ bool
 VideoPushApplication::GetPullActive () const
 {
 	return m_pullActive;
+}
+
+void
+VideoPushApplication::SetHelloActive (bool hello)
+{
+	m_helloActive = hello;
+}
+
+bool
+VideoPushApplication::GetHelloActive () const
+{
+	return m_helloActive;
 }
 
 void
