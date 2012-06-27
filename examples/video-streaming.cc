@@ -154,6 +154,8 @@ int main(int argc, char **argv) {
 	// max number of pull to retrieve a chunk
 	uint32_t pullmax = 1;
 	// Time in seconds between hellos
+	bool helloactive = true;
+	// Time in seconds between hellos
 	double hellotime = 4;
 	// max number of hello loss before removing a neighbor
 	uint32_t helloloss = 1;
@@ -193,6 +195,7 @@ int main(int argc, char **argv) {
 	cmd.AddValue("routing", "Unicast Routing Protocol (1 - AODV, 2 - MBN) ", routing);
 	cmd.AddValue("hellotime", "Hello time", hellotime);
 	cmd.AddValue("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
+	cmd.AddValue("helloactive", "Hello activation", helloactive);
 	cmd.AddValue("pullactive", "Pull activation allowed", pullactive);
 	cmd.AddValue("pullmax", "Max number of pull allowed per chunk", pullmax);
 	cmd.AddValue("pulltime", "Time between pull in sec. (e.g., 0.100 sec = 100ms)", pulltime);
