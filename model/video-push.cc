@@ -628,9 +628,11 @@ void VideoPushApplication::PeerLoop ()
 					m_chunks.SetChunkState(missed, CHUNK_SKIPPED);
 					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " is marking chunk "<< missed <<" as skipped ("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")");
 					missed = m_chunks.GetLeastMissed();
+					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " is new missed is chunk "<< missed);
 				}
 				if (missed)
 				{
+					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " purge neighbors");
 					m_neighbors.Purge();
 					if (m_neighbors.GetSize() == 0)
 					{
