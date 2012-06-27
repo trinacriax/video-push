@@ -1013,7 +1013,7 @@ void VideoPushApplication::SendHello ()
 //	Ipv4Mask mask ("255.255.255.0");
 	Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask (mask));
 	NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
-	NS_ASSERT (GetPullActive());
+	NS_ASSERT (GetHelloActive());
 	m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
 	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 100)), Time::MS);
 	m_helloTimer.Schedule (m_helloTime - t);
