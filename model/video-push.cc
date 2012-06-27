@@ -741,7 +741,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 	if (hasChunk)
 	{
 	  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.15));
-	  NS_ASSERT (delayv > 1);
+	  NS_ASSERT_MSG (delayv > 1, "pulltime is 0");
 	  Time delay = Time::FromDouble (delayv, Time::US);
 	  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
 	  AddPending(chunkid);
