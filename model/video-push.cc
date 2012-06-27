@@ -717,6 +717,12 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	{
 	  SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
 	}
+	if (missed == chunk.c_id)
+	{
+		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< missed);
+		m_pullTimer.Cancel();
+		m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
+	}
 	missed = m_chunks.GetLeastMissed();
 	if (missed && !m_pullTimer.IsRunning() && GetPullActive())
 	  Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
