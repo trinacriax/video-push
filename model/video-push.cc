@@ -915,8 +915,8 @@ VideoPushApplication::ForgeChunk ()
 {
 	uint64_t tstamp = Simulator::Now().ToInteger(Time::US);
 	if (m_chunks.GetBufferSize() == 0 )
-		m_latestChunkID = 1;
-	return new ChunkVideo (m_latestChunkID, tstamp, m_pktSize, 0);
+		m_latestChunkID = 0;
+	return new ChunkVideo (++m_latestChunkID, tstamp, m_pktSize, 0);
 }
 
 uint32_t
@@ -927,14 +927,13 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		case CS_NEW_CHUNK:
 		{
 			ChunkVideo *cv = ForgeChunk();
-			chunkid = m_latestChunkID;
+			chunkid = cv->c_id;
 			if(!m_chunks.AddChunk(*cv, CHUNK_RECEIVED_PUSH))
 			{
 				AddDuplicate(cv->c_id);
 				NS_ASSERT (true);
 			}
 			NS_ASSERT (m_duplicates.find(cv->c_id) == m_duplicates.end());
-			m_latestChunkID++;
 			break;
 		}
 		case CS_LEAST_USEFUL:
