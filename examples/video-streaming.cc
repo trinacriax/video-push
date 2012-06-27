@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
 	/// Grid ymax
 	double ymax = 80;
 	// Period between pull
-	double pulltime = 150;//in ms
+	double pulltime = 15;//in ms
 	// max number of pull to retrieve a chunk
 	uint32_t pullmax = 1;
 	// Time in seconds between hellos
