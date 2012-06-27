@@ -217,6 +217,7 @@ int main(int argc, char **argv) {
 	double pulltime = 150;//in ms
 	// max number of pull to retrieve a chunk
 	uint32_t pullmax = 1;
+	bool helloactive = true;
 	// Time in seconds between hellos
 	double hellotime = 4;
 	// max number of hello loss before removing a neighbor
@@ -242,6 +243,7 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("routing", "Unicast Routing Protocol (1 - AODV, 2 - MBN) ", routing);
 	cmd.AddValue ("hellotime", "Hello time", hellotime);
 	cmd.AddValue ("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
+	cmd.AddValue ("helloactive", "Hello activation", helloactive);
 	cmd.AddValue ("pullactive", "Pull activation allowed", pullactive);
 	cmd.AddValue ("pullmax", "Max number of pull allowed per chunk", pullmax);
 	cmd.AddValue ("pulltime", "Time between pull in sec. (e.g., 0.100 sec = 100ms)", pulltime);
@@ -266,9 +268,10 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(PLref));
 	Config::SetDefault ("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(PLexp));
 	Config::SetDefault ("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
-	Config::SetDefault ("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
-	Config::SetDefault ("ns3::VideoPushApplication::HelloTime", TimeValue(Time::FromDouble(hellotime,Time::S)));
 	Config::SetDefault ("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
+	Config::SetDefault ("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
+	Config::SetDefault ("ns3::VideoPushApplication::HelloActive", BooleanValue(helloactive));
+	Config::SetDefault ("ns3::VideoPushApplication::HelloTime", TimeValue(Time::FromDouble(hellotime,Time::S)));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
 	Config::SetDefault ("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
 	Config::SetDefault ("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
