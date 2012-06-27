@@ -229,15 +229,17 @@ NeighborsSet::Purge ()
 {
 //	std::map<Neighbor, NeighborData> newset;
 	for (std::map<Neighbor, NeighborData>::iterator iter = m_neighbor_set.begin();
-		iter != m_neighbor_set.end(); iter++)
+		iter != m_neighbor_set.end();)
 		{
 //			std::cout << "Node "<< iter->first.n_address << " Last "<< iter->second.GetLastContact() << "\n";
 			if (Simulator::Now() - iter->second.GetLastContact() > m_expire)
 			{
-				std::map<Neighbor, NeighborData>::iterator iter2 = iter;
-				m_neighbor_set.erase (iter2);
+//				std::map<Neighbor, NeighborData>::iterator iter2 = iter;
+				m_neighbor_set.erase (iter++);
 //				newset.insert (*iter);
 			}
+			else
+				++iter;
 		}
 //	m_neighbor_set = newset;
 }
