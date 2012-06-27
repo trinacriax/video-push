@@ -695,11 +695,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	}
 #endif
 	// INDUCING MISSING CHUNKS END.
-	if (missed == chunk.c_id)
-	{
-		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< missed);
-		m_pullTimer.Cancel();
-	}
 	toolate = m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED;
 	duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
 	if (toolate) // Chunk was pulled and received to late
