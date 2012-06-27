@@ -211,15 +211,15 @@ VideoPushApplication::DoDispose (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
   std::map<uint32_t, ChunkVideo> tmp_buffer = m_chunks.GetChunkBuffer();
-  uint32_t received = 1, missed = 0, duplicates = 0, cnt = 0, cid = 0, current = 1, late = 0, split = 0;
-  uint64_t delay = 0, delaylate = 0, delayavg = 0;
+  uint32_t received = 1, receivedpull = 0, receivedpush = 0, missed = 0, duplicates = 0, chunkID = 0, current = 1, late = 0, split = 0, splitP = 0, splitL = 0;
+  uint64_t delay = 0, delaylate = 0, delayavg = 0, delayavgpush = 0, delayavgpull = 0;
   uint64_t delaymax = (tmp_buffer.empty() ? 0: GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds()), delaymin = (tmp_buffer.empty()?0:GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds());
-  Time delay_max, delay_min, delay_avg;
-  double miss =0.0, rec = 0.0, dups = 0.0, sigma = 0.0, delayavgB = 0.0, dlate = 0.0 ;
+  Time delay_max, delay_min, delay_avg, delay_avg_push, delay_avg_pull;
+  double miss = 0.0, rec = 0.0, dups = 0.0, sigma = 0.0, sigmaP = 0.0, sigmaL = 0.0, delayavgB = 0.0, delayavgP = 0.0, delayavgL = 0.0, dlate = 0.0 ;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
-	  cid = iter->first;
+	  chunkID = iter->first;
 	  current = received + missed;
-	  while (current < cid){
+	  while (current < chunkID){
 //		NS_LOG_DEBUG ("Missed chunk "<< received << "-"<<m_chunks.GetChunk(received));
 		NS_ASSERT (!m_chunks.HasChunk(current));
 		if (m_chunks.GetChunkState(current) == CHUNK_DELAYED)
@@ -236,35 +236,88 @@ VideoPushApplication::DoDispose (void)
 	  delaymax = (chunk_timestamp > delaymax)? chunk_timestamp : delaymax;
 	  delaymin = (chunk_timestamp < delaymin)? chunk_timestamp : delaymin;
 	  delayavg += chunk_timestamp;
-	  if ( received % 1000 == 0)
+	  switch (m_chunks.GetChunkState(current))
+	  {
+		  case CHUNK_RECEIVED_PUSH:
+		  {
+			  delayavgpush += chunk_timestamp;
+			  receivedpush++;
+			  break;
+		  }
+		  case CHUNK_RECEIVED_PULL:
+		  {
+			  delayavgpull += chunk_timestamp;
+			  receivedpull++;
+			  break;
+		  }
+		  default:
+		  {
+			  NS_ASSERT (false);
+			  break;
+		  }
+	  }
+	  if ( delayavg != 0 && received > 0 && received % 1000 == 0)
 	  {
 		  delayavgB += (delayavg/1000.0);
 		  split++;
 		  delayavg = 0;
+	  }
+	  if ( delayavgpush != 0 && receivedpush > 0 && receivedpush % 1000 == 0)
+	  {
+		  delayavgP += (delayavgpush/1000.0);
+		  splitP++;
+		  delayavgpush = 0;
+	  }
+	  if ( delayavgpull != 0 && receivedpull > 0 && receivedpull % 1000 == 0)
+	  {
+		  delayavgL += (delayavgpull/1000.0);
+		  splitL++;
+		  delayavgpull = 0;
 	  }
 //	  NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " Dup("<<current<<")="<<GetDuplicate (current)<< " Delay("<<current<<")="<< chunk_timestamp
 //			  <<" Max="<<delay_max.GetMicroSeconds()<< " Min="<<delay_min.GetMicroSeconds()<<" Avg="<< delay_avg.GetMicroSeconds()<<" Rec="<<received<<" Mis="<<missed);
 
 	  received++;
   }
-  double avg = (delayavgB/(1.0*split)) + (received%1000==0?0:((1.0*delayavg)/(received%1000)));
+  received--;
+  delayavgB = received == 0 ? 0 : (delayavgB/(1.0*split)) + (received%1000==0?0:((1.0*delayavg)/(received%1000)));
+  delayavgP = receivedpush == 0 ? 0 : (splitP == 0 ? 0 : (delayavgP/(1.0*splitP))) + (receivedpush%1000==0 ? 0 : ((1.0*delayavgpush)/(receivedpush%1000)));
+  delayavgL = receivedpull == 0 ? 0 : (splitL == 0 ? 0 : (delayavgL/(1.0*splitL))) + (receivedpull%1000==0 ? 0 : ((1.0*delayavgpull)/(receivedpull%1000)));
   delay_max = Time::FromInteger(delaymax, Time::US);
   delay_min = Time::FromInteger(delaymin, Time::US);
   current = received + missed;
   while ((current = received + missed) < m_latestChunkID) //OCIO QUI ANDAVA IN LOOP, devo distinguire received dai ricevuti e dai totali.
 	  missed++;
-  double actual = received-missed-1;
+  double actual = received-missed;
   actual = (actual <= 0?1:(actual));
 //  double avg = delayavg/(1.0*actual);
-  delay_avg = Time::FromDouble(avg, Time::US);
+  delay_avg = Time::FromDouble(delayavgB, Time::US);
+  delay_avg_push = Time::FromDouble(delayavgP, Time::US);
+  delay_avg_pull = Time::FromDouble(delayavgL, Time::US);
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
   	  double t_dev = ((GetChunkDelay(iter->second.c_id) - delay_avg).ToDouble(Time::US));
   	  sigma += pow(t_dev,2);
-  	  cnt++;
+  	  switch (m_chunks.GetChunkState(iter->second.c_id))
+  	  {
+		  case CHUNK_RECEIVED_PUSH:
+		  {
+			  t_dev = ((GetChunkDelay(iter->second.c_id) - delay_avg_push).ToDouble(Time::US));
+			  sigmaP += pow(t_dev,2);
+			  break;
+		  }
+		  case CHUNK_RECEIVED_PULL:
+		  {
+			  t_dev = ((GetChunkDelay(iter->second.c_id) - delay_avg_pull).ToDouble(Time::US));
+			  sigmaL += pow(t_dev,2);
+			  break;
+		  }
+  	  }
   }
-  cnt--;
-  sigma = sqrt(sigma/(1.0*cnt));
-  if (received == 0) {
+  sigma = sqrt(sigma/(1.0*(receivedpush+receivedpull)));
+  sigmaP = sqrt(sigmaP/(1.0*receivedpush));
+  sigmaL = sqrt(sigmaL/(1.0*receivedpull));
+  if (received == 0)
+  {
 	  miss = 1;
 	  rec = dups = 0;
 	  delaylate = 0;
@@ -279,11 +332,25 @@ VideoPushApplication::DoDispose (void)
   NS_ASSERT (m_latestChunkID==received+missed);
   double tstudent = 1.96; // alpha = 0.025, degree of freedom = infinite
   double confidence = tstudent * (sigma/sqrt(received));
+  double confidenceP = tstudent * (sigmaP/sqrt(receivedpush));
+  double confidenceL = tstudent * (sigmaL/sqrt(receivedpull));
+  if (receivedpush == 0)
+  {
+  	sigmaP = 0;
+  	confidenceP = 0.0;
+    delay_avg_push = MicroSeconds (0);
+  }
+  if (receivedpull == 0)
+  {
+	sigmaL = 0;
+	confidenceL = 0.0;
+	delay_avg_pull = MicroSeconds (0);
+  }
   char buffer [1024];
-  sprintf(buffer, " Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f",
-		  	  	  	   rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence, dlate);
-  std::cout << "Chunks Node " << m_node->GetId() << buffer << "\n";
-
+  sprintf(buffer, "Chunks Node %d Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f RecP %d AvgP %ld us sigmaP %.5f confP %.5f RecL %d AvgL %ld us sigmaL %.5f confL %.5f\n",
+		  	  	    m_node->GetId(), rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence, dlate,
+		  receivedpush, delay_avg_push.ToInteger(Time::US), sigmaP, confidenceP, receivedpull, delay_avg_pull.ToInteger(Time::US), sigmaL, confidenceL);
+  std::cout << buffer;
   m_socket = 0;
   m_socketList.clear();
   // chain up
