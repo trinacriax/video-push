@@ -620,6 +620,7 @@ void VideoPushApplication::PeerLoop ()
 			uint32_t last = m_chunks.GetLastChunk();
 			NS_LOG_INFO ("Node=" <<m_node->GetId()<< " IP=" << GetLocalAddress() << " Last="<<last<<" Missed="<< missed <<" ("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")"<<" TimerRunning="<<(m_pullTimer.IsRunning()?"Yes":"No"));
 			NS_ASSERT (GetPullActive());
+			NS_ASSERT (GetHelloActive());
 			if (missed && !m_pullTimer.IsRunning())
 			{
 				m_pullTimer.Cancel();
@@ -1026,6 +1027,7 @@ VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
 	NS_ASSERT (chunkid>0);
 	NS_ASSERT (target != GetLocalAddress());
 	NS_ASSERT (GetPullActive());
+	NS_ASSERT (GetHelloActive());
 	switch (m_peerType)
 	{
 		case PEER:
