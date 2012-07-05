@@ -609,7 +609,8 @@ VideoPushApplication::GetLocalAddress ()
 	return Ipv4Address::ConvertFrom(m_localAddress);
 }
 
-void VideoPushApplication::PeerLoop ()
+void
+VideoPushApplication::PeerLoop ()
 {
 	NS_LOG_FUNCTION_NOARGS ();
 	switch (m_peerType)
@@ -627,9 +628,10 @@ void VideoPushApplication::PeerLoop ()
 				while (missed && GetPullRetry(missed) >= GetPullMax())
 				{
 					m_chunks.SetChunkState(missed, CHUNK_SKIPPED);
-					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " is marking chunk "<< missed <<" as skipped ("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")");
+					uint32_t lastmissed = missed;
 					missed = m_chunks.GetLeastMissed();
-					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " is new missed is chunk "<< missed);
+					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " is marking chunk "<< lastmissed <<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<","
+							<<GetPullMax()<<") New missed="<<missed);
 				}
 				if (missed)
 				{
