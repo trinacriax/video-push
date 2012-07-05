@@ -3,7 +3,7 @@
 def build(bld):
     obj = bld.create_ns3_program('video-streaming', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'applications', 'mbn-aodv'])
     obj.source = 'video-streaming.cc'
-    obj = bld.create_ns3_program('streaming-pull', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'applications', 'visualizer'])
+    obj = bld.create_ns3_program('streaming-pull', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'applications'])
     obj.source = 'streaming-pull.cc'
-    obj = bld.create_ns3_program('video-streaming-pimdm', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'mbn-aodv', 'pimdm', 'igmpx', 'applications', 'visualizer'])
+    obj = bld.create_ns3_program('video-streaming-pimdm', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'mbn-aodv', 'pimdm', 'igmpx', 'applications'])
     obj.source = 'video-streaming-pimdm.cc'
