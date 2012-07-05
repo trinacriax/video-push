@@ -185,9 +185,9 @@ int main(int argc, char **argv) {
 	// loss exponent
 	double PLexp = 3.5;
 	// Tx power start
-	double TxStart = 18.0;
+	double TxStart = 20.0;
 	// Tx power end
-	double TxEnd = 18.0;
+	double TxEnd = 20.0;
 	// Tx power levels
 	uint32_t TxLevels = 1;
 	// Energy detection threshold
@@ -240,16 +240,17 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("CCAMode1", "CCA mode 1 threshold dBm.", CCAMode1);
 	cmd.AddValue ("xmax", "Grid X max", xmax);
 	cmd.AddValue ("ymax", "Grid Y max", ymax);
-	cmd.AddValue ("routing", "Unicast Routing Protocol (1 - AODV, 2 - MBN) ", routing);
+	cmd.AddValue ("routing", "Unicast Routing Protocol (0 - Nothing, 1 - AODV, 2 - MBN) ", routing);
 	cmd.AddValue ("hellotime", "Hello time", hellotime);
 	cmd.AddValue ("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
 	cmd.AddValue ("helloactive", "Hello activation", helloactive);
 	cmd.AddValue ("pullactive", "Pull activation allowed", pullactive);
 	cmd.AddValue ("pullmax", "Max number of pull allowed per chunk", pullmax);
-	cmd.AddValue ("pulltime", "Time between pull in sec. (e.g., 0.100 sec = 100ms)", pulltime);
+	cmd.AddValue ("pulltime", "Time between pull in ms (e.g., 100ms = 0.100s)", pulltime);
 	cmd.AddValue ("stream", "Source streaming rate in bps", stream);
 	cmd.AddValue ("v", "Verbose", verbose);
 	cmd.Parse(argc, argv);
+//	video-streaming-pimdm --sizeSource=1 --sizeRouter=6 --sizeClient=12 --xmax=80 --ymax=80 --helloactive=1 --helloloss=1 --hellotime=5 --pullactive=1 --pullmax=1 --pulltime=20 --routing=1 --time=100
 
 	NS_LOG_DEBUG("Seed " << seed << " run "<< run << " sizeRouter "<< sizeRouter << " sizeClient " << sizeClient <<
 			" sizeSource " << sizeSource << " routing " << routing <<
@@ -285,13 +286,13 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::YansWifiPhy::CcaMode1Threshold",DoubleValue(CCAMode1));///17.3.10.5 CCA sensitivity
 
 	if(verbose==1){
-		LogComponentEnable("VideoStreamingPIMDM", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
-		LogComponentEnable("VideoPushApplication", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+		LogComponentEnable("VideoStreamingPIMDM", LogLevel (LOG_LEVEL_ALL | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+		LogComponentEnable("VideoPushApplication", LogLevel (LOG_LEVEL_ALL | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 //		LogComponentEnable("CsmaChannel", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 //		LogComponentEnable("CsmaNetDevice", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
-//		LogComponentEnable("AodvRoutingProtocol", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
-		LogComponentEnable("PIMDMMulticastRouting", LogLevel(LOG_INFO| LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
-//		LogComponentEnable("IGMPXRoutingProtocol", LogLevel(LOG_LEVEL_ALL| LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+		LogComponentEnable("AodvRoutingProtocol", LogLevel (LOG_LEVEL_ALL | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+		LogComponentEnable("PIMDMMulticastRouting", LogLevel(LOG_LEVEL_ALL | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+		LogComponentEnable("IGMPXRoutingProtocol", LogLevel(LOG_LEVEL_ALL| LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 //		LogComponentEnable("UdpSocketImpl", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
 //		LogComponentEnable("Ipv4L3Protocol", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 //		LogComponentEnable("Ipv4RawSocketImpl", LogLevel (LOG_LEVEL_ALL |LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
@@ -334,7 +335,7 @@ int main(int argc, char **argv) {
 	/// Video start
 	double sourceStart = ceil(totalTime*.10);
 	/// Video stop
-	double sourceStop = ceil(totalTime*.80);
+	double sourceStop = ceil(totalTime*.90);
 	/// Client start
 	double clientStart = ceil(totalTime*.05);;
 	/// Client stop
@@ -382,7 +383,7 @@ int main(int argc, char **argv) {
 	/* Source Node to Gateway */
 	CsmaHelper csma; //Wired
 	csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (100000000)));
-	csma.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (2)));
+	csma.SetChannelAttribute ("Delay", TimeValue (MicroSeconds (10)));
 
 	NetDeviceContainer routersNetDev = wifi.Install(wifiPhy, wifiMac, routers);
 	NetDeviceContainer clientsNetDev = wifi.Install(wifiPhy, wifiMac, clients);;
@@ -457,7 +458,7 @@ int main(int argc, char **argv) {
 			case 1:
 			{
 	//			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableHello", BooleanValue(false));
-				Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
+//				Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
 				Config::SetDefault ("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(2)));
 				listSource.Add (aodvStack, 10);
 				break;
@@ -497,10 +498,12 @@ int main(int argc, char **argv) {
 
 	Ipv4InterfaceContainer ipRouter = address.Assign (routersNetDev);
 	Ipv4InterfaceContainer ipClient = address.Assign (clientsNetDev);
-
-	address.SetBase ("11.0.0.0", "255.0.0.0");
 	Ipv4InterfaceContainer ipSource = address.Assign (ds0dr0);
-	Ipv4Address multicastSource ("11.0.0.1");
+	Ipv4Address multicastSource (ipRouter.GetAddress(0).Get()+sizeRouter+sizeClient);
+
+//	address.SetBase ("11.0.0.0", "255.0.0.0");
+//	Ipv4InterfaceContainer ipSource = address.Assign (ds0dr0);
+//	Ipv4Address multicastSource ("11.0.0.1");
 
 	NS_LOG_INFO ("Configure multicasting.");
 
@@ -557,7 +560,7 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::UdpSocket::IpMulticastTtl", UintegerValue (1));
 	VideoHelper video = VideoHelper ("ns3::UdpSocketFactory", dst);
 	video.SetAttribute ("DataRate", DataRateValue (DataRate (stream)));
-	video.SetAttribute ("PacketSize", UintegerValue (1200));
+	video.SetAttribute ("PacketSize", UintegerValue (2100));
 	video.SetAttribute ("PeerType", EnumValue (SOURCE));
 	video.SetAttribute ("Local", AddressValue (multicastSource));
 	video.SetAttribute ("PeerPolicy", EnumValue (PS_RANDOM));
