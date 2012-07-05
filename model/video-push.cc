@@ -118,7 +118,7 @@ VideoPushApplication::GetTypeId (void)
 	.AddTraceSource ("Rx", "A packet has been received",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxTrace))
 	.AddAttribute ("PullTime", "Time between two consecutive pulls.",
-				 TimeValue (Seconds (2)),
+				 TimeValue (MilliSeconds (50)),
 				 MakeTimeAccessor (&VideoPushApplication::SetPullTime,
 								   &VideoPushApplication::GetPullTime),
 				 MakeTimeChecker ())
@@ -641,7 +641,7 @@ void VideoPushApplication::PeerLoop ()
 					AddPullRetry(missed);
 					Ipv4Address target = PeerSelection (PS_RANDOM);
 					NS_ASSERT (target != Ipv4Address::GetAny());
-					double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
+					double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.30));
 					Time delay = Time::FromDouble(delayv, Time::US);
 					Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, missed, target);
 					m_pullTimer.Schedule();
@@ -737,7 +737,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 			<< " Received pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sender);
 	if (hasChunk)
 	{
-	  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.15));
+	  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.05, m_pullTime.GetMicroSeconds()*.85));
 	  NS_ASSERT_MSG (delayv > 1, "pulltime is 0");
 	  Time delay = Time::FromDouble (delayv, Time::US);
 	  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
