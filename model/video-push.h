@@ -211,6 +211,7 @@ private:
 	Time 			m_helloTime;
 	Timer 			m_helloTimer;
 	Time 			m_helloNeighborsTime;
+	Timer 			m_helloNeighborsTimer;
 	uint32_t		m_helloLoss;
 	bool			m_helloActive;
 

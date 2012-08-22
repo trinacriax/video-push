@@ -165,7 +165,7 @@ VideoPushApplication::GetTypeId (void)
 VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
 		m_connected(false), m_ipv4(0), m_socket(0),
-		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY)
+		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY), m_helloNeighborsTimer (Timer::CANCEL_ON_DESTROY)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
@@ -405,10 +405,13 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_pullTimer.SetFunction(&VideoPushApplication::PeerLoop, this);
       m_helloTimer.SetDelay(GetHelloTime());
       m_helloTimer.SetFunction(&VideoPushApplication::SendHello, this);
-      Time start = Time::FromDouble (UniformVariable().GetValue (0, GetHelloTime().GetSeconds()), Time::S);
+      m_helloNeighborsTimer.SetDelay (GetHelloNeighborsTime());
+      m_helloNeighborsTimer.SetFunction (&VideoPushApplication::SendHelloNeighbors, this);
+      Time start = Time::FromDouble (UniformVariable().GetValue (0, GetHelloTime().GetSeconds()*.20), Time::MS);
       if (GetHelloActive())
       {
     	  Simulator::Schedule (start, &VideoPushApplication::SendHello, this);
+    	  Simulator::Schedule (GetHelloNeighborsTime()+start, &VideoPushApplication::SendHelloNeighbors, this);
       }
       m_neighbors.SetExpire (Time::FromDouble (GetHelloTime().GetMicroSeconds() * (1 + GetHelloLoss()), Time::US));
     }
