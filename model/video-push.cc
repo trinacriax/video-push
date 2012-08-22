@@ -776,13 +776,38 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 {
 	uint32_t last = helloheader.GetLastChunk();
 	uint32_t chunks = helloheader.GetChunksReceived();
-	NS_LOG_INFO ("Node " << GetLocalAddress() << " Received hello from "
-			<< sender << " with "<< chunks << " chunks.");
-	Neighbor nt (sender, PUSH_PORT);
-	if(!m_neighbors.IsNeighbor (nt))
-		m_neighbors.AddNeighbor (nt);
-	NeighborData* neighbor = m_neighbors.GetNeighbor(nt);
-	neighbor->Update(last, chunks);
+	Ipv4Address destination = helloheader.GetDestination();
+	Ipv4Mask mask ("255.0.0.0");
+	if (destination.IsSubnetDirectedBroadcast(mask))
+	{
+		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast("<<destination<<") hello from " << sender << " #Chunks="<< chunks);
+		double delayv = rint(UniformVariable().GetValue (m_helloTime.GetMilliSeconds()*.05, m_helloTime.GetMilliSeconds()*.35));
+		NS_ASSERT_MSG (delayv > 1, "pulltime is 0");
+		Time delay = Time::FromDouble (delayv, Time::US);
+		Simulator::Schedule (delay, &VideoPushApplication::SendHelloUnicast, this, sender);
+		NS_LOG_INFO ("Node " << GetLocalAddress() << " reply to " << sender << " in "<< delay.GetSeconds() << "sec");
+	}
+	else if (destination.IsEqual(GetLocalAddress()))
+	{
+		Neighbor nt (sender, PUSH_PORT);
+		if(!m_neighbors.IsNeighbor (nt))
+		{
+			m_neighbors.AddNeighbor (nt);
+		}
+		NeighborData* neighbor = m_neighbors.GetNeighbor(nt);
+		neighbor->Update(last, chunks);
+		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives hello from " << sender << " #Chunks="<< chunks << " #Neighbors="<<m_neighbors.GetSize());
+		uint32_t chunkid = m_chunks.GetLastChunk();
+		if ( last < chunkid )
+		{
+			double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.05, m_pullTime.GetMicroSeconds()*.85));
+			NS_ASSERT_MSG (delayv > 1, "pulltime is 0");
+			Time delay = Time::FromDouble (delayv, Time::US);
+			Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
+			AddPending(chunkid);
+		}
+	}
+	//TODO: If the source isn't a neighbor, subscribe to a node
 }
 
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
