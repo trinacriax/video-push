@@ -551,9 +551,9 @@ VideoPushApplication::GetPullTime () const
 }
 
 void
-VideoPushApplication::SetHelloTime (Time pullt)
+VideoPushApplication::SetHelloTime (Time hellot)
 {
-	m_helloTime = pullt;
+	m_helloTime = hellot;
 }
 
 Time
