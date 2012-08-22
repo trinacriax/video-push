@@ -401,10 +401,10 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_socket->SetCloseCallbacks (
          MakeCallback (&VideoPushApplication::HandlePeerClose, this),
          MakeCallback (&VideoPushApplication::HandlePeerError, this));
-      m_pullTimer.SetDelay(GetPullTime());
-      m_pullTimer.SetFunction(&VideoPushApplication::PeerLoop, this);
-      m_helloTimer.SetDelay(GetHelloTime());
-      m_helloTimer.SetFunction(&VideoPushApplication::SendHello, this);
+      m_pullTimer.SetDelay (GetPullTime());
+      m_pullTimer.SetFunction (&VideoPushApplication::PeerLoop, this);
+      m_helloTimer.SetDelay (GetHelloTime());
+      m_helloTimer.SetFunction (&VideoPushApplication::SendHello, this);
       m_helloNeighborsTimer.SetDelay (GetHelloNeighborsTime());
       m_helloNeighborsTimer.SetFunction (&VideoPushApplication::SendHelloNeighbors, this);
       Time start = Time::FromDouble (UniformVariable().GetValue (0, GetHelloTime().GetSeconds()*.20), Time::MS);
