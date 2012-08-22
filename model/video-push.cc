@@ -1022,6 +1022,20 @@ void VideoPushApplication::SendHello ()
 	m_helloTimer.Schedule (m_helloTime - t);
 }
 
+void VideoPushApplication::SendHelloNeighbors ()
+{
+	NS_LOG_FUNCTION (this);
+	uint32_t size = m_neighbors.GetSize();
+	for (int i = 0; i < size;  i++)
+	{
+		Neighbor nt = m_neighbors.Get(i);
+		Time delay = Time::FromDouble (UniformVariable().GetValue(0, 200),Time::MS);
+		Simulator::Schedule (delay, &VideoPushApplication::SendHelloUnicast, this, nt.GetAddress());
+	}
+	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 100)), Time::MS);
+	m_helloNeighborsTimer.Schedule (m_helloNeighborsTime - t);
+}
+
 void VideoPushApplication::SendHelloUnicast (Ipv4Address &neighbor)
 {
 	NS_LOG_FUNCTION (this);
