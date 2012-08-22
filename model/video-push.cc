@@ -1022,6 +1022,21 @@ void VideoPushApplication::SendHello ()
 	m_helloTimer.Schedule (m_helloTime - t);
 }
 
+void VideoPushApplication::SendHelloUnicast (Ipv4Address &neighbor)
+{
+	NS_LOG_FUNCTION (this);
+	ChunkHeader hello (MSG_HELLO);
+	hello.GetHelloMessage().SetLastChunk (m_chunks.GetLastChunk());
+	hello.GetHelloMessage().SetChunksReceived (m_chunks.GetBufferSize());
+	hello.GetHelloMessage().SetDestination (neighbor);
+	Ptr<Packet> packet = Create<Packet> ();
+	packet->AddHeader(hello);
+	m_txTrace (packet);
+	NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello directly to "<< neighbor);
+	NS_ASSERT (GetHelloActive());
+	m_socket->SendTo(packet, 0, InetSocketAddress (neighbor, PUSH_PORT));
+}
+
 void
 VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
 {
