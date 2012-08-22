@@ -1026,15 +1026,15 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 void VideoPushApplication::SendHello ()
 {
 	NS_LOG_FUNCTION (this);
+	Ipv4Mask mask ("255.0.0.0");
+	Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask (mask));
 	ChunkHeader hello (MSG_HELLO);
 	hello.GetHelloMessage().SetLastChunk (m_chunks.GetLastChunk());
 	hello.GetHelloMessage().SetChunksReceived (m_chunks.GetBufferSize());
+	hello.GetHelloMessage().SetDestination (subnet);
 	Ptr<Packet> packet = Create<Packet> ();
 	packet->AddHeader(hello);
 	m_txTrace (packet);
-	Ipv4Mask mask ("255.0.0.0");
-//	Ipv4Mask mask ("255.255.255.0");
-	Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask (mask));
 	NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
 	NS_ASSERT (GetHelloActive());
 	m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
