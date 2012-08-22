@@ -662,12 +662,15 @@ VideoPushApplication::PeerLoop ()
 						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " has no neighbors to pull chunk "<< missed);
 					}
 					AddPullRetry(missed);
-					Ipv4Address target = PeerSelection (PS_RANDOM);
-					NS_ASSERT (target != Ipv4Address::GetAny());
-					double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.30));
-					Time delay = Time::FromDouble(delayv, Time::US);
-					Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, missed, target);
-					m_pullTimer.Schedule();
+					if (m_neighbors.GetSize() != 0 )
+					{
+						Ipv4Address target = PeerSelection (PS_RANDOM);
+						NS_ASSERT (target != Ipv4Address::GetAny());
+						double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.30));
+						Time delay = Time::FromDouble(delayv, Time::US);
+						Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, missed, target);
+						m_pullTimer.Schedule();
+					}
 				}
 			}
 			break;
