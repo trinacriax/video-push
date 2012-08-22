@@ -605,7 +605,7 @@ Time
 VideoPushApplication::GetChunkDelay (uint32_t chunkid)
 {
 	NS_ASSERT (chunkid>0);
-	NS_ASSERT (m_chunks.HasChunk(chunkid)||m_chunks.GetChunkState(chunkid) == CHUNK_DELAYED);
+	NS_ASSERT (m_chunks.HasChunk(chunkid) || m_chunks.GetChunkState(chunkid) == CHUNK_DELAYED);
 	NS_ASSERT (m_chunk_delay.find(chunkid) != m_chunk_delay.end());
 	return Time::FromInteger(m_chunk_delay.find(chunkid)->second, Time::US);
 }
