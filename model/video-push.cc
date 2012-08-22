@@ -813,6 +813,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 //    	  NS_LOG_DEBUG("Duplicated packet Gateway "<<gateway<< " Sender " << relayTag.m_sender);
 //		  break;
       }
+      NS_ASSERT (sourceAddr != GetLocalAddress());
       if (InetSocketAddress::IsMatchingType (from))
         {
           ChunkHeader chunkH (MSG_CHUNK);
