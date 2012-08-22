@@ -355,13 +355,14 @@ ChunkHeader::HelloMessage::GetSerializedSize (void) const
 void
 ChunkHeader::HelloMessage::Print (std::ostream &os) const
 {
-  os<< "Last Chunk: " << m_lastChunk<< " chunks Received: "<< m_chunksRec <<"\n";
+  os<< "Destination: " << m_destination << ", Last Chunk: " << m_lastChunk<< ", Received: "<< m_chunksRec <<"\n";
 }
 
 void
 ChunkHeader::HelloMessage::Serialize (Buffer::Iterator start) const
 {
   Buffer::Iterator i = start;
+  i.WriteHtonU32 (m_destination.Get());
   i.WriteHtonU32 (m_lastChunk);
   i.WriteHtonU32 (m_chunksRec);
 }
@@ -371,9 +372,22 @@ ChunkHeader::HelloMessage::Deserialize (Buffer::Iterator start)
 {
   Buffer::Iterator i = start;
   uint32_t size = MSG_HELLO_SIZE;
+  m_destination = Ipv4Address(i.ReadNtohU32());
   m_lastChunk = i.ReadNtohU32();
   m_chunksRec = i.ReadNtohU32();
   return size;
+}
+
+Ipv4Address
+ChunkHeader::HelloMessage::GetDestination()
+{
+	return m_destination;
+}
+
+void
+ChunkHeader::HelloMessage::SetDestination (Ipv4Address destination)
+{
+	m_destination = destination;
 }
 
 uint32_t

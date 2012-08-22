@@ -28,13 +28,14 @@
 
 #include <stdio.h>
 #include "ns3/header.h"
+#include "ns3/ipv4-address.h"
 #include "chunk-video.h"
 #include <iostream>
 
 #define CHUNK_HEADER_SIZE 4
 #define MSG_CHUNK_SIZE (4 + 8 + 2 + 2)
 #define MSG_PULL_SIZE 4
-#define MSG_HELLO_SIZE 8
+#define MSG_HELLO_SIZE 12
 
 enum ChunkMessageType
 {
@@ -141,12 +142,15 @@ public:
 
   struct HelloMessage
     {
+	  Ipv4Address m_destination; // Destination Address
   	  uint32_t m_lastChunk; // Chunks received
   	  uint32_t m_chunksRec; // Chunks received
   	  virtual void Print (std::ostream &os) const;
   	  virtual uint32_t GetSerializedSize (void) const;
   	  virtual void Serialize (Buffer::Iterator start) const;
   	  virtual uint32_t Deserialize (Buffer::Iterator start);
+  	  virtual Ipv4Address GetDestination ();
+	  virtual void SetDestination (Ipv4Address destination);
   	  virtual uint32_t GetLastChunk ();
 	  virtual void SetLastChunk (uint32_t last);
   	  virtual uint32_t GetChunksReceived ();
