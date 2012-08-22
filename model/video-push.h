@@ -117,6 +117,8 @@ public:
 	Time GetPullTime () const;
 	void SetHelloTime (Time time);
 	Time GetHelloTime () const;
+	void SetHelloNeighborsTime (Time time);
+	Time GetHelloNeighborsTime () const;
 	void SetHelloLoss (uint32_t loss);
 	uint32_t GetHelloLoss () const;
 	void SetSource (Ipv4Address source);
@@ -208,6 +210,7 @@ private:
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	Time 			m_helloTime;
 	Timer 			m_helloTimer;
+	Time 			m_helloNeighborsTime;
 	uint32_t		m_helloLoss;
 	bool			m_helloActive;
 

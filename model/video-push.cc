@@ -127,6 +127,11 @@ VideoPushApplication::GetTypeId (void)
 				 MakeTimeAccessor (&VideoPushApplication::SetHelloTime,
 								   &VideoPushApplication::GetHelloTime),
 				 MakeTimeChecker ())
+	.AddAttribute ("HelloNeighborsTime", "Hello Neighbors Time.",
+				 TimeValue (Seconds (4)),
+				 MakeTimeAccessor (&VideoPushApplication::SetHelloNeighborsTime,
+								   &VideoPushApplication::GetHelloNeighborsTime),
+				 MakeTimeChecker ())
 	.AddAttribute ("PullMax", "Max number of pull.",
 				   UintegerValue (1),
 				   MakeUintegerAccessor (&VideoPushApplication::SetPullMax,
@@ -555,6 +560,18 @@ Time
 VideoPushApplication::GetHelloTime () const
 {
 	return m_helloTime;
+}
+
+void
+VideoPushApplication::SetHelloNeighborsTime (Time hellot)
+{
+	m_helloNeighborsTime = hellot;
+}
+
+Time
+VideoPushApplication::GetHelloNeighborsTime () const
+{
+	return m_helloNeighborsTime;
 }
 
 void
