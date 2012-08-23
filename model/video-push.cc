@@ -655,8 +655,9 @@ VideoPushApplication::PeerLoop ()
 				}
 				if (missed)
 				{
-					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " purge neighbors");
+					uint32_t size = m_neighbors.GetSize();
 					m_neighbors.Purge();
+					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " purge neighbors, size="<<size<<"->"<<m_neighbors.GetSize());
 					if (m_neighbors.GetSize() == 0)
 					{
 						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " has no neighbors to pull chunk "<< missed);
