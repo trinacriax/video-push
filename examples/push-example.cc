@@ -175,6 +175,10 @@ int main(int argc, char **argv) {
 	double TxEnd = 16.0;
 	// Tx power levels
 	uint32_t TxLevels = 1;
+	// Tx gain
+	double TxGain = 1.0;
+	// Rx gain
+	double RxGain = 1.0;
 	// Energy detection threshold
 	double EnergyDet= -95.0;
 	// CCA mode 1
@@ -201,6 +205,8 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("TxStart", "Transmission power start dBm.", TxStart);
 	cmd.AddValue ("TxEnd", "Transmission power end dBm.", TxEnd);
 	cmd.AddValue ("TxLevels", "Transmission power levels.", TxLevels);
+	cmd.AddValue ("TxGain", "Transmission power gain dBm.", TxGain);
+	cmd.AddValue ("RxGain", "Receiver power gain dBm.", RxGain);
 	cmd.AddValue ("EnergyDet", "Energy detection threshold dBm.", EnergyDet);
 	cmd.AddValue ("CCAMode1", "CCA mode 1 threshold dBm.", CCAMode1);
 	cmd.AddValue ("xmax", "Grid X max", xmax);
@@ -238,8 +244,8 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
 	Config::SetDefault ("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
 	Config::SetDefault ("ns3::Ipv4::IpForward", BooleanValue (false));
-	Config::SetDefault ("ns3::YansWifiPhy::TxGain",DoubleValue(0.0));
-	Config::SetDefault ("ns3::YansWifiPhy::RxGain",DoubleValue(0.0));
+	Config::SetDefault ("ns3::YansWifiPhy::TxGain",DoubleValue(TxGain));
+	Config::SetDefault ("ns3::YansWifiPhy::RxGain",DoubleValue(RxGain));
 	Config::SetDefault ("ns3::YansWifiPhy::TxPowerStart",DoubleValue(TxStart));
 	Config::SetDefault ("ns3::YansWifiPhy::TxPowerEnd",DoubleValue(TxEnd));
 	Config::SetDefault ("ns3::YansWifiPhy::TxPowerLevels",UintegerValue(TxLevels));
