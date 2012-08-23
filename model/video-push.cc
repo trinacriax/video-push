@@ -760,16 +760,16 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 {
 	uint32_t chunkid = pullheader.GetChunk();
 	bool hasChunk = m_chunks.HasChunk (chunkid);
-	NS_LOG_INFO ("Node " <<m_node->GetId()<< " IP " << GetLocalAddress()
-			<< " Received pull for [" <<  chunkid << "::"<< (hasChunk?"Yes":"No") <<"] from " << sender);
+	Time delay (0);
 	if (hasChunk)
 	{
-	  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.05, m_pullTime.GetMicroSeconds()*.85));
+	  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
 	  NS_ASSERT_MSG (delayv > 1, "pulltime is 0");
-	  Time delay = Time::FromDouble (delayv, Time::US);
+	  delay = Time::FromDouble (delayv, Time::US);
 	  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
 	  AddPending(chunkid);
 	}
+	NS_LOG_INFO ("Node " << GetLocalAddress() << " Received pull for " <<  chunkid << (hasChunk?"(Y)":"(N)") <<" from " << sender << ", reply in "<<delay.GetSeconds());
 }
 
 void
