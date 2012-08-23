@@ -180,12 +180,22 @@ int main(int argc, char **argv) {
 	// CCA mode 1
 	double CCAMode1 = -62.0;
 
+	double nak_d1 = 80;
+	double nak_d2 = 200;
+	double nak_m0 = 1.0;
+	double nak_m1 = 1.0;
+	double nak_m2 = 1.0;
 
 	CommandLine cmd;
 	cmd.AddValue ("size", "Number of nodes.", size);
 	cmd.AddValue ("time", "Simulation time, s.", totalTime);
 	cmd.AddValue ("run", "Run Identifier", run);
 	cmd.AddValue ("seed", "Seed ", seed);
+	cmd.AddValue ("nakd1", "Nakagami distance 1", nak_d1);
+	cmd.AddValue ("nakd2", "Nakagami distance 2", nak_d2);
+	cmd.AddValue ("nakm0", "Nakagami exponent 0", nak_m0);
+	cmd.AddValue ("nakm1", "Nakagami exponent 1", nak_m1);
+	cmd.AddValue ("nakm2", "Nakagami exponent 2", nak_m2);
 	cmd.AddValue ("PLref", "Reference path loss dB.", PLref);
 	cmd.AddValue ("PLexp", "Path loss exponent.", PLexp);
 	cmd.AddValue ("TxStart", "Transmission power start dBm.", TxStart);
@@ -214,6 +224,11 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("2100"));
 	Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(PLref));
 	Config::SetDefault ("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(PLexp));
+	Config::SetDefault("ns3::NakagamiPropagationLossModel::Distance1", DoubleValue(nak_d1));
+	Config::SetDefault("ns3::NakagamiPropagationLossModel::Distance2", DoubleValue(nak_d2));
+	Config::SetDefault("ns3::NakagamiPropagationLossModel::m0", DoubleValue(nak_m0));
+	Config::SetDefault("ns3::NakagamiPropagationLossModel::m1", DoubleValue(nak_m1));
+	Config::SetDefault("ns3::NakagamiPropagationLossModel::m2", DoubleValue(nak_m2));
 	Config::SetDefault ("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
 	Config::SetDefault ("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
 	Config::SetDefault ("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
