@@ -308,7 +308,7 @@ int main(int argc, char **argv) {
 
 	wifi.SetStandard(WIFI_PHY_STANDARD_80211g);
 	wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager"
-			,"DataMode", StringValue("ErpOfdmRate36Mbps")
+			,"DataMode", StringValue("ErpOfdmRate54Mbps")
 			,"ControlMode", StringValue("ErpOfdmRate18Mbps")
 			,"NonUnicastMode", StringValue("ErpOfdmRate18Mbps")
 			);
