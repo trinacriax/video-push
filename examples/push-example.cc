@@ -152,7 +152,7 @@ int main(int argc, char **argv) {
 	/// Radius range
 	double radius = 120;
 	// Period between pull
-	double pulltime = 15;//in ms
+	double pulltime = 20;//in ms
 	// max number of pull to retrieve a chunk
 	uint32_t pullmax = 1;
 	// Time in seconds between hellos
@@ -166,9 +166,9 @@ int main(int argc, char **argv) {
 	// Unicast routing protocol to use
 	uint32_t routing = 0;
 	// reference loss
-	double log_r = 60.06899553;
+	double log_r = 52.059796126;
 	// loss exponent
-	double log_n = 3.0;
+	double log_n = 2.6;
 	// Tx power start
 	double TxStart = 20.0;
 	// Tx power end
