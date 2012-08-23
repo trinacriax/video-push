@@ -775,18 +775,22 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 void
 VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const Ipv4Address &sender)
 {
-	uint32_t last = helloheader.GetLastChunk();
-	uint32_t chunks = helloheader.GetChunksReceived();
+	uint32_t n_last = helloheader.GetLastChunk();
+	uint32_t n_chunks = helloheader.GetChunksReceived();
 	Ipv4Address destination = helloheader.GetDestination();
 	Ipv4Mask mask ("255.0.0.0");
 	if (destination.IsSubnetDirectedBroadcast(mask))
 	{
-		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast("<<destination<<") hello from " << sender << " #Chunks="<< chunks);
-		double delayv = rint(UniformVariable().GetValue (m_helloTime.GetMilliSeconds()*.05, m_helloTime.GetMilliSeconds()*.35));
-		NS_ASSERT_MSG (delayv > 1, "pulltime is 0");
-		Time delay = Time::FromDouble (delayv, Time::US);
-		Simulator::Schedule (delay, &VideoPushApplication::SendHelloUnicast, this, sender);
-		NS_LOG_INFO ("Node " << GetLocalAddress() << " reply to " << sender << " in "<< delay.GetSeconds() << "sec");
+		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast("<<destination<<") hello from " << sender << " #Chunks="<< n_chunks);
+		Neighbor nt (sender, PUSH_PORT);
+		if(!m_neighbors.IsNeighbor (nt))
+		{
+			double delayv = rint(UniformVariable().GetValue (m_helloTime.GetMilliSeconds()*.05, m_helloTime.GetMilliSeconds()*.35));
+			NS_ASSERT_MSG (delayv > 1, "pulltime is 0");
+			Time delay = Time::FromDouble (delayv, Time::US);
+			Simulator::Schedule (delay, &VideoPushApplication::SendHelloUnicast, this, sender);
+			NS_LOG_INFO ("Node " << GetLocalAddress() << " reply to " << sender << " in "<< delay.GetSeconds() << "sec");
+		}
 	}
 	else if (destination.IsEqual(GetLocalAddress()))
 	{
@@ -796,16 +800,16 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 			m_neighbors.AddNeighbor (nt);
 		}
 		NeighborData* neighbor = m_neighbors.GetNeighbor(nt);
-		neighbor->Update(last, chunks);
-		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives hello from " << sender << " #Chunks="<< chunks << " #Neighbors="<<m_neighbors.GetSize());
-		uint32_t chunkid = m_chunks.GetLastChunk();
-		if ( last < chunkid )
+		neighbor->Update(n_last, n_chunks);
+		uint32_t last = m_chunks.GetLastChunk();
+		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives hello from " << sender
+				<< ", Chunks="<< n_chunks << "("<<m_chunks.GetBufferSize()<<")"
+				<< ", Last="<<n_last<<"("<<last<<") #Neighbors="<<m_neighbors.GetSize());
+		if ( m_chunks.GetLastChunk() < n_last && !m_pullTimer.IsRunning())
 		{
-			double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.05, m_pullTime.GetMicroSeconds()*.85));
-			NS_ASSERT_MSG (delayv > 1, "pulltime is 0");
-			Time delay = Time::FromDouble (delayv, Time::US);
-			Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
-			AddPending(chunkid);
+			double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
+			Time delay = Time::FromDouble(delayv, Time::US);
+			Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, n_last, sender);
 		}
 	}
 	//TODO: If the source isn't a neighbor, subscribe to a node
