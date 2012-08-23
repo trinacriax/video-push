@@ -166,9 +166,9 @@ int main(int argc, char **argv) {
 	// Unicast routing protocol to use
 	uint32_t routing = 0;
 	// reference loss
-	double PLref = 36.5;
+	double log_r = 60.06899553;
 	// loss exponent
-	double PLexp = 3.0;
+	double log_n = 3.0;
 	// Tx power start
 	double TxStart = 16.0;
 	// Tx power end
@@ -200,8 +200,8 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("nakm0", "Nakagami exponent 0", nak_m0);
 	cmd.AddValue ("nakm1", "Nakagami exponent 1", nak_m1);
 	cmd.AddValue ("nakm2", "Nakagami exponent 2", nak_m2);
-	cmd.AddValue ("PLref", "Reference path loss dB.", PLref);
-	cmd.AddValue ("PLexp", "Path loss exponent.", PLexp);
+	cmd.AddValue ("logn", "Reference path loss dB.", log_r);
+	cmd.AddValue ("logr", "Path loss exponent.", log_n);
 	cmd.AddValue ("TxStart", "Transmission power start dBm.", TxStart);
 	cmd.AddValue ("TxEnd", "Transmission power end dBm.", TxEnd);
 	cmd.AddValue ("TxLevels", "Transmission power levels.", TxLevels);
@@ -228,8 +228,8 @@ int main(int argc, char **argv) {
 	SeedManager::SetSeed (seed);
 	Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2100"));
 	Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("2100"));
-	Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(PLref));
-	Config::SetDefault ("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(PLexp));
+	Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceLoss", DoubleValue(log_r));
+	Config::SetDefault ("ns3::LogDistancePropagationLossModel::Exponent", DoubleValue(log_n));
 	Config::SetDefault("ns3::NakagamiPropagationLossModel::Distance1", DoubleValue(nak_d1));
 	Config::SetDefault("ns3::NakagamiPropagationLossModel::Distance2", DoubleValue(nak_d2));
 	Config::SetDefault("ns3::NakagamiPropagationLossModel::m0", DoubleValue(nak_m0));
