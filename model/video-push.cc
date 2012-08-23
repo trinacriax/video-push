@@ -407,7 +407,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_helloTimer.SetFunction (&VideoPushApplication::SendHello, this);
       m_helloNeighborsTimer.SetDelay (GetHelloNeighborsTime());
       m_helloNeighborsTimer.SetFunction (&VideoPushApplication::SendHelloNeighbors, this);
-      Time start = Time::FromDouble (UniformVariable().GetValue (0, GetHelloTime().GetSeconds()*.20), Time::MS);
+      Time start = Time::FromDouble (UniformVariable().GetValue (0, 2000), Time::MS);
       if (GetHelloActive())
       {
     	  Simulator::Schedule (start, &VideoPushApplication::SendHello, this);
