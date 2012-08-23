@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
 	/// Number of nodes
 	uint32_t size = 5;
 	/// Simulation time in seconds
-	double totalTime = 50;
+	double totalTime = 100;
 	// Simulation run
 	uint32_t run = 1;
 	// Simulation seed
@@ -282,11 +282,11 @@ int main(int argc, char **argv) {
 	}
 
 	/// Video start
-	double sourceStart = ceil(totalTime*.10);
+	double sourceStart = ceil(totalTime*.05);
 	/// Video stop
 	double sourceStop = ceil(totalTime*.90);
 	/// Client start
-	double clientStart = ceil(totalTime*.05);;
+	double clientStart = ceil(totalTime*.01);;
 	/// Client stop
 	double clientStop = ceil(totalTime*.99);
 
