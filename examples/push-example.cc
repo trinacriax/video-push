@@ -321,6 +321,8 @@ int main(int argc, char **argv) {
 //			);
 
 	YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default();
+	wifiChannel.AddPropagationLoss("ns3::NakagamiPropagationLossModel");
+
 	YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default();
 	wifiPhy.SetChannel(wifiChannel.Create());
 
