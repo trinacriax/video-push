@@ -700,6 +700,7 @@ VideoPushApplication::PeerLoop ()
 					AddPullRetry(missed);
 					if (m_neighbors.GetSize() != 0 )
 					{
+						//TODO PULL WINDOW CHECK
 						Ipv4Address target = PeerSelection (PS_RANDOM);
 						NS_ASSERT (target != Ipv4Address::GetAny());
 						double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
@@ -783,8 +784,11 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
 	}
 	missed = m_chunks.GetLeastMissed();
+	//TODO PULL WINDOW CHECK
 	if (missed && !m_pullTimer.IsRunning() && GetPullActive())
+	{
 	  Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
+	}
 	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate":" Received "))
 		  << chunk << "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"<<" from "
 		  << sender << " totalRx="<<m_totalRx<<" Timer "<< m_pullTimer.IsRunning()<<" Neighbors "<< m_neighbors.GetSize()<<" Missed="<<missed);
@@ -837,9 +841,12 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 		NeighborData* neighbor = m_neighbors.GetNeighbor(nt);
 		neighbor->Update(n_last, n_chunks);
 		uint32_t last = m_chunks.GetLastChunk();
+		double ratio = m_chunks.GetBufferSize() / (1.0 * n_last);
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives hello from " << sender
 				<< ", Chunks="<< n_chunks << "("<<m_chunks.GetBufferSize()<<")"
-				<< ", Last="<<n_last<<"("<<last<<") #Neighbors="<<m_neighbors.GetSize());
+				<< ", Last="<<n_last<<"("<<last<<") "
+				<< ", Ratio="<<ratio<<", #Neighbors="<<m_neighbors.GetSize());
+		//TODO PULL WINDOW CHECK
 		if ( m_chunks.GetLastChunk() < n_last && !m_pullTimer.IsRunning() && GetPullActive())
 		{
 			double delayv = rint(UniformVariable().GetValue (0, m_pullTime.GetMicroSeconds()*.30));
