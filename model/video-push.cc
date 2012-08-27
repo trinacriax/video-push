@@ -807,7 +807,7 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 				<< ", Last="<<n_last<<"("<<last<<") #Neighbors="<<m_neighbors.GetSize());
 		if ( m_chunks.GetLastChunk() < n_last && !m_pullTimer.IsRunning() && GetPullActive())
 		{
-			double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
+			double delayv = rint(UniformVariable().GetValue (0, m_pullTime.GetMicroSeconds()*.30));
 			Time delay = Time::FromDouble(delayv, Time::US);
 			Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, n_last, sender);
 		}
