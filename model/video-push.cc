@@ -785,9 +785,9 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 		Neighbor nt (sender, PUSH_PORT);
 		if(!m_neighbors.IsNeighbor (nt))
 		{
-			double delayv = rint(UniformVariable().GetValue (m_helloTime.GetMilliSeconds()*.05, m_helloTime.GetMilliSeconds()*.35));
+			double delayv = rint(UniformVariable().GetValue (0, m_helloNeighborsTime.GetMilliSeconds()));
 			NS_ASSERT_MSG (delayv > 1, "pulltime is 0");
-			Time delay = Time::FromDouble (delayv, Time::US);
+			Time delay = Time::FromDouble (delayv, Time::MS);
 			Simulator::Schedule (delay, &VideoPushApplication::SendHelloUnicast, this, sender);
 			NS_LOG_INFO ("Node " << GetLocalAddress() << " reply to " << sender << " in "<< delay.GetSeconds() << "sec");
 		}
