@@ -152,7 +152,7 @@ VideoPushApplication::GetTypeId (void)
 				   DoubleValue (0.80),
 				   MakeDoubleAccessor (&VideoPushApplication::SetPullRatio,
 									   &VideoPushApplication::GetPullRatio),
-				   MakeDoubleChecker<uint32_t> (0.80))
+				   MakeDoubleChecker<double> (0.80, 1.0))
 	.AddAttribute ("HelloLoss", "Number of allowed hello loss.",
 				   UintegerValue (1),
 				   MakeUintegerAccessor (&VideoPushApplication::SetHelloLoss,
