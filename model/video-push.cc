@@ -800,7 +800,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	//TODO PULL WINDOW CHECK
 	if (missed && !m_pullTimer.IsRunning() && GetPullActive())
 	{
-	  Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
+	  Simulator::ScheduleNow (&VideoPushApplication::PeerLoop, this);
 	}
 	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate":" Received "))
 		  << chunk << "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"<<" from "
