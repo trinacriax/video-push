@@ -664,6 +664,19 @@ VideoPushApplication::GetLocalAddress ()
 	return Ipv4Address::ConvertFrom(m_localAddress);
 }
 
+double
+VideoPushApplication::GetRatio (uint32_t window)
+{
+	uint32_t last = m_chunks.GetLastChunk();
+	double ratio = 0.0;
+	for (int i = last; i > (last - window + 1); i--)
+	{
+		ratio += ( m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PUSH || m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PULL ? 1.0 : 0.0);
+	}
+	return (ratio / window);
+}
+
+
 void
 VideoPushApplication::PeerLoop ()
 {
