@@ -665,17 +665,19 @@ VideoPushApplication::GetLocalAddress ()
 }
 
 double
-VideoPushApplication::GetRatio (uint32_t window)
+VideoPushApplication::GetReceived ()
 {
 	uint32_t last = m_chunks.GetLastChunk();
+	uint32_t window = GetPullWindow();
+	window = (last - window + 1) > 0 ? window : last;
 	double ratio = 0.0;
 	for (int i = last; i > (last - window + 1); i--)
 	{
-		ratio += ( m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PUSH || m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PULL ? 1.0 : 0.0);
+		ratio += (m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PUSH || m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PULL ? 1.0 : 0.0);
 	}
-	return (ratio / window);
+	ratio = (ratio / window);
+	return  ratio;
 }
-
 
 void
 VideoPushApplication::PeerLoop ()

@@ -166,7 +166,7 @@ private:
 	void AddPending (uint32_t chunkid);
 	bool IsPending (uint32_t chunkid);
 	bool RemovePending (uint32_t chunkid);
-	double GetRatio (uint32_t window);
+	double GetReceived ();
 
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
