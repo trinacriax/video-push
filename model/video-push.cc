@@ -805,7 +805,7 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives hello from " << sender
 				<< ", Chunks="<< n_chunks << "("<<m_chunks.GetBufferSize()<<")"
 				<< ", Last="<<n_last<<"("<<last<<") #Neighbors="<<m_neighbors.GetSize());
-		if ( m_chunks.GetLastChunk() < n_last && !m_pullTimer.IsRunning())
+		if ( m_chunks.GetLastChunk() < n_last && !m_pullTimer.IsRunning() && GetPullActive())
 		{
 			double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
 			Time delay = Time::FromDouble(delayv, Time::US);
