@@ -1072,7 +1072,7 @@ void VideoPushApplication::SendHello ()
 	NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
 	NS_ASSERT (GetHelloActive());
 	m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
-	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 100)), Time::MS);
+	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 1000)), Time::MS);
 	m_helloTimer.Schedule (m_helloTime - t);
 }
 
