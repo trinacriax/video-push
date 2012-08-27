@@ -810,13 +810,14 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 void
 VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ipv4Address &sender)
 {
+	NS_ASSERT (GetPullActive());
 	uint32_t chunkid = pullheader.GetChunk();
 	bool hasChunk = m_chunks.HasChunk (chunkid);
 	Time delay (0);
 	if (hasChunk)
 	{
 	  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
-	  NS_ASSERT_MSG (delayv > 1, "pulltime is 0");
+//	  NS_ASSERT_MSG (delayv > 1, "HandlePull: pulltime is 0");
 	  delay = Time::FromDouble (delayv, Time::US);
 	  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
 	  AddPending(chunkid);
@@ -838,7 +839,7 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 		if(!m_neighbors.IsNeighbor (nt))
 		{
 			double delayv = rint(UniformVariable().GetValue (0, m_helloNeighborsTime.GetMilliSeconds()));
-			NS_ASSERT_MSG (delayv > 1, "pulltime is 0");
+//			NS_ASSERT_MSG (delayv > 0, "HandleHello pulltime is 0");
 			Time delay = Time::FromDouble (delayv, Time::MS);
 			Simulator::Schedule (delay, &VideoPushApplication::SendHelloUnicast, this, sender);
 			NS_LOG_INFO ("Node " << GetLocalAddress() << " reply to " << sender << " in "<< delay.GetSeconds() << "sec");
@@ -915,11 +916,13 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 			  }
 			  case MSG_PULL:
 			  {
+				  NS_ASSERT (GetPullActive());
 				  HandlePull(chunkH.GetPullMessage(), sourceAddr);
 				  break;
 			  }
 			  case MSG_HELLO:
 			  {
+				  NS_ASSERT (GetHelloActive());
 				  HandleHello(chunkH.GetHelloMessage(), sourceAddr);
 				  break;
 			  }
