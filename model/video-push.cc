@@ -865,12 +865,13 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 				<< ", Last="<<n_last<<"("<<last<<") "
 				<< ", Ratio="<<ratio<<", #Neighbors="<<m_neighbors.GetSize());
 		//TODO PULL WINDOW CHECK
-		if ( m_chunks.GetLastChunk() < n_last && !m_pullTimer.IsRunning() && GetPullActive())
-		{
-			double delayv = rint(UniformVariable().GetValue (0, m_pullTime.GetMicroSeconds()*.30));
-			Time delay = Time::FromDouble(delayv, Time::US);
-			Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, n_last, sender);
-		}
+//		if ( m_chunks.GetLastChunk() < n_last && !m_pullTimer.IsRunning() && GetPullActive())
+//		{
+//			NS_ASSERT (GetPullActive());
+//			double delayv = rint(UniformVariable().GetValue (0, m_pullTime.GetMicroSeconds()*.30));
+//			Time delay = Time::FromDouble(delayv, Time::US);
+//			Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, n_last, sender);
+//		}
 	}
 	//TODO: If the source isn't a neighbor, subscribe to a node
 }
