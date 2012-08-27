@@ -425,6 +425,8 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
     	  Simulator::Schedule (GetHelloNeighborsTime()+start, &VideoPushApplication::SendHelloNeighbors, this);
       }
       m_neighbors.SetExpire (Time::FromDouble (GetHelloTime().GetMicroSeconds() * (1 + GetHelloLoss()), Time::US));
+      double inter_time = 1 / (m_cbrRate.GetBitRate()/(8.0*m_pktSize));
+      m_pullSlot = Time::FromDouble(inter_time,Time::S);
     }
   // Insure no pending event
   CancelEvents ();

@@ -213,6 +213,7 @@ private:
 	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
 	uint32_t 		m_pullWindow;		// pull window
 	double	 		m_pullRatio;		// pull ratio activation
+	Time			m_pullSlot;
 
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	Time 			m_helloTime;
