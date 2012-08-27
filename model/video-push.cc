@@ -142,6 +142,11 @@ VideoPushApplication::GetTypeId (void)
 				   MakeBooleanAccessor (&VideoPushApplication::SetPullActive,
 										&VideoPushApplication::GetPullActive),
 				   MakeBooleanChecker() )
+	.AddAttribute ("PullWindow", "Pull window.",
+				   UintegerValue (50),
+				   MakeUintegerAccessor (&VideoPushApplication::SetPullWindow,
+										 &VideoPushApplication::GetPullWindow),
+				   MakeUintegerChecker<uint32_t> (50))
 	.AddAttribute ("HelloLoss", "Number of allowed hello loss.",
 				   UintegerValue (1),
 				   MakeUintegerAccessor (&VideoPushApplication::SetHelloLoss,
@@ -587,6 +592,18 @@ uint32_t
 VideoPushApplication::GetPullMax () const
 {
 	return m_pullMax;
+}
+
+void
+VideoPushApplication::SetPullWindow (uint32_t window)
+{
+	m_pullWindow = window;
+}
+
+uint32_t
+VideoPushApplication::GetPullWindow () const
+{
+	return m_pullWindow;
 }
 
 void

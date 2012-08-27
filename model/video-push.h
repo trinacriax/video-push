@@ -106,6 +106,8 @@ public:
 	uint32_t GetPullRetry (uint32_t chunkid);
 	void SetPullMax (uint32_t max);
 	uint32_t GetPullMax () const;
+	void SetPullWindow (uint32_t window);
+	uint32_t GetPullWindow () const;
 
 	void SetPullActive (bool pull);
 	bool GetPullActive () const;
@@ -206,6 +208,7 @@ private:
 	Timer 			m_pullTimer;
 	bool			m_pullActive;
 	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
+	uint32_t 		m_pullWindow;		// pull window
 
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	Time 			m_helloTime;
