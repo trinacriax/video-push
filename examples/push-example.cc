@@ -222,6 +222,41 @@ int main(int argc, char **argv) {
 //		LogComponentEnable("DefaultSimulatorImpl", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
 	}
 
+	for (int c = 0; c < argc; c++)
+		std::cout << argv[c] << " ";
+	std::cout << "\n";
+
+	std::cout << " --size=" << size
+			<< " --time=" << totalTime
+			<< " --run=" << run
+			<< " --seed=" << seed
+			<< " --nakd1=" << nak_d1
+			<< " --nakd2=" << nak_d2
+			<< " --nakm0=" << nak_m0
+			<< " --nakm1=" << nak_m1
+			<< " --nakm2=" << nak_m2
+			<< " --logr=" << log_r
+			<< " --logn=" << log_n
+			<< " --TxStart=" << TxStart
+			<< " --TxEnd=" << TxEnd
+			<< " --TxLevels=" << TxLevels
+			<< " --TxGain=" << TxGain
+			<< " --RxGain=" << RxGain
+			<< " --EnergyDet=" << EnergyDet
+			<< " --CCAMode1=" << CCAMode1
+			<< " --xmax=" << xmax
+			<< " --ymax=" << ymax
+			<< " --radius=" << radius
+			<< " --routing=" << routing
+			<< " --hellotime=" << hellotime
+			<< " --helloloss=" << helloloss
+			<< " --helloactive=" << helloactive
+			<< " --pullactive=" << pullactive
+			<< " --pullmax=" << pullmax
+			<< " --pulltime=" << pulltime
+			<< " --v=" << verbose
+			<< "\n";
+
 	/// Video start
 	double sourceStart = ceil(totalTime*.05);
 	/// Video stop
