@@ -37,6 +37,7 @@
 #include "ns3/socket-factory.h"
 #include "ns3/packet.h"
 #include "ns3/uinteger.h"
+#include "ns3/double.h"
 #include "ns3/enum.h"
 #include "ns3/boolean.h"
 #include "ns3/trace-source-accessor.h"
@@ -147,6 +148,11 @@ VideoPushApplication::GetTypeId (void)
 				   MakeUintegerAccessor (&VideoPushApplication::SetPullWindow,
 										 &VideoPushApplication::GetPullWindow),
 				   MakeUintegerChecker<uint32_t> (50))
+	.AddAttribute ("PullRatio", "Pull ratio.",
+				   DoubleValue (0.80),
+				   MakeDoubleAccessor (&VideoPushApplication::SetPullRatio,
+									   &VideoPushApplication::GetPullRatio),
+				   MakeDoubleChecker<uint32_t> (0.80))
 	.AddAttribute ("HelloLoss", "Number of allowed hello loss.",
 				   UintegerValue (1),
 				   MakeUintegerAccessor (&VideoPushApplication::SetHelloLoss,
@@ -604,6 +610,18 @@ uint32_t
 VideoPushApplication::GetPullWindow () const
 {
 	return m_pullWindow;
+}
+
+void
+VideoPushApplication::SetPullRatio (double ratio)
+{
+	m_pullRatio = ratio;
+}
+
+double
+VideoPushApplication::GetPullRatio () const
+{
+	return m_pullRatio;
 }
 
 void
