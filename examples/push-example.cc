@@ -72,68 +72,12 @@ struct mycontext GetContextInfo (std::string context){
 	return mcontext;
 }
 
-static void GenericPacketTrace (std::string context, Ptr<const Packet> p)
+void
+GenericPacketTrace (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
 //	controls
-	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " " << p->GetSize() << " UID "<< p->GetUid() << " TRACING"<< std::endl;
-}
-
-static void PhyTxDrop (Ptr<const Packet> p)
-{
-std::cout << Simulator::Now() <<" Phy Drop Packet "<< p->GetSize() << " bytes " << std::endl;
-}
-
-void
-DevTxTrace (std::string context, Ptr<const Packet> p)
-{
-	struct mycontext mc = GetContextInfo (context);
-	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<< p->GetUid() << std::endl;
-}
-void
-DevRxTrace (std::string context, Ptr<const Packet> p)
-{
-	struct mycontext mc = GetContextInfo (context);
-	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " " << p->GetUid() << std::endl;
-}
-void
-PhyRxOkTrace (std::string context, Ptr<const Packet> packet, double
-snr, WifiMode mode, enum WifiPreamble preamble)
-{
-	struct mycontext mc = GetContextInfo (context);
-	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " PHYRXOK mode=" << mode << " snr=" << snr << " " <<
-*packet << std::endl;
-}
-
-void
-PhyRxErrorTrace (std::string context, Ptr<const Packet> packet, double
-snr)
-{
-	struct mycontext mc = GetContextInfo (context);
-	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " PHYRXERROR snr=" << snr << " " << *packet <<
-std::endl;
-}
-void
-PhyTxTrace (std::string context, Ptr<const Packet> packet, WifiMode
-mode, WifiPreamble preamble, uint8_t txPower)
-{
-	struct mycontext mc = GetContextInfo (context);
-	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " PHYTX mode=" << mode << " " << *packet <<
-std::endl;
-}
-
-void
-PhyStateTrace (std::string context, Time start, Time duration, enum
-WifiPhy::State state)
-{
-	struct mycontext mc = GetContextInfo (context);
-	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " state=" << state << " start=" << start << " duration=" << duration << std::endl;
-}
-
-static void ArpDiscard (std::string context, Ptr<const Packet> p)
-{
-	struct mycontext mc = GetContextInfo (context);
-	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<< " Arp discards packet "<< p->GetUid() << " of "<<p->GetSize() << " bytes " << std::endl;
+	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
 }
 
 int main(int argc, char **argv) {
@@ -276,16 +220,6 @@ int main(int argc, char **argv) {
 //		LogComponentEnable("Node", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
 
 //		LogComponentEnable("DefaultSimulatorImpl", LogLevel( LOG_LEVEL_ALL | LOG_DEBUG | LOG_LOGIC | LOG_PREFIX_FUNC | LOG_PREFIX_TIME));
-		Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/$ns3::YansWifiPhy/PhyTxDrop",MakeCallback (&PhyTxDrop));
-		Config::Connect ("/NodeList/*/DeviceList/*/Mac/MacTx", MakeCallback (&DevTxTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/Mac/MacRx",	MakeCallback (&DevRxTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/RxOk",	MakeCallback (&PhyRxOkTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/RxError",	MakeCallback (&PhyRxErrorTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/Tx",	MakeCallback (&PhyTxTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/State", MakeCallback (&PhyStateTrace));
-		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/Drop", MakeCallback (&ArpDiscard));
-		Config::Connect ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficSent", MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficReceived", MakeCallback (&GenericPacketTrace));
 	}
 
 	/// Video start
@@ -432,9 +366,141 @@ int main(int argc, char **argv) {
 		appC.Stop (Seconds (clientStop));
 	}
 
+	if (verbose == 1)
+	{
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTx", MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTxDrop", MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRx", MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRxDrop", MakeCallback (&GenericPacketTrace));
+
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxBegin",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxEnd",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxDrop",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxBegin",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxEnd",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/Drop", MakeCallback (&GenericPacketTrace));
+	}
+
 	std::cout << "Starting simulation for " << totalTime << " s ...\n";
 	Simulator::Stop(Seconds(totalTime));
 	Simulator::Run();
 	Simulator::Destroy();
 	return 0;
 }
+
+//
+//void
+//PhyTxBegin (Ptr<const Packet> p)
+//{
+//std::cout << Simulator::Now() <<" PhyTxBegin "<< p->GetSize() << " bytes " << std::endl;
+//}
+//
+//void
+//PhyTxEnd (Ptr<const Packet> p)
+//{
+//std::cout << Simulator::Now() <<" PhyTxEnd "<< p->GetSize() << " bytes " << std::endl;
+//}
+//
+//void
+//PhyTxDrop (Ptr<const Packet> p)
+//{
+//std::cout << Simulator::Now() <<" PhyTxDrop "<< p->GetSize() << " bytes " << std::endl;
+//}
+//
+//void
+//PhyRxBegin (Ptr<const Packet> p)
+//{
+//std::cout << Simulator::Now() <<" PhyRxBegin "<< p->GetSize() << " bytes " << std::endl;
+//}
+//
+//void
+//PhyRxEnd (Ptr<const Packet> p)
+//{
+//std::cout << Simulator::Now() <<" PhyRxEnd "<< p->GetSize() << " bytes " << std::endl;
+//}
+//
+//void
+//PhyRxDrop (Ptr<const Packet> p)
+//{
+//std::cout << Simulator::Now() <<" PhyRxDrop "<< p->GetSize() << " bytes " << std::endl;
+//}
+//
+//void
+//MaxTx (std::string context, Ptr<const Packet> p)
+//{
+//std::cout << Simulator::Now() <<" MaxTx "<< p->GetSize() << " bytes " << std::endl;
+//}
+//
+//void
+//MaxTxDrop (Ptr<const Packet> p)
+//{
+//std::cout << Simulator::Now() <<" MaxTxDrop "<< p->GetSize() << " bytes " << std::endl;
+//}
+//
+//void
+//MaxRx (Ptr<const Packet> p)
+//{
+//std::cout << Simulator::Now() <<" MaxRx "<< p->GetSize() << " bytes " << std::endl;
+//}
+//
+//void
+//MaxRxDrop (Ptr<const Packet> p)
+//{
+//std::cout << Simulator::Now() <<" MaxRxDrop "<< p->GetSize() << " bytes " << std::endl;
+//}
+//
+//void
+//DevTxTrace (std::string context, Ptr<const Packet> p)
+//{
+//	struct mycontext mc = GetContextInfo (context);
+//	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<< p->GetUid() << std::endl;
+//}
+//
+//void
+//DevRxTrace (std::string context, Ptr<const Packet> p)
+//{
+//	struct mycontext mc = GetContextInfo (context);
+//	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " " << p->GetUid() << std::endl;
+//}
+//
+//void
+//PhyRxOkTrace (std::string context, Ptr<const Packet> packet, double
+//snr, WifiMode mode, enum WifiPreamble preamble)
+//{
+//	struct mycontext mc = GetContextInfo (context);
+//	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " PHYRXOK mode=" << mode << " snr=" << snr << " " <<
+//*packet << std::endl;
+//}
+//
+//void
+//PhyRxErrorTrace (std::string context, Ptr<const Packet> packet, double
+//snr)
+//{
+//	struct mycontext mc = GetContextInfo (context);
+//	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " PHYRXERROR snr=" << snr << " " << *packet <<
+//std::endl;
+//}
+//
+//void
+//PhyTxTrace (std::string context, Ptr<const Packet> packet, WifiMode
+//mode, WifiPreamble preamble, uint8_t txPower)
+//{
+//	struct mycontext mc = GetContextInfo (context);
+//	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " PHYTX mode=" << mode << " " << *packet <<
+//std::endl;
+//}
+//
+//void
+//PhyStateTrace (std::string context, Time start, Time duration, enum
+//WifiPhy::State state)
+//{
+//	struct mycontext mc = GetContextInfo (context);
+//	std::cout << Simulator::Now() << " Node "<< mc.id << " "<< mc.callback << " "<<  " state=" << state << " start=" << start << " duration=" << duration << std::endl;
+//}
+//
+//void
+//ArpDiscard (Ptr<const Packet> p)
+//{
+//	std::cout << Simulator::Now() << " Arp discards packet "<< p->GetUid() << " of "<<p->GetSize() << " bytes " << std::endl;
+//}
