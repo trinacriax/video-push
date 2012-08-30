@@ -222,6 +222,7 @@ private:
 	Timer 			m_helloNeighborsTimer;
 	uint32_t		m_helloLoss;
 	bool			m_helloActive;
+	uint32_t 		m_flag;
 
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	std::map<uint32_t, uint32_t> m_duplicates; // count chunks duplicated

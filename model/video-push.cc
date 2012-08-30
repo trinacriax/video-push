@@ -168,6 +168,10 @@ VideoPushApplication::GetTypeId (void)
 				   MakeBooleanAccessor (&VideoPushApplication::SetHelloActive,
 										&VideoPushApplication::GetHelloActive),
 				   MakeBooleanChecker() )
+	.AddAttribute ("Flag", "Flag.",
+				   UintegerValue (0),
+				   MakeUintegerAccessor (&VideoPushApplication::m_flag),
+				   MakeUintegerChecker<uint32_t> (0))
   ;
   return tid;
 }

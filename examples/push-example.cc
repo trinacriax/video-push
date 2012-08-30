@@ -192,6 +192,8 @@ int main(int argc, char **argv) {
 	double nak_m1 = 1.0;
 	double nak_m2 = 1.0;
 
+	uint32_t flag = 0;
+
 	CommandLine cmd;
 	cmd.AddValue ("size", "Number of nodes.", size);
 	cmd.AddValue ("time", "Simulation time, s.", totalTime);
@@ -222,6 +224,7 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("pullmax", "Max number of pull allowed per chunk", pullmax);
 	cmd.AddValue ("pulltime", "Time between pull in ms (e.g., 100ms = 0.100s)", pulltime);
 	cmd.AddValue ("v", "Verbose", verbose);
+	cmd.AddValue ("ff", "flag", flag);
 	cmd.Parse(argc, argv);
 	if (pullactive)
 		NS_ASSERT (helloactive);
@@ -245,6 +248,7 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::VideoPushApplication::HelloNeighborsTime", TimeValue(Time::FromDouble(helloneighbors,Time::S)));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
 	Config::SetDefault ("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
+	Config::SetDefault ("ns3::VideoPushApplication::Flag", UintegerValue(flag));
 	Config::SetDefault ("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
 	Config::SetDefault ("ns3::Ipv4::IpForward", BooleanValue (false));
 	Config::SetDefault ("ns3::YansWifiPhy::TxGain",DoubleValue(TxGain));
