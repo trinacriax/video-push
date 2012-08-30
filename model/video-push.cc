@@ -769,7 +769,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	uint32_t missed = m_chunks.GetLeastMissed();
 	bool duplicated = false;
 	bool toolate = false;
-#define MISS // INDUCING MISSING CHUNKS START
+//#define MISS // INDUCING MISSING CHUNKS START
 #ifdef MISS
 	bool missed_chunk = UniformVariable().GetValue() < 0.05;
 //	uint32_t chunktomiss = 10;//Only node 2 misses chunk #1
