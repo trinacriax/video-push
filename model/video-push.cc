@@ -1156,8 +1156,8 @@ void VideoPushApplication::SendHelloNeighbors ()
 	for (int i = 0; i < size && m_flag > 1 ;  i++)
 	{
 		Neighbor nt = m_neighbors.Get(i);
-		Time delay = Time::FromDouble (UniformVariable().GetValue(0, 200),Time::MS);
-		Simulator::Schedule (delay, &VideoPushApplication::SendHelloUnicast, this, nt.GetAddress());
+//		Time delay = Time::FromDouble (UniformVariable().GetValue(0, 200),Time::MS);
+		Simulator::ScheduleNow (&VideoPushApplication::SendHelloUnicast, this, nt.GetAddress());
 	}
 	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 100)), Time::MS);
 	m_helloNeighborsTimer.Schedule (m_helloNeighborsTime - t);
