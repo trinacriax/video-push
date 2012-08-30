@@ -850,7 +850,7 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 	{
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast("<<destination<<") hello from " << sender << " #Chunks="<< n_chunks);
 		Neighbor nt (sender, PUSH_PORT);
-		if(!m_neighbors.IsNeighbor (nt) && m_flag > 1)
+		if(!m_neighbors.IsNeighbor (nt) && m_flag > 0)
 		{
 //			double delayv = rint(UniformVariable().GetValue (1, m_helloNeighborsTime.GetMilliSeconds()));
 //			NS_ASSERT_MSG (delayv > 0, "HandleHello pulltime is 0");
