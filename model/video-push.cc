@@ -852,11 +852,11 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 		Neighbor nt (sender, PUSH_PORT);
 		if(!m_neighbors.IsNeighbor (nt) && m_flag > 1)
 		{
-			double delayv = rint(UniformVariable().GetValue (1, m_helloNeighborsTime.GetMilliSeconds()));
+//			double delayv = rint(UniformVariable().GetValue (1, m_helloNeighborsTime.GetMilliSeconds()));
 //			NS_ASSERT_MSG (delayv > 0, "HandleHello pulltime is 0");
-			Time delay = Time::FromDouble (delayv, Time::MS);
-			Simulator::Schedule (delay, &VideoPushApplication::SendHelloUnicast, this, sender);
-			NS_LOG_INFO ("Node " << GetLocalAddress() << " reply to " << sender << " in "<< delay.GetSeconds() << "sec");
+//			Time delay = Time::FromDouble (delayv, Time::MS);
+			Simulator::ScheduleNow (&VideoPushApplication::SendHelloUnicast, this, sender);
+//			NS_LOG_INFO ("Node " << GetLocalAddress() << " reply to " << sender << " in "<< delay.GetSeconds() << "sec");
 		}
 	}
 	else if (destination.IsEqual(GetLocalAddress()))
