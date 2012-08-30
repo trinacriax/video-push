@@ -358,6 +358,7 @@ int main(int argc, char **argv) {
 	AodvHelper aodv;
 	switch (routing)
 	{
+		default:
 		case 1:
 		{
 			uint32_t aodvHello = 2, aodvHelloLoss = 2;
@@ -387,10 +388,6 @@ int main(int argc, char **argv) {
 //			stack.SetRoutingHelper(mbnaodv);
 //			break;
 //		}
-		default:
-		{
-			break;
-		}
 	}
 	stack.Install(source);
 	stack.Install(nodes);
