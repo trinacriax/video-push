@@ -232,8 +232,10 @@ private:
 
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm
 	enum ChunkPolicy m_chunkSelection; // Chunk selection algorithm
-	TracedCallback<Ptr<const Packet> > m_txTrace;
-	TracedCallback<Ptr<const Packet>, const Address &> m_rxTrace;
+	TracedCallback<Ptr<const Packet> > m_txDataTrace;
+	TracedCallback<Ptr<const Packet>, const Address &> m_rxDataTrace;
+	TracedCallback<Ptr<const Packet> > m_txControlTrace;
+	TracedCallback<Ptr<const Packet>, const Address &> m_rxControlTrace;
 };
 }
 #endif /* VIDEO_PUSH_H_ */
