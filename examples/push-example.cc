@@ -383,17 +383,16 @@ int main(int argc, char **argv) {
 	AodvHelper aodv;
 	switch (routing)
 	{
-		default:
 		case 1:
 		{
 			uint32_t aodvHello = 2, aodvHelloLoss = 2;
 //			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableHello", BooleanValue(false));
-			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
+//			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
 //			Config::SetDefault ("ns3::aodv::RoutingProtocol::RreqRetries", UintegerValue(2));
 //			Config::SetDefault ("ns3::aodv::RoutingProtocol::NodeTraversalTime", TimeValue (MicroSeconds(40)));
-			Config::SetDefault ("ns3::aodv::RoutingProtocol::ActiveRouteTimeout", TimeValue (Seconds(aodvHello*(aodvHelloLoss+1))));
-			Config::SetDefault ("ns3::aodv::RoutingProtocol::AllowedHelloLoss", UintegerValue (aodvHelloLoss));
-			Config::SetDefault ("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(aodvHello)));
+//			Config::SetDefault ("ns3::aodv::RoutingProtocol::ActiveRouteTimeout", TimeValue (Seconds(aodvHello*(aodvHelloLoss+1))));
+//			Config::SetDefault ("ns3::aodv::RoutingProtocol::AllowedHelloLoss", UintegerValue (aodvHelloLoss));
+//			Config::SetDefault ("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(aodvHello)));
 			stack.SetRoutingHelper(aodv);
 			break;
 		}
@@ -413,6 +412,8 @@ int main(int argc, char **argv) {
 //			stack.SetRoutingHelper(mbnaodv);
 //			break;
 //		}
+		default:
+			break;
 	}
 	stack.Install(source);
 	stack.Install(nodes);
