@@ -57,6 +57,9 @@ uint32_t aodvSent = 0;
 uint32_t arpSent = 0;
 uint32_t videoBroadcast = 0;
 uint32_t videoUnicast = 0;
+uint32_t phyTxBegin = 0;
+uint32_t phyTxEnd = 0;
+uint32_t phyTxDrop = 0;
 
 struct mycontext{
 	uint32_t id;
@@ -83,8 +86,12 @@ GenericPacketTrace (std::string context, Ptr<const Packet> p)
 	struct mycontext mc = GetContextInfo (context);
 //	controls
 	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
-	if ( mc.callback.find("arp",0) )
-		arpSent += p->GetSize();
+	if ( mc.callback.compare("PhyTxBegin") )
+		phyTxBegin += p->GetSize();
+	else if ( mc.callback.compare("PhyTxEnd") )
+		phyTxEnd += p->GetSize();
+	else if ( mc.callback.compare("PhyTxDrop") )
+		phyTxDrop += p->GetSize();
 }
 
 void
@@ -117,7 +124,7 @@ VideoControlSent (std::string context, Ptr<const Packet> p)
 void
 ResetValues ()
 {
-	std::cout << (Simulator::Now().GetSeconds())<<"\t"<< (aodvSent+videoBroadcast+videoUnicast) <<"\t"<< aodvSent <<"\t"<< videoBroadcast << "\t"<< videoUnicast << "\n";
+	std::cout << (Simulator::Now().GetSeconds())<<"\t"<< (aodvSent+videoBroadcast+videoUnicast) <<"\t"<< aodvSent <<"\t"<< videoBroadcast << "\t"<< videoUnicast << "\t" << "histogram"<<"\n";
 	aodvSent = videoBroadcast = videoUnicast = 0;
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
@@ -450,30 +457,31 @@ int main(int argc, char **argv) {
 		appC.Stop (Seconds (clientStop));
 	}
 
-	if (verbose == 1)
+//	if (verbose == 1)
 	{
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTx", MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTxDrop", MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRx", MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRxDrop", MakeCallback (&GenericPacketTrace));
-
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxBegin",	MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxEnd",	MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxDrop",	MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxBegin",	MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxEnd",	MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop",	MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/Drop", MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiMac/Mac/MacTx", MakeCallback (&GenericPacketTrace));
+//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiMac/Mac/MacTxDrop", MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiMac/MacRx", MakeCallback (&GenericPacketTrace));
+//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiMac/Mac/MacRxDrop", MakeCallback (&GenericPacketTrace));
+//
+//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiPhy/PhyTxBegin",	MakeCallback (&GenericPacketTrace));
+//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiPhy/PhyTxEnd",	MakeCallback (&GenericPacketTrace));
+//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiPhy/PhyTxDrop",	MakeCallback (&GenericPacketTrace));
+//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxBegin",	MakeCallback (&GenericPacketTrace));
+//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxEnd",	MakeCallback (&GenericPacketTrace));
+//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop",	MakeCallback (&GenericPacketTrace));
+//		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/Drop", MakeCallback (&GenericPacketTrace));
 
 		Config::ConnectWithoutContext ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficSent", MakeCallback (&AodvTrafficSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxData", MakeCallback (&VideoTrafficSent));
-		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxControl", MakeCallback (&VideoTrafficSent));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxControl", MakeCallback (&VideoControlSent));
 	}
 
 	std::cout << "Starting simulation for " << totalTime << " s ...\n";
+
 //	FlowMonitorHelper flowmon;
 //	Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
-//	Simulator::Schedule (Seconds(1), &ResetValues);
+	Simulator::Schedule (Seconds(1), &ResetValues);
 
 	Simulator::Stop(Seconds(totalTime));
 	Simulator::Run();
@@ -492,6 +500,7 @@ int main(int argc, char **argv) {
 //	          std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / 10.0 / 1024 / 1024  << " Mbps\n";
 //	        }
 //	    }
+	std::cout<<"\n\n\n";
 
 	Simulator::Destroy();
 	return 0;
