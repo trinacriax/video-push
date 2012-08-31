@@ -52,6 +52,10 @@ NS_LOG_COMPONENT_DEFINE ("VideoStreaming");
 
 /// Verbose
 uint32_t verbose = 0;
+uint32_t aodvSent = 0;
+uint32_t arpSent = 0;
+uint32_t videoBroadcast = 0;
+uint32_t videoUnicast = 0;
 
 struct mycontext{
 	uint32_t id;
@@ -78,6 +82,43 @@ GenericPacketTrace (std::string context, Ptr<const Packet> p)
 	struct mycontext mc = GetContextInfo (context);
 //	controls
 	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
+	if ( mc.callback.find("arp",0) )
+		arpSent += p->GetSize();
+}
+
+void
+//AodvTrafficSent (std::string context, Ptr<const Packet> p)
+AodvTrafficSent (Ptr<const Packet> p)
+{
+//	struct mycontext mc = GetContextInfo (context);
+//	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
+	aodvSent += p->GetSize();
+}
+
+void
+VideoTrafficSent (std::string context, Ptr<const Packet> p)
+//VideoTrafficSent (Ptr<const Packet> p)
+{
+//	struct mycontext mc = GetContextInfo (context);
+//	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
+	videoBroadcast += p->GetSize();
+}
+
+void
+VideoControlSent (std::string context, Ptr<const Packet> p)
+//VideoTrafficSent (Ptr<const Packet> p)
+{
+//	struct mycontext mc = GetContextInfo (context);
+//	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
+	videoUnicast += p->GetSize();
+}
+
+void
+ResetValues ()
+{
+	std::cout << (Simulator::Now().GetSeconds())<<"\t"<< (aodvSent+videoBroadcast+videoUnicast) <<"\t"<< aodvSent <<"\t"<< videoBroadcast << "\t"<< videoUnicast << "\n";
+	aodvSent = videoBroadcast = videoUnicast = 0;
+	Simulator::Schedule (Seconds(1), &ResetValues);
 }
 
 int main(int argc, char **argv) {
@@ -422,6 +463,10 @@ int main(int argc, char **argv) {
 		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxEnd",	MakeCallback (&GenericPacketTrace));
 		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop",	MakeCallback (&GenericPacketTrace));
 		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/Drop", MakeCallback (&GenericPacketTrace));
+
+		Config::ConnectWithoutContext ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficSent", MakeCallback (&AodvTrafficSent));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxData", MakeCallback (&VideoTrafficSent));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxControl", MakeCallback (&VideoTrafficSent));
 	}
 
 	std::cout << "Starting simulation for " << totalTime << " s ...\n";
