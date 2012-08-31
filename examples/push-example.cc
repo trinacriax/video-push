@@ -278,12 +278,19 @@ int main(int argc, char **argv) {
 	mobilityS.SetMobilityModel("ns3::ConstantPositionMobilityModel");
 	mobilityS.Install(source);
 
+	Ptr<UniformRandomVariable> rhos = CreateObject<UniformRandomVariable> ();
+
+	rhos->SetAttribute ("Min", DoubleValue (1));
+	rhos->SetAttribute ("Max", DoubleValue (radius));
+//	std::stringstream rho;
+//	rho<<"ns3::UniformRandomVariable[Min=0|Max="<<radius<<"]";
+
 	MobilityHelper mobility;
 	mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
 	mobility.SetPositionAllocator("ns3::RandomDiscPositionAllocator",
 					"X",DoubleValue(0.0),
 					"Y",DoubleValue(0.0),
-					"Rho", RandomVariableValue (UniformVariable(1.0,radius))
+					"Rho", PointerValue (rhos)
 					);
 	mobility.Install(nodes);
 
