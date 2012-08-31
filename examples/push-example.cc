@@ -45,6 +45,7 @@
 #include "ns3/wifi-module.h"
 #include "ns3/aodv-helper.h"
 #include "ns3/string.h"
+#include "ns3/flow-monitor-module.h"
 
 using namespace ns3;
 
@@ -470,8 +471,28 @@ int main(int argc, char **argv) {
 	}
 
 	std::cout << "Starting simulation for " << totalTime << " s ...\n";
+//	FlowMonitorHelper flowmon;
+//	Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
+//	Simulator::Schedule (Seconds(1), &ResetValues);
+
 	Simulator::Stop(Seconds(totalTime));
 	Simulator::Run();
+
+//	 monitor->CheckForLostPackets ();
+//	  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
+//	  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
+//	  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+//	    {
+//	      // first 2 FlowIds are for ECHO apps, we don't want to display them
+//	      if (i->first > 2)
+//	        {
+//	          Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
+//	          std::cout << "Flow " << i->first - 2 << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";           std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
+//	          std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
+//	          std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / 10.0 / 1024 / 1024  << " Mbps\n";
+//	        }
+//	    }
+
 	Simulator::Destroy();
 	return 0;
 }
