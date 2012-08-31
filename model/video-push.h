@@ -113,8 +113,8 @@ public:
 
 	void SetPullActive (bool pull);
 	bool GetPullActive () const;
-	void SetHelloActive (bool hello);
-	bool GetHelloActive () const;
+	void SetHelloActive (uint32_t hello);
+	uint32_t GetHelloActive () const;
 	void SetChunkDelay (uint32_t chunkid, Time delay);
 	Time GetChunkDelay (uint32_t chunkid);
 	void SetPullTime (Time time);
@@ -221,7 +221,7 @@ private:
 	Time 			m_helloNeighborsTime;
 	Timer 			m_helloNeighborsTimer;
 	uint32_t		m_helloLoss;
-	bool			m_helloActive;
+	uint32_t		m_helloActive;
 	uint32_t 		m_flag;
 
 	ChunkBuffer		m_chunks;			// current chunk buffer

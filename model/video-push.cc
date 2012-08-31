@@ -164,10 +164,10 @@ VideoPushApplication::GetTypeId (void)
 						   	   	   	   	    &VideoPushApplication::GetSource),
 				   MakeIpv4AddressChecker())
 	.AddAttribute ("HelloActive", "Hello activation.",
-				   BooleanValue (true),
-				   MakeBooleanAccessor (&VideoPushApplication::SetHelloActive,
+				   UintegerValue (0),
+				   MakeUintegerAccessor (&VideoPushApplication::SetHelloActive,
 										&VideoPushApplication::GetHelloActive),
-				   MakeBooleanChecker() )
+				   MakeUintegerChecker<uint32_t> (0))
 	.AddAttribute ("Flag", "Flag.",
 				   UintegerValue (0),
 				   MakeUintegerAccessor (&VideoPushApplication::m_flag),
@@ -547,12 +547,12 @@ VideoPushApplication::GetPullActive () const
 }
 
 void
-VideoPushApplication::SetHelloActive (bool hello)
+VideoPushApplication::SetHelloActive (uint32_t hello)
 {
 	m_helloActive = hello;
 }
 
-bool
+uint32_t
 VideoPushApplication::GetHelloActive () const
 {
 	return m_helloActive;
@@ -850,7 +850,7 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 	{
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast("<<destination<<") hello from " << sender << " #Chunks="<< n_chunks);
 		Neighbor nt (sender, PUSH_PORT);
-		if(!m_neighbors.IsNeighbor (nt) && m_flag > 0)
+		if(!m_neighbors.IsNeighbor (nt) && GetHelloActive() > 1)
 		{
 //			double delayv = rint(UniformVariable().GetValue (1, m_helloNeighborsTime.GetMilliSeconds()));
 //			NS_ASSERT_MSG (delayv > 0, "HandleHello pulltime is 0");
@@ -1153,7 +1153,7 @@ void VideoPushApplication::SendHelloNeighbors ()
 {
 	NS_LOG_FUNCTION (this);
 	uint32_t size = m_neighbors.GetSize();
-	for (int i = 0; i < size && m_flag > 1 ;  i++)
+	for (int i = 0; i < size && GetHelloActive() > 2 ;  i++)
 	{
 		Neighbor nt = m_neighbors.Get(i);
 //		Time delay = Time::FromDouble (UniformVariable().GetValue(0, 200),Time::MS);

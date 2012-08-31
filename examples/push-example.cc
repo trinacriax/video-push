@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
 	// max number of pull to retrieve a chunk
 	uint32_t pullmax = 1;
 	// Time in seconds between hellos
-	bool helloactive = false;
+	uint32_t helloactive = 0;
 	// Time in seconds between hellos
 	double hellotime = 12;
 	// Time in seconds between hellos
@@ -187,7 +187,7 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
 	Config::SetDefault ("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
 	Config::SetDefault ("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
-	Config::SetDefault ("ns3::VideoPushApplication::HelloActive", BooleanValue(helloactive));
+	Config::SetDefault ("ns3::VideoPushApplication::HelloActive", UintegerValue(helloactive));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloTime", TimeValue(Time::FromDouble(hellotime,Time::S)));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloNeighborsTime", TimeValue(Time::FromDouble(helloneighbors,Time::S)));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
