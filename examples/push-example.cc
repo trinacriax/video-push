@@ -101,20 +101,15 @@ GenericPacketTrace (std::string context, Ptr<const Packet> p)
 }
 
 void
-//AodvTrafficSent (std::string context, Ptr<const Packet> p)
 AodvTrafficSent (Ptr<const Packet> p)
 {
-//	struct mycontext mc = GetContextInfo (context);
-//	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
 	aodvSent += p->GetSize();
 }
 
 void
 VideoTrafficSent (std::string context, Ptr<const Packet> p)
-//VideoTrafficSent (Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
-//	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
 	msgVideo[mc.id] += p->GetSize();
 	msgVideoT += p->GetSize();
 }
@@ -132,19 +127,14 @@ void StatisticVideo ()
 
 void
 VideoControlSent (std::string context, Ptr<const Packet> p)
-//VideoTrafficSent (Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
-//	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
-//	uint32_t id = mc.id;
-//	(*msgControl)[id] = 0;
 	msgControl[mc.id] += p->GetSize();
 	msgControlT += p->GetSize();
 }
 
 void StatisticControl ()
 {
-//	for (std::vector<uint32_t>::iterator iter = msgControl.begin();  iter != msgControl.end();  iter++)
 	for (uint32_t i = 0; i < msgControl.size(); i++)
 	{
 		std::cout << "ControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgControl[i] << "\n";
@@ -156,7 +146,6 @@ void StatisticControl ()
 
 void
 Neighbors (std::string context, const uint32_t n)
-//VideoTrafficSent (Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
 	neighbors[mc.id] = n;
