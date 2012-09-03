@@ -286,6 +286,7 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::VideoPushApplication::Flag", UintegerValue(flag));
 	Config::SetDefault ("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
 	Config::SetDefault ("ns3::Ipv4::IpForward", BooleanValue (false));
+	Config::SetDefault ("ns3::aodv::RoutingProtocol::Enable1Hop", BooleanValue (true));
 	Config::SetDefault ("ns3::YansWifiPhy::TxGain",DoubleValue(TxGain));
 	Config::SetDefault ("ns3::YansWifiPhy::RxGain",DoubleValue(RxGain));
 	Config::SetDefault ("ns3::YansWifiPhy::TxPowerStart",DoubleValue(TxStart));
