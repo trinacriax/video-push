@@ -122,6 +122,8 @@ VideoPushApplication::GetTypeId (void)
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_txControlTrace))
 	.AddTraceSource ("RxControl", "A packet has been received",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxControlTrace))
+	.AddTraceSource ("NeighborTrace", "Neighbors",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_neighborsTrace))
 	.AddAttribute ("PullTime", "Time between two consecutive pulls.",
 				 TimeValue (MilliSeconds (50)),
 				 MakeTimeAccessor (&VideoPushApplication::SetPullTime,
@@ -1187,6 +1189,7 @@ void VideoPushApplication::SendHelloNeighbors ()
 	}
 	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 100)), Time::MS);
 	m_helloNeighborsTimer.Schedule (m_helloNeighborsTime - t);
+	m_neighborsTrace (m_neighbors.GetSize());
 }
 
 void VideoPushApplication::SendHelloUnicast (Ipv4Address &neighbor)

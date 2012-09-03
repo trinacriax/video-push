@@ -237,6 +237,7 @@ private:
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxDataTrace;
 	TracedCallback<Ptr<const Packet> > m_txControlTrace;
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxControlTrace;
+	TracedCallback<uint32_t> m_neighborsTrace;
 };
 }
 #endif /* VIDEO_PUSH_H_ */
