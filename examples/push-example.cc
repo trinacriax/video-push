@@ -57,6 +57,8 @@ uint32_t aodvSent = 0;
 uint32_t arpSent = 0;
 uint32_t videoBroadcast = 0;
 std::vector<uint32_t> msgControl;
+std::vector<uint32_t> msgVideo;
+uint32_t msgVideoT;
 uint32_t msgControlT = 0;
 
 uint32_t phyTxBegin = 0;
@@ -109,9 +111,21 @@ void
 VideoTrafficSent (std::string context, Ptr<const Packet> p)
 //VideoTrafficSent (Ptr<const Packet> p)
 {
-//	struct mycontext mc = GetContextInfo (context);
+	struct mycontext mc = GetContextInfo (context);
 //	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
-	videoBroadcast += p->GetSize();
+	msgVideo[mc.id] += p->GetSize();
+	msgVideoT += p->GetSize();
+}
+
+void StatisticVideo ()
+{
+	for (uint32_t i = 0; i < msgVideo.size(); i++)
+	{
+		std::cout << "VideoMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideo[i] << "\n";
+		msgVideo[i];
+	}
+	std::cout << "VideoMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideoT<< "\n";
+	msgVideoT = 0;
 }
 
 void
@@ -142,6 +156,7 @@ void
 ResetValues ()
 {
 	StatisticControl ();
+	StatisticVideo ();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
 
@@ -338,8 +353,13 @@ int main(int argc, char **argv) {
 	NodeContainer nodes;
 	nodes.Create(size);
 
+
 	for (int k=0; k<size; k++)
+	{
 	    msgControl.push_back(0);
+	    msgVideo.push_back(0);
+	}
+
 	WifiHelper wifi = WifiHelper::Default();
 
 //	wifi.SetStandard(WIFI_PHY_STANDARD_80211b);
