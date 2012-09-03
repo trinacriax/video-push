@@ -61,6 +61,8 @@ std::vector<uint32_t> msgVideo;
 uint32_t msgVideoT;
 uint32_t msgControlT = 0;
 
+std::vector<uint32_t> neighbors;
+uint32_t neighborsT = 0;
 uint32_t phyTxBegin = 0;
 uint32_t phyTxEnd = 0;
 uint32_t phyTxDrop = 0;
@@ -153,10 +155,30 @@ void StatisticControl ()
 }
 
 void
+Neighbors (std::string context, const uint32_t n)
+//VideoTrafficSent (Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	neighbors[mc.id] = n;
+}
+
+void StatisticNeighbors ()
+{
+	for (uint32_t i = 0; i < neighbors.size(); i++)
+	{
+		std::cout << "Neighbor Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << neighbors[i] << "\n";
+		neighborsT += neighbors[i];
+	}
+	std::cout << "Neighbors\t" << Simulator::Now().GetSeconds()<< "\t" << neighborsT << "\n";
+	neighborsT = 0;
+}
+
+void
 ResetValues ()
 {
 	StatisticControl ();
 	StatisticVideo ();
+	StatisticNeighbors ();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
 
@@ -358,6 +380,7 @@ int main(int argc, char **argv) {
 	{
 	    msgControl.push_back(0);
 	    msgVideo.push_back(0);
+	    neighbors.push_back(0);
 	}
 
 	WifiHelper wifi = WifiHelper::Default();
