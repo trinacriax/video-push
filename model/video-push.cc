@@ -233,6 +233,17 @@ VideoPushApplication::GetAcceptedSockets (void) const
 void
 VideoPushApplication::DoDispose (void)
 {
+	NS_LOG_FUNCTION_NOARGS ();
+	StatisticChunk();
+	m_socket = 0;
+	m_socketList.clear();
+	// chain up
+	Application::DoDispose ();
+}
+
+void
+VideoPushApplication::StatisticChunk (void)
+{
   NS_LOG_FUNCTION_NOARGS ();
   std::map<uint32_t, ChunkVideo> tmp_buffer = m_chunks.GetChunkBuffer();
   uint32_t received = 1, receivedpull = 0, receivedpush = 0, missed = 0, duplicates = 0, chunkID = 0, current = 1, late = 0, split = 0, splitP = 0, splitL = 0;
@@ -375,10 +386,6 @@ VideoPushApplication::DoDispose (void)
 		  	  	    m_node->GetId(), rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence, dlate,
 		  receivedpush, delay_avg_push.ToInteger(Time::US), sigmaP, confidenceP, receivedpull, delay_avg_pull.ToInteger(Time::US), sigmaL, confidenceL);
   std::cout << buffer;
-  m_socket = 0;
-  m_socketList.clear();
-  // chain up
-  Application::DoDispose ();
 }
 
 uint32_t

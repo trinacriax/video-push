@@ -183,6 +183,7 @@ private:
 	void ConnectionFailed (Ptr<Socket>);
 	void Ignore (Ptr<Socket>);
 	Ipv4Address GetLocalAddress ();
+	void StatisticChunk (void);
 
 	Ptr<Socket>     m_socket;       // Associated socket
 	std::list<Ptr<Socket> > m_socketList; //the accepted sockets
