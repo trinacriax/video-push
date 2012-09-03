@@ -124,7 +124,7 @@ void StatisticVideo ()
 	for (uint32_t i = 0; i < msgVideo.size(); i++)
 	{
 		std::cout << "VideoMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideo[i] << "\n";
-		msgVideo[i];
+		msgVideo[i] = 0;
 	}
 	std::cout << "VideoMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideoT<< "\n";
 	msgVideoT = 0;
