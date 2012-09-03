@@ -56,7 +56,9 @@ uint32_t verbose = 0;
 uint32_t aodvSent = 0;
 uint32_t arpSent = 0;
 uint32_t videoBroadcast = 0;
-uint32_t videoUnicast = 0;
+std::vector<uint32_t> msgControl;
+uint32_t msgControlT = 0;
+
 uint32_t phyTxBegin = 0;
 uint32_t phyTxEnd = 0;
 uint32_t phyTxDrop = 0;
@@ -116,16 +118,30 @@ void
 VideoControlSent (std::string context, Ptr<const Packet> p)
 //VideoTrafficSent (Ptr<const Packet> p)
 {
-//	struct mycontext mc = GetContextInfo (context);
+	struct mycontext mc = GetContextInfo (context);
 //	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
-	videoUnicast += p->GetSize();
+//	uint32_t id = mc.id;
+//	(*msgControl)[id] = 0;
+	msgControl[mc.id] += p->GetSize();
+	msgControlT += p->GetSize();
+}
+
+void StatisticControl ()
+{
+//	for (std::vector<uint32_t>::iterator iter = msgControl.begin();  iter != msgControl.end();  iter++)
+	for (uint32_t i = 0; i < msgControl.size(); i++)
+	{
+		std::cout << "ControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgControl[i] << "\n";
+		msgControl[i] = 0;
+	}
+	std::cout << "ControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgControlT<< "\n";
+	msgControlT = 0;
 }
 
 void
 ResetValues ()
 {
-	std::cout << (Simulator::Now().GetSeconds())<<"\t"<< (aodvSent+videoBroadcast+videoUnicast) <<"\t"<< aodvSent <<"\t"<< videoBroadcast << "\t"<< videoUnicast << "\t" << "histogram"<<"\n";
-	aodvSent = videoBroadcast = videoUnicast = 0;
+	StatisticControl ();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
 
@@ -322,6 +338,8 @@ int main(int argc, char **argv) {
 	NodeContainer nodes;
 	nodes.Create(size);
 
+	for (int k=0; k<size; k++)
+	    msgControl.push_back(0);
 	WifiHelper wifi = WifiHelper::Default();
 
 //	wifi.SetStandard(WIFI_PHY_STANDARD_80211b);
