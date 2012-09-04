@@ -234,8 +234,6 @@ int main(int argc, char **argv) {
 	uint32_t helloactive = 0;
 	// Time in seconds between hellos
 	double hellotime = 12;
-	// Time in seconds between hellos
-	double helloneighbors = 4;
 	// max number of hello loss before removing a neighbor
 	uint32_t helloloss = 1;
 	// Activate pull as recovery mechanism
@@ -320,7 +318,6 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloActive", UintegerValue(helloactive));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloTime", TimeValue(Time::FromDouble(hellotime,Time::S)));
-	Config::SetDefault ("ns3::VideoPushApplication::HelloNeighborsTime", TimeValue(Time::FromDouble(helloneighbors,Time::S)));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
 	Config::SetDefault ("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
 	Config::SetDefault ("ns3::VideoPushApplication::Flag", UintegerValue(flag));

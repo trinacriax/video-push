@@ -134,11 +134,6 @@ VideoPushApplication::GetTypeId (void)
 				 MakeTimeAccessor (&VideoPushApplication::SetHelloTime,
 								   &VideoPushApplication::GetHelloTime),
 				 MakeTimeChecker ())
-	.AddAttribute ("HelloNeighborsTime", "Hello Neighbors Time.",
-				 TimeValue (Seconds (4)),
-				 MakeTimeAccessor (&VideoPushApplication::SetHelloNeighborsTime,
-								   &VideoPushApplication::GetHelloNeighborsTime),
-				 MakeTimeChecker ())
 	.AddAttribute ("PullMax", "Max number of pull.",
 				   UintegerValue (1),
 				   MakeUintegerAccessor (&VideoPushApplication::SetPullMax,
@@ -186,7 +181,7 @@ VideoPushApplication::GetTypeId (void)
 VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
 		m_connected(false), m_ipv4(0), m_socket(0),
-		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY), m_helloNeighborsTimer (Timer::CANCEL_ON_DESTROY)
+		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
@@ -433,15 +428,12 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_pullTimer.SetFunction (&VideoPushApplication::PeerLoop, this);
       m_helloTimer.SetDelay (GetHelloTime());
       m_helloTimer.SetFunction (&VideoPushApplication::SendHello, this);
-      m_helloNeighborsTimer.SetDelay (GetHelloNeighborsTime());
-      m_helloNeighborsTimer.SetFunction (&VideoPushApplication::SendHelloNeighbors, this);
       Time start = Time::FromDouble (UniformVariable().GetValue (0, 5000), Time::MS);
       if (GetHelloActive())
       {
     	  Simulator::Schedule (start, &VideoPushApplication::SendHello, this);
-    	  Simulator::Schedule (GetHelloNeighborsTime()+start, &VideoPushApplication::SendHelloNeighbors, this);
       }
-      m_neighbors.SetExpire (Time::FromDouble (GetHelloNeighborsTime().GetSeconds() * (1 + GetHelloLoss()), Time::S));
+      m_neighbors.SetExpire (Time::FromDouble (GetHelloTime().GetSeconds() * (1.10 * (1.0 + GetHelloLoss())), Time::S));
       double inter_time = 1 / (m_cbrRate.GetBitRate()/(8.0*m_pktSize));
       m_pullSlot = Time::FromDouble(inter_time,Time::S);
     }
@@ -593,18 +585,6 @@ Time
 VideoPushApplication::GetHelloTime () const
 {
 	return m_helloTime;
-}
-
-void
-VideoPushApplication::SetHelloNeighborsTime (Time hellot)
-{
-	m_helloNeighborsTime = hellot;
-}
-
-Time
-VideoPushApplication::GetHelloNeighborsTime () const
-{
-	return m_helloNeighborsTime;
 }
 
 void
@@ -1175,21 +1155,8 @@ void VideoPushApplication::SendHello ()
 	m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
 	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 1000)), Time::MS);
 	m_helloTimer.Schedule (m_helloTime - t);
-}
-
-void VideoPushApplication::SendHelloNeighbors ()
-{
-	NS_LOG_FUNCTION (this);
-	uint32_t size = m_neighbors.GetSize();
-	for (int i = 0; i < size && GetHelloActive() > 2 ;  i++)
 	{
-		Neighbor nt = m_neighbors.Get(i);
-//		Time delay = Time::FromDouble (UniformVariable().GetValue(0, 200),Time::MS);
-		Simulator::ScheduleNow (&VideoPushApplication::SendHelloUnicast, this, nt.GetAddress());
 	}
-	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 100)), Time::MS);
-	m_helloNeighborsTimer.Schedule (m_helloNeighborsTime - t);
-	m_neighborsTrace (m_neighbors.GetSize());
 }
 
 void VideoPushApplication::SendHelloUnicast (Ipv4Address &neighbor)

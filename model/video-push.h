@@ -121,8 +121,6 @@ public:
 	Time GetPullTime () const;
 	void SetHelloTime (Time time);
 	Time GetHelloTime () const;
-	void SetHelloNeighborsTime (Time time);
-	Time GetHelloNeighborsTime () const;
 	void SetHelloLoss (uint32_t loss);
 	uint32_t GetHelloLoss () const;
 	void SetSource (Ipv4Address source);
@@ -158,7 +156,6 @@ private:
 	void SendPull (uint32_t chunkid, const Ipv4Address target);
 	void SendHello ();
 	void SendHelloUnicast (Ipv4Address &neighbor);
-	void SendHelloNeighbors ();
 	ChunkVideo* ForgeChunk ();
 	uint32_t ChunkSelection (ChunkPolicy policy);
 	Ipv4Address PeerSelection (PeerPolicy policy);
