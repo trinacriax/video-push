@@ -130,7 +130,7 @@ VideoPushApplication::GetTypeId (void)
 								   &VideoPushApplication::GetPullTime),
 				 MakeTimeChecker ())
 	.AddAttribute ("HelloTime", "Hello Time.",
-				 TimeValue (Seconds (12)),
+				 TimeValue (Seconds (10)),
 				 MakeTimeAccessor (&VideoPushApplication::SetHelloTime,
 								   &VideoPushApplication::GetHelloTime),
 				 MakeTimeChecker ())
