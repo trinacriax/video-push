@@ -54,6 +54,7 @@ NS_LOG_COMPONENT_DEFINE ("VideoStreaming");
 /// Verbose
 uint32_t verbose = 0;
 uint32_t aodvSent = 0;
+uint32_t aodvSentP = 0;
 uint32_t arpSent = 0;
 uint32_t videoBroadcast = 0;
 std::vector<uint32_t> msgControl;
@@ -104,6 +105,13 @@ void
 AodvTrafficSent (Ptr<const Packet> p)
 {
 	aodvSent += p->GetSize();
+	aodvSentP++;
+}
+
+void StatisticAodv ()
+{
+	std::cout << "AodvMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<aodvSent<<"\t"<< aodvSentP<< "\n";
+	aodvSent = aodvSentP= 0;
 }
 
 void
@@ -168,6 +176,7 @@ ResetValues ()
 	StatisticControl ();
 	StatisticVideo ();
 	StatisticNeighbors ();
+	StatisticAodv();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
 
