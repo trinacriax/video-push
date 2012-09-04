@@ -831,17 +831,20 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		{
 	//	  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
 	//	  double delayv = rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.40));
-		  double delayv = 0;
+//		  double delayv = 0;
 	//	  NS_ASSERT_MSG (delayv > 1, "HandlePull: pulltime is 0");
-		  delay = Time::FromDouble (delayv, Time::US);
-		  Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
+//		  delay = Time::FromDouble (delayv, Time::US);
+		  Simulator::ScheduleNow (&VideoPushApplication::SendChunk, this, chunkid, sender);
 		  AddPending(chunkid);
 		}
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " Received pull for " <<  chunkid << (hasChunk?"(Y)":"(N)") <<" from " << sender << ", reply in "<<delay.GetSeconds());\
 		break;
 	}
 	default:
+	{
 		NS_ASSERT_MSG (false, "State not valid");
+		break;
+	}
 	}
 }
 
