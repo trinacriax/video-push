@@ -1140,22 +1140,36 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 
 void VideoPushApplication::SendHello ()
 {
-	NS_LOG_FUNCTION (this);
-	Ipv4Mask mask ("255.0.0.0");
-	Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask (mask));
-	ChunkHeader hello (MSG_HELLO);
-	hello.GetHelloMessage().SetLastChunk (m_chunks.GetLastChunk());
-	hello.GetHelloMessage().SetChunksReceived (m_chunks.GetBufferSize());
-	hello.GetHelloMessage().SetDestination (subnet);
-	Ptr<Packet> packet = Create<Packet> ();
-	packet->AddHeader(hello);
-	m_txControlTrace (packet);
-	NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
-	NS_ASSERT (GetHelloActive());
-	m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
-	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 1000)), Time::MS);
-	m_helloTimer.Schedule (m_helloTime - t);
+	switch (m_peerType)
 	{
+		case SOURCE:
+		{
+			break;
+		}
+		case PEER:
+		{
+			NS_LOG_FUNCTION (this);
+			NS_ASSERT (GetHelloActive());
+			Ipv4Mask mask ("255.0.0.0");
+			Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask (mask));
+			ChunkHeader hello (MSG_HELLO);
+			hello.GetHelloMessage().SetLastChunk (m_chunks.GetLastChunk());
+			hello.GetHelloMessage().SetChunksReceived (m_chunks.GetBufferSize());
+			hello.GetHelloMessage().SetDestination (subnet);
+			Ptr<Packet> packet = Create<Packet> ();
+			packet->AddHeader(hello);
+			m_txControlTrace (packet);
+			NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
+			m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
+		//	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 1000)), Time::MS);
+			m_helloTimer.Schedule ();
+			break;
+		}
+		default:
+		{
+			NS_ASSERT_MSG (false, "no valid peer state");
+			break;
+		}
 	}
 }
 
