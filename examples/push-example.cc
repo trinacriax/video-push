@@ -65,6 +65,7 @@ uint32_t msgControlT = 0;
 std::vector<uint32_t> neighbors;
 uint32_t neighborsT = 0;
 uint32_t phyTxBegin = 0;
+uint32_t phyTxBeginP = 0;
 uint32_t phyTxEnd = 0;
 uint32_t phyTxDrop = 0;
 
@@ -92,13 +93,34 @@ GenericPacketTrace (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
 //	controls
-	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
-	if ( mc.callback.compare("PhyTxBegin") )
+//	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
+	if ( mc.callback.compare("PhyTxBegin")==0 )
+	{
 		phyTxBegin += p->GetSize();
-	else if ( mc.callback.compare("PhyTxEnd") )
+		phyTxBeginP++;
+	}
+	else if ( mc.callback.compare("PhyTxEnd")==0 )
+	{
 		phyTxEnd += p->GetSize();
-	else if ( mc.callback.compare("PhyTxDrop") )
+	}
+	else if ( mc.callback.compare("PhyTxDrop")==0)
+	{
 		phyTxDrop += p->GetSize();
+	}
+	else if ( mc.callback.compare("MacTx")==0)
+	{
+		macTx += p->GetSize();
+		macTxP++;
+	}
+}
+
+void StatisticPhy ()
+{
+	std::cout << "PhyMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<phyTxBegin<<"\t"<< phyTxBeginP<< "\n";
+	phyTxBegin = phyTxBeginP = 0;
+	phyTxEnd = 0;
+	phyTxDrop = 0;
+}
 }
 
 void
@@ -176,6 +198,7 @@ ResetValues ()
 	StatisticControl ();
 	StatisticVideo ();
 	StatisticNeighbors ();
+	StatisticPhy();
 	StatisticAodv();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
