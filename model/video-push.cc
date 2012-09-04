@@ -848,48 +848,64 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 void
 VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const Ipv4Address &sender)
 {
-	uint32_t n_last = helloheader.GetLastChunk();
-	uint32_t n_chunks = helloheader.GetChunksReceived();
-	Ipv4Address destination = helloheader.GetDestination();
-	Ipv4Mask mask ("255.0.0.0");
-	if (destination.IsSubnetDirectedBroadcast(mask))
+	switch (m_peerType)
 	{
-		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast("<<destination<<") hello from " << sender << " #Chunks="<< n_chunks);
-		Neighbor nt (sender, PUSH_PORT);
-		if(!m_neighbors.IsNeighbor (nt) && GetHelloActive() > 1)
+		case SOURCE:
 		{
-//			double delayv = rint(UniformVariable().GetValue (1, m_helloNeighborsTime.GetMilliSeconds()));
-//			NS_ASSERT_MSG (delayv > 0, "HandleHello pulltime is 0");
-//			Time delay = Time::FromDouble (delayv, Time::MS);
-			Simulator::ScheduleNow (&VideoPushApplication::SendHelloUnicast, this, sender);
-//			NS_LOG_INFO ("Node " << GetLocalAddress() << " reply to " << sender << " in "<< delay.GetSeconds() << "sec");
+			break;
+		}
+		case PEER:
+		{
+			uint32_t n_last = helloheader.GetLastChunk();
+			uint32_t n_chunks = helloheader.GetChunksReceived();
+			Ipv4Address destination = helloheader.GetDestination();
+			Ipv4Mask mask ("255.0.0.0");
+			if (destination.IsSubnetDirectedBroadcast(mask))
+			{
+				NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast("<<destination<<") hello from " << sender << " #Chunks="<< n_chunks);
+				Neighbor nt (sender, PUSH_PORT);
+				if(!m_neighbors.IsNeighbor (nt) && GetHelloActive() > 1)
+				{
+//					double delayv = rint(UniformVariable().GetValue (1, m_helloNeighborsTime.GetMilliSeconds()));
+		//			NS_ASSERT_MSG (delayv > 0, "HandleHello pulltime is 0");
+//					Time delay = Time::FromDouble (delayv, Time::MS);
+					Simulator::ScheduleNow (&VideoPushApplication::SendHelloUnicast, this, sender);
+//					NS_LOG_INFO ("Node " << GetLocalAddress() << " reply to " << sender << " in "<< delay.GetSeconds() << "sec");
+				}
+			}
+			else if (destination.IsEqual(GetLocalAddress()))
+			{
+				Neighbor nt (sender, PUSH_PORT);
+				if(!m_neighbors.IsNeighbor (nt))
+				{
+					m_neighbors.AddNeighbor (nt);
+				}
+				NeighborData* neighbor = m_neighbors.GetNeighbor(nt);
+				neighbor->Update(n_last, n_chunks);
+				uint32_t last = m_chunks.GetLastChunk();
+				double ratio = m_chunks.GetBufferSize() / (1.0 * n_last);
+				NS_LOG_INFO ("Node " << GetLocalAddress() << " receives hello from " << sender
+						<< ", Chunks="<< n_chunks << "("<<m_chunks.GetBufferSize()<<")"
+						<< ", Last="<<n_last<<"("<<last<<") "
+						<< ", Ratio="<<ratio<<", #Neighbors="<<m_neighbors.GetSize());
+				//TODO PULL WINDOW CHECK
+		//		if ( m_chunks.GetLastChunk() < n_last && !m_pullTimer.IsRunning() && GetPullActive())
+		//		{
+		//			NS_ASSERT (GetPullActive());
+		//			double delayv = rint(UniformVariable().GetValue (0, m_pullTime.GetMicroSeconds()*.30));
+		//			Time delay = Time::FromDouble(delayv, Time::US);
+		//			Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, n_last, sender);
+		//		}
+			}
+		break;
+		}
+		default:
+		{
+			NS_ASSERT_MSG (false, "no valid peer state");
+			break;
 		}
 	}
-	else if (destination.IsEqual(GetLocalAddress()))
-	{
-		Neighbor nt (sender, PUSH_PORT);
-		if(!m_neighbors.IsNeighbor (nt))
-		{
-			m_neighbors.AddNeighbor (nt);
-		}
-		NeighborData* neighbor = m_neighbors.GetNeighbor(nt);
-		neighbor->Update(n_last, n_chunks);
-		uint32_t last = m_chunks.GetLastChunk();
-		double ratio = m_chunks.GetBufferSize() / (1.0 * n_last);
-		NS_LOG_INFO ("Node " << GetLocalAddress() << " receives hello from " << sender
-				<< ", Chunks="<< n_chunks << "("<<m_chunks.GetBufferSize()<<")"
-				<< ", Last="<<n_last<<"("<<last<<") "
-				<< ", Ratio="<<ratio<<", #Neighbors="<<m_neighbors.GetSize());
-		//TODO PULL WINDOW CHECK
-//		if ( m_chunks.GetLastChunk() < n_last && !m_pullTimer.IsRunning() && GetPullActive())
-//		{
-//			NS_ASSERT (GetPullActive());
-//			double delayv = rint(UniformVariable().GetValue (0, m_pullTime.GetMicroSeconds()*.30));
-//			Time delay = Time::FromDouble(delayv, Time::US);
-//			Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, n_last, sender);
-//		}
-	}
-	//TODO: If the source isn't a neighbor, subscribe to a node
+		//TODO: If the source isn't a neighbor, subscribe to a node
 }
 
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
