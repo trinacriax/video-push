@@ -68,6 +68,8 @@ uint32_t phyTxBegin = 0;
 uint32_t phyTxBeginP = 0;
 uint32_t phyTxEnd = 0;
 uint32_t phyTxDrop = 0;
+uint32_t macTx = 0;
+uint32_t macTxP = 0;
 
 struct mycontext{
 	uint32_t id;
@@ -121,6 +123,11 @@ void StatisticPhy ()
 	phyTxEnd = 0;
 	phyTxDrop = 0;
 }
+
+void StatisticMac ()
+{
+	std::cout << "MacMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<macTx<<"\t"<< macTxP<< "\n";
+	macTx = macTxP = 0;
 }
 
 void
@@ -199,6 +206,7 @@ ResetValues ()
 	StatisticVideo ();
 	StatisticNeighbors ();
 	StatisticPhy();
+	StatisticMac();
 	StatisticAodv();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
