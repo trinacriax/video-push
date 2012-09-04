@@ -552,15 +552,15 @@ int main(int argc, char **argv) {
 
 //	if (verbose == 1)
 	{
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiMac/Mac/MacTx", MakeCallback (&GenericPacketTrace));
-//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiMac/Mac/MacTxDrop", MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiMac/MacRx", MakeCallback (&GenericPacketTrace));
-//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiMac/Mac/MacRxDrop", MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTx", MakeCallback (&GenericPacketTrace));
+//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTxDrop", MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRx", MakeCallback (&GenericPacketTrace));
+//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRxDrop", MakeCallback (&GenericPacketTrace));
 //
 //		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiPhy/PhyTxBegin",	MakeCallback (&GenericPacketTrace));
 //		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiPhy/PhyTxEnd",	MakeCallback (&GenericPacketTrace));
 //		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiPhy/PhyTxDrop",	MakeCallback (&GenericPacketTrace));
-//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxBegin",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxBegin",	MakeCallback (&GenericPacketTrace));
 //		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxEnd",	MakeCallback (&GenericPacketTrace));
 //		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop",	MakeCallback (&GenericPacketTrace));
 //		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/Drop", MakeCallback (&GenericPacketTrace));
