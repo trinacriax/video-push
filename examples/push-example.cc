@@ -547,7 +547,7 @@ int main(int argc, char **argv) {
 		appC.Stop (Seconds (clientStop));
 	}
 
-//	if (verbose == 1)
+	if (verbose == 1)
 	{
 		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTx", MakeCallback (&GenericPacketTrace));
 //		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTxDrop", MakeCallback (&GenericPacketTrace));
@@ -566,13 +566,13 @@ int main(int argc, char **argv) {
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxData", MakeCallback (&VideoTrafficSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxControl", MakeCallback (&VideoControlSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/NeighborTrace", MakeCallback (&Neighbors));
+		Simulator::Schedule (Seconds(1), &ResetValues);
 	}
 
 	std::cout << "Starting simulation for " << totalTime << " s ...\n";
 
 //	FlowMonitorHelper flowmon;
 //	Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
-	Simulator::Schedule (Seconds(1), &ResetValues);
 
 	Simulator::Stop(Seconds(totalTime));
 	Simulator::Run();
