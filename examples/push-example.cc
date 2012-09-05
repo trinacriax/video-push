@@ -539,6 +539,50 @@ int main(int argc, char **argv) {
 	Ipv4InterfaceContainer interfaces;
 	interfaces = address.Assign(device);
 
+//	NS_LOG_INFO ("Statically populate ARP cache!\n");
+	Ptr<ArpCache> arp;
+	for (uint32_t n = 0;  n < nodes.GetN() ; n++)
+	{
+		if(arp == NULL){
+			arp = CreateObject<ArpCache> ();
+			arp->SetAliveTimeout (Seconds (3600 * 24 * 365));
+		}
+		NS_LOG_INFO ("Populate node \n");
+		Ptr<Ipv4L3Protocol> ip = nodes.Get(n)->GetObject<Ipv4L3Protocol> ();
+		NS_ASSERT (ip !=0);
+		ObjectVectorValue interfaces;
+		ip->GetAttribute ("InterfaceList", interfaces);
+		for(ObjectVectorValue::Iterator j = interfaces.Begin (); j != interfaces.End (); j++)
+		{
+			Ptr<Ipv4Interface> ipIface = j->second->GetObject<Ipv4Interface> ();
+			NS_ASSERT (ipIface != 0);
+			Ptr<NetDevice> device = ipIface->GetDevice ();
+			NS_ASSERT (device != 0);
+			Address hwAddr = Mac48Address::ConvertFrom (device->GetAddress ());
+			NS_LOG_INFO ("Detected address " << hwAddr);
+			for(uint32_t k = 0; k < ipIface->GetNAddresses (); k++)
+			{
+				Ipv4Address ipAddr = ipIface->GetAddress (k).GetLocal();
+				if(ipAddr == Ipv4Address::GetLoopback ())
+				  continue;
+				ArpCache::Entry * entry = arp->Add (ipAddr);
+				entry->MarkWaitReply (0);
+				entry->MarkAlive (hwAddr);
+			}
+		}
+	}
+	for (uint32_t n = 0;  n < nodes.GetN() ; n++){
+		NS_LOG_INFO ("Populate node");
+		Ptr<Ipv4L3Protocol> ip = nodes.Get(n)->GetObject<Ipv4L3Protocol> ();
+		NS_ASSERT (ip !=0);
+		ObjectVectorValue interfaces;
+		ip->GetAttribute ("InterfaceList", interfaces);
+		for(ObjectVectorValue::Iterator j = interfaces.Begin (); j !=interfaces.End (); j++)
+		{
+			Ptr<Ipv4Interface> ipIface = j->second->GetObject<Ipv4Interface> ();
+			ipIface->SetAttribute ("ArpCache", PointerValue (arp));
+		}
+	}
 	//Source streaming rate
 	uint64_t stream = 1000000;
 	Ipv4Address subnet ("10.255.255.255");
