@@ -547,7 +547,7 @@ int main(int argc, char **argv) {
 		appC.Stop (Seconds (clientStop));
 	}
 
-	if (verbose == 1)
+//	if (verbose == 1)
 	{
 		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTx", MakeCallback (&GenericPacketTrace));
 //		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTxDrop", MakeCallback (&GenericPacketTrace));
