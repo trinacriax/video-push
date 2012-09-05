@@ -233,7 +233,7 @@ int main(int argc, char **argv) {
 	// Time in seconds between hellos
 	uint32_t helloactive = 0;
 	// Time in seconds between hellos
-	double hellotime = 12;
+	double hellotime = 10;
 	// max number of hello loss before removing a neighbor
 	uint32_t helloloss = 1;
 	// Activate pull as recovery mechanism
