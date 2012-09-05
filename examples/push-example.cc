@@ -113,6 +113,7 @@ GenericPacketTrace (std::string context, Ptr<const Packet> p)
 	}
 	else if ( mc.callback.compare("MacTx")==0)
 	{
+		NS_LOG_DEBUG("MacPacketTx "<< p->GetSize());
 		macTx += p->GetSize();
 		macTxP++;
 	}
