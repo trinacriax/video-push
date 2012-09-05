@@ -70,6 +70,8 @@ uint32_t phyTxEnd = 0;
 uint32_t phyTxDrop = 0;
 uint32_t macTx = 0;
 uint32_t macTxP = 0;
+uint32_t arpTx = 0;
+uint32_t arpTxP = 0;
 
 struct mycontext{
 	uint32_t id;
@@ -114,6 +116,12 @@ GenericPacketTrace (std::string context, Ptr<const Packet> p)
 		macTx += p->GetSize();
 		macTxP++;
 	}
+	else if ( mc.callback.compare("TxArp")==0)
+	{
+		NS_LOG_DEBUG("ArpPacketTx "<< p->GetSize());
+		arpTx += p->GetSize();
+		arpTxP++;
+	}
 }
 
 void StatisticPhy ()
@@ -128,6 +136,12 @@ void StatisticMac ()
 {
 	std::cout << "MacMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<macTx<<"\t"<< macTxP<< "\n";
 	macTx = macTxP = 0;
+}
+
+void StatisticArp()
+{
+	std::cout << "ArpMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<arpTx<<"\t"<< arpTxP<< "\n";
+	arpTx = arpTxP = 0;
 }
 
 void
@@ -207,6 +221,7 @@ ResetValues ()
 	StatisticNeighbors ();
 	StatisticPhy();
 	StatisticMac();
+	StatisticArp();
 	StatisticAodv();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
@@ -560,7 +575,7 @@ int main(int argc, char **argv) {
 		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxBegin",	MakeCallback (&GenericPacketTrace));
 //		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxEnd",	MakeCallback (&GenericPacketTrace));
 //		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop",	MakeCallback (&GenericPacketTrace));
-//		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/Drop", MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/TxArp", MakeCallback (&GenericPacketTrace));
 
 		Config::ConnectWithoutContext ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficSent", MakeCallback (&AodvTrafficSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxData", MakeCallback (&VideoTrafficSent));
