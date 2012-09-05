@@ -215,7 +215,7 @@ int main(int argc, char **argv) {
 	/// Number of nodes
 	uint32_t size = 5;
 	/// Simulation time in seconds
-	double totalTime = 100;
+	double totalTime = 160;
 	// Simulation run
 	uint32_t run = 1;
 	// Simulation seed
@@ -388,13 +388,13 @@ int main(int argc, char **argv) {
 			<< "\n";
 
 	/// Video start
-	double sourceStart = ceil(totalTime*.05);
+	double sourceStart = 40;
 	/// Video stop
-	double sourceStop = ceil(totalTime*.90);
+	double sourceStop = 140;
 	/// Client start
-	double clientStart = ceil(totalTime*.01);;
+	double clientStart = 1;
 	/// Client stop
-	double clientStop = ceil(totalTime*.99);
+	double clientStop = 150;
 
 	NodeContainer fake;
 	fake.Create(1);
