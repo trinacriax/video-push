@@ -108,8 +108,10 @@ public:
 	uint32_t GetPullMax () const;
 	void SetPullWindow (uint32_t window);
 	uint32_t GetPullWindow () const;
-	void SetPullRatio (double ratio);
-	double GetPullRatio () const;
+	void SetPullRatioMin (double ratio);
+	double GetPullRatioMin () const;
+	void SetPullRatioMax (double ratio);
+	double GetPullRatioMax () const;
 
 	void SetPullActive (bool pull);
 	bool GetPullActive () const;
@@ -210,7 +212,8 @@ private:
 	bool			m_pullActive;
 	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
 	uint32_t 		m_pullWindow;		// pull window
-	double	 		m_pullRatio;		// pull ratio activation
+	double	 		m_pullRatioMin;		// pull ratio activation
+	double	 		m_pullRatioMax;		// target pull
 	Time			m_pullSlot;
 
 	NeighborsSet 	m_neighbors;		// collect neighbors

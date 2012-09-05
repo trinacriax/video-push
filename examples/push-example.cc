@@ -247,6 +247,10 @@ int main(int argc, char **argv) {
 	double pulltime = 20;//in ms
 	// max number of pull to retrieve a chunk
 	uint32_t pullmax = 1;
+	// pull ratio for activation
+	double pullratiomin = .70;
+	// pull ratio for de-activation
+	double pullratiomax = .90;
 	// Time in seconds between hellos
 	uint32_t helloactive = 0;
 	// Time in seconds between hellos
@@ -312,6 +316,8 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("helloactive", "Hello activation", helloactive);
 	cmd.AddValue ("pullactive", "Pull activation allowed", pullactive);
 	cmd.AddValue ("pullmax", "Max number of pull allowed per chunk", pullmax);
+	cmd.AddValue ("pullratiomin", "Ratio to activate pull", pullratiomin);
+	cmd.AddValue ("pullratiomax", "Ratio to de-activate pull", pullratiomax);
 	cmd.AddValue ("pulltime", "Time between pull in ms (e.g., 100ms = 0.100s)", pulltime);
 	cmd.AddValue ("v", "Verbose", verbose);
 	cmd.AddValue ("ff", "flag", flag);
@@ -333,6 +339,8 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
 	Config::SetDefault ("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
 	Config::SetDefault ("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
+	Config::SetDefault ("ns3::VideoPushApplication::PullRatioMin", DoubleValue(pullratiomin));
+	Config::SetDefault ("ns3::VideoPushApplication::PullRatioMax", DoubleValue(pullratiomax));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloActive", UintegerValue(helloactive));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloTime", TimeValue(Time::FromDouble(hellotime,Time::S)));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
@@ -398,6 +406,8 @@ int main(int argc, char **argv) {
 			<< " --helloloss=" << helloloss
 			<< " --helloactive=" << helloactive
 			<< " --pullactive=" << pullactive
+			<< " --pullratiomin=" << pullratiomin
+			<< " --pullratiomax=" << pullratiomax
 			<< " --pullmax=" << pullmax
 			<< " --pulltime=" << pulltime
 			<< " --v=" << verbose

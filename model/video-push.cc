@@ -149,10 +149,15 @@ VideoPushApplication::GetTypeId (void)
 				   MakeUintegerAccessor (&VideoPushApplication::SetPullWindow,
 										 &VideoPushApplication::GetPullWindow),
 				   MakeUintegerChecker<uint32_t> (50))
-	.AddAttribute ("PullRatio", "Pull ratio.",
+	.AddAttribute ("PullRatioMin", "Min ratio to activate pull.",
 				   DoubleValue (0.80),
-				   MakeDoubleAccessor (&VideoPushApplication::SetPullRatio,
-									   &VideoPushApplication::GetPullRatio),
+				   MakeDoubleAccessor (&VideoPushApplication::SetPullRatioMin,
+									   &VideoPushApplication::GetPullRatioMin),
+				   MakeDoubleChecker<double> (0.70, .80))
+	.AddAttribute ("PullRatioMax", "Max ratio to stop pull.",
+				   DoubleValue (0.90),
+				   MakeDoubleAccessor (&VideoPushApplication::SetPullRatioMax,
+									   &VideoPushApplication::GetPullRatioMax),
 				   MakeDoubleChecker<double> (0.80, 1.0))
 	.AddAttribute ("HelloLoss", "Number of allowed hello loss.",
 				   UintegerValue (1),
@@ -612,15 +617,27 @@ VideoPushApplication::GetPullWindow () const
 }
 
 void
-VideoPushApplication::SetPullRatio (double ratio)
+VideoPushApplication::SetPullRatioMin (double ratio)
 {
-	m_pullRatio = ratio;
+	m_pullRatioMin = ratio;
 }
 
 double
-VideoPushApplication::GetPullRatio () const
+VideoPushApplication::GetPullRatioMin () const
 {
-	return m_pullRatio;
+	return m_pullRatioMin;
+}
+
+void
+VideoPushApplication::SetPullRatioMax (double ratio)
+{
+	m_pullRatioMax = ratio;
+}
+
+double
+VideoPushApplication::GetPullRatioMax () const
+{
+	return m_pullRatioMax;
 }
 
 void
@@ -704,7 +721,8 @@ VideoPushApplication::PeerLoop ()
 							<<GetPullMax()<<") New missed="<<missed);
 				}
 				ratio = GetReceived ();
-				if (missed && ratio < GetPullRatio())
+				NS_LOG_INFO ("Node=" <<m_node->GetId()<< " has ratio="<<ratio<<" ["<<GetPullRatioMin()<<":"<<GetPullRatioMax()<<"]");
+				if (missed && ratio >= GetPullRatioMin() && ratio <= GetPullRatioMax())
 				{
 					uint32_t size = m_neighbors.GetSize();
 					m_neighbors.Purge();
