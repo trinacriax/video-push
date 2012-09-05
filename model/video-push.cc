@@ -464,24 +464,24 @@ void VideoPushApplication::StopApplication () // Called at time specified by Sto
     }
 }
 
-Ptr<Ipv4Route>
-VideoPushApplication::GetRoute(const Ipv4Address &local, const Ipv4Address &destination) {
-	Ptr<Packet> receivedPacket = Create<Packet> (100);
-	Ipv4Header hdr;
-	hdr.SetDestination(destination);
-	hdr.SetSource(local);
-	Ptr<NetDevice> oif = 0;
-	Socket::SocketErrno err = Socket::ERROR_NOROUTETOHOST;
-	Ptr<Ipv4Route> route = m_ipv4->GetRoutingProtocol()->RouteOutput(receivedPacket, hdr, oif, err);
-	return route;
-}
+//Ptr<Ipv4Route>
+//VideoPushApplication::GetRoute(const Ipv4Address &local, const Ipv4Address &destination) {
+//	Ptr<Packet> receivedPacket = Create<Packet> (100);
+//	Ipv4Header hdr;
+//	hdr.SetDestination(destination);
+//	hdr.SetSource(local);
+//	Ptr<NetDevice> oif = 0;
+//	Socket::SocketErrno err = Socket::ERROR_NOROUTETOHOST;
+//	Ptr<Ipv4Route> route = m_ipv4->GetRoutingProtocol()->RouteOutput(receivedPacket, hdr, oif, err);
+//	return route;
+//}
 
-Ipv4Address
-VideoPushApplication::GetNextHop (const Ipv4Address &destination) {
-	Ipv4Address local = Ipv4Address::ConvertFrom(m_localAddress);
-	Ptr<Ipv4Route> route = GetRoute (local, destination);
-	return (route == NULL ? m_gateway: route->GetGateway());
-}
+//Ipv4Address
+//VideoPushApplication::GetNextHop (const Ipv4Address &destination) {
+//	Ipv4Address local = Ipv4Address::ConvertFrom(m_localAddress);
+//	Ptr<Ipv4Route> route = GetRoute (local, destination);
+//	return (route == NULL ? m_gateway: route->GetGateway());
+//}
 
 void VideoPushApplication::HandlePeerClose (Ptr<Socket> socket)
 {
@@ -928,20 +928,20 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
       InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
       Ipv4Address sourceAddr = address.GetIpv4 ();
       uint32_t port = address.GetPort();
-      Ipv4Address gateway = GetNextHop(sourceAddr);
+//      Ipv4Address gateway = GetNextHop(sourceAddr);
       Ipv4Mask mask ("255.0.0.0");
       Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(mask);
-      NS_LOG_DEBUG("Node " << GetLocalAddress() <<  " receives packet from "<< sourceAddr << " gw " << gateway<< " Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast());
+      NS_LOG_DEBUG("Node " << GetLocalAddress() <<  " receives packet from "<< sourceAddr << /*" gw " << gateway<< */" Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast());
       if(rtag && subnet != relayTag.m_receiver)
       {
 //    	  // NS_LOG_DEBUG("Discarded: not for clients "<<relayTag.m_receiver);
     	  break;
       }
-      if(gateway!=relayTag.m_sender)
-      {
+//      if(gateway!=relayTag.m_sender)
+//      {
 //    	  NS_LOG_DEBUG("Duplicated packet Gateway "<<gateway<< " Sender " << relayTag.m_sender);
 //		  break;
-      }
+//      }
       NS_ASSERT (sourceAddr != GetLocalAddress());
       if (InetSocketAddress::IsMatchingType (from))
         {
