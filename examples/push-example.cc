@@ -100,6 +100,7 @@ GenericPacketTrace (std::string context, Ptr<const Packet> p)
 //	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
 	if ( mc.callback.compare("PhyTxBegin")==0 )
 	{
+		NS_LOG_DEBUG("PhyPacketTx "<< p->GetSize());
 		phyTxBegin += p->GetSize();
 		phyTxBeginP++;
 	}
