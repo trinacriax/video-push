@@ -182,8 +182,8 @@ void
 VideoControlSent (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
-	msgControl[mc.id] += p->GetSize();
-	msgControlT += p->GetSize();
+	msgControl[mc.id] += (p->GetSize() + 20 + 8 );
+	msgControlT += (p->GetSize() + 20 + 8 );
 }
 
 void StatisticControl ()
