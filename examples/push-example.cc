@@ -323,7 +323,6 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::VideoPushApplication::Flag", UintegerValue(flag));
 	Config::SetDefault ("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
 	Config::SetDefault ("ns3::Ipv4::IpForward", BooleanValue (false));
-	Config::SetDefault ("ns3::aodv::RoutingProtocol::Enable1Hop", BooleanValue (true));
 	Config::SetDefault ("ns3::YansWifiPhy::TxGain",DoubleValue(TxGain));
 	Config::SetDefault ("ns3::YansWifiPhy::RxGain",DoubleValue(RxGain));
 	Config::SetDefault ("ns3::YansWifiPhy::TxPowerStart",DoubleValue(TxStart));
@@ -469,11 +468,12 @@ int main(int argc, char **argv) {
 
 	InternetStackHelper stack;
 //	MbnAodvHelper mbnaodv;
-	AodvHelper aodv;
 	switch (routing)
 	{
 		case 1:
 		{
+			Config::SetDefault ("ns3::aodv::RoutingProtocol::Enable1Hop", BooleanValue (true));
+			AodvHelper aodv;
 			uint32_t aodvHello = 2, aodvHelloLoss = 2;
 //			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableHello", BooleanValue(false));
 //			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
