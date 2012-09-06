@@ -35,7 +35,7 @@
 #define CHUNK_HEADER_SIZE 4
 #define MSG_CHUNK_SIZE (4 + 8 + 2 + 2)
 #define MSG_PULL_SIZE 4
-#define MSG_HELLO_SIZE 12
+#define MSG_HELLO_SIZE 4*4
 
 enum ChunkMessageType
 {
@@ -145,6 +145,7 @@ public:
 	  Ipv4Address m_destination; // Destination Address
   	  uint32_t m_lastChunk; // Chunks received
   	  uint32_t m_chunksRec; // Chunks received
+  	  uint32_t m_chunksRatio; // Chunks ratio
   	  virtual void Print (std::ostream &os) const;
   	  virtual uint32_t GetSerializedSize (void) const;
   	  virtual void Serialize (Buffer::Iterator start) const;
@@ -155,6 +156,8 @@ public:
 	  virtual void SetLastChunk (uint32_t last);
   	  virtual uint32_t GetChunksReceived ();
   	  virtual void SetChunksReceived (uint32_t chunksRec);
+  	  virtual uint32_t GetChunksRatio ();
+  	  virtual void SetChunksRatio (uint32_t chunksRec);
     };
 
 private:

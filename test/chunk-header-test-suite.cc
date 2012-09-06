@@ -181,6 +181,7 @@ HelloTestCase::DoRun (void)
 	    streaming::ChunkHeader::HelloMessage &chunkIn = msgIn.GetHelloMessage ();
 	    chunkIn.SetLastChunk (1223);
 	    chunkIn.SetChunksReceived (1023);
+	    chunkIn.SetChunksRatio (80);
 	    chunkIn.Print(std::cout);
 	  }
 	  packet.AddHeader(msgIn);
@@ -196,6 +197,7 @@ HelloTestCase::DoRun (void)
 	  {
 		  NS_TEST_ASSERT_MSG_EQ (chunkOut.GetLastChunk(), 1223, "Last Chunk");
 		  NS_TEST_ASSERT_MSG_EQ (chunkOut.GetChunksReceived(), 1023, "Chunks Received");
+		  NS_TEST_ASSERT_MSG_EQ (chunkOut.GetChunksRatio(), 80, "Chunks Ratio");
 		  chunkOut.Print(std::cout);
 	  }
 	  }

@@ -355,7 +355,7 @@ ChunkHeader::HelloMessage::GetSerializedSize (void) const
 void
 ChunkHeader::HelloMessage::Print (std::ostream &os) const
 {
-  os<< "Destination: " << m_destination << ", Last Chunk: " << m_lastChunk<< ", Received: "<< m_chunksRec <<"\n";
+  os<< "Destination: " << m_destination << ", Last Chunk: " << m_lastChunk<< ", Received: "<< m_chunksRec << ", Ratio: " << m_chunksRatio <<"\n";
 }
 
 void
@@ -365,6 +365,7 @@ ChunkHeader::HelloMessage::Serialize (Buffer::Iterator start) const
   i.WriteHtonU32 (m_destination.Get());
   i.WriteHtonU32 (m_lastChunk);
   i.WriteHtonU32 (m_chunksRec);
+  i.WriteHtonU32 (m_chunksRatio);
 }
 
 uint32_t
@@ -375,6 +376,7 @@ ChunkHeader::HelloMessage::Deserialize (Buffer::Iterator start)
   m_destination = Ipv4Address(i.ReadNtohU32());
   m_lastChunk = i.ReadNtohU32();
   m_chunksRec = i.ReadNtohU32();
+  m_chunksRatio = i.ReadNtohU32();
   return size;
 }
 
@@ -414,6 +416,19 @@ ChunkHeader::HelloMessage::SetChunksReceived (uint32_t chunks)
 {
 	NS_ASSERT (chunks>=0);
 	m_chunksRec = chunks;
+}
+
+uint32_t
+ChunkHeader::HelloMessage::GetChunksRatio ()
+{
+	return m_chunksRatio;
+}
+
+void
+ChunkHeader::HelloMessage::SetChunksRatio (uint32_t chunks)
+{
+	NS_ASSERT (chunks>=0);
+	m_chunksRatio = chunks;
 }
 } // namespace pidm
 } // namespace ns3
