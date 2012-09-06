@@ -879,6 +879,7 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 		{
 			uint32_t n_last = helloheader.GetLastChunk();
 			uint32_t n_chunks = helloheader.GetChunksReceived();
+			uint32_t n_neighborhood = helloheader.GetNeighborhoodSize();
 			uint32_t n_ratio = helloheader.GetChunksRatio();
 			Ipv4Address destination = helloheader.GetDestination();
 			Ipv4Mask mask ("255.0.0.0");
@@ -1197,6 +1198,7 @@ void VideoPushApplication::SendHello ()
 			hello.GetHelloMessage().SetChunksRatio (GetReceived());
 			hello.GetHelloMessage().SetChunksReceived (m_chunks.GetBufferSize());
 			hello.GetHelloMessage().SetDestination (subnet);
+			hello.GetHelloMessage().SetNeighborhoodSize (m_neighbors.GetSize());
 			Ptr<Packet> packet = Create<Packet> ();
 			packet->AddHeader(hello);
 			m_txControlTrace (packet);

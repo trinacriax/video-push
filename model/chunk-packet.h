@@ -35,7 +35,7 @@
 #define CHUNK_HEADER_SIZE 4
 #define MSG_CHUNK_SIZE (4 + 8 + 2 + 2)
 #define MSG_PULL_SIZE 4
-#define MSG_HELLO_SIZE 4*4
+#define MSG_HELLO_SIZE 4*5
 
 enum ChunkMessageType
 {
@@ -146,6 +146,7 @@ public:
   	  uint32_t m_lastChunk; // Chunks received
   	  uint32_t m_chunksRec; // Chunks received
   	  uint32_t m_chunksRatio; // Chunks ratio
+  	  uint32_t m_neighborhoodSize; // Neighborhood size
   	  virtual void Print (std::ostream &os) const;
   	  virtual uint32_t GetSerializedSize (void) const;
   	  virtual void Serialize (Buffer::Iterator start) const;
@@ -158,6 +159,8 @@ public:
   	  virtual void SetChunksReceived (uint32_t chunksRec);
   	  virtual uint32_t GetChunksRatio ();
   	  virtual void SetChunksRatio (uint32_t chunksRec);
+  	  virtual uint32_t GetNeighborhoodSize ();
+  	  virtual void SetNeighborhoodSize (uint32_t neighSize);
     };
 
 private:

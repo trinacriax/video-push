@@ -355,7 +355,7 @@ ChunkHeader::HelloMessage::GetSerializedSize (void) const
 void
 ChunkHeader::HelloMessage::Print (std::ostream &os) const
 {
-  os<< "Destination: " << m_destination << ", Last Chunk: " << m_lastChunk<< ", Received: "<< m_chunksRec << ", Ratio: " << m_chunksRatio <<"\n";
+  os<< "Destination: " << m_destination << ", Last Chunk: " << m_lastChunk<< ", Received: "<< m_chunksRec << ", Ratio: " << m_chunksRatio << ", Neighborhood: " << m_neighborhoodSize << "\n";
 }
 
 void
@@ -366,6 +366,7 @@ ChunkHeader::HelloMessage::Serialize (Buffer::Iterator start) const
   i.WriteHtonU32 (m_lastChunk);
   i.WriteHtonU32 (m_chunksRec);
   i.WriteHtonU32 (m_chunksRatio);
+  i.WriteHtonU32 (m_neighborhoodSize);
 }
 
 uint32_t
@@ -377,6 +378,7 @@ ChunkHeader::HelloMessage::Deserialize (Buffer::Iterator start)
   m_lastChunk = i.ReadNtohU32();
   m_chunksRec = i.ReadNtohU32();
   m_chunksRatio = i.ReadNtohU32();
+  m_neighborhoodSize = i.ReadNtohU32();
   return size;
 }
 
@@ -430,5 +432,18 @@ ChunkHeader::HelloMessage::SetChunksRatio (uint32_t chunks)
 	NS_ASSERT (chunks>=0);
 	m_chunksRatio = chunks;
 }
+
+uint32_t
+ChunkHeader::HelloMessage::GetNeighborhoodSize ()
+{
+	return m_neighborhoodSize;
+}
+
+void
+ChunkHeader::HelloMessage::SetNeighborhoodSize (uint32_t neighSize)
+{
+	m_neighborhoodSize = neighSize;
+}
+
 } // namespace pidm
 } // namespace ns3
