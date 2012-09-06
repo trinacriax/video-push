@@ -211,7 +211,7 @@ void StatisticNeighbors ()
 		std::cout << "Neighbor Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << neighbors[i] << "\n";
 		neighborsT += neighbors[i];
 	}
-	std::cout << "Neighbors\t" << Simulator::Now().GetSeconds()<< "\t" << neighborsT << "\n";
+	std::cout << "Neighbors\t" << Simulator::Now().GetSeconds()<< "\t" << (neighborsT/(1.0*neighbors.size())) << "\n";
 	neighborsT = 0;
 }
 

@@ -901,6 +901,7 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 				if(!m_neighbors.IsNeighbor (nt))
 				{
 					m_neighbors.AddNeighbor (nt);
+					m_neighborsTrace (m_neighbors.GetSize());
 				}
 				NeighborData* neighbor = m_neighbors.GetNeighbor(nt);
 				neighbor->Update(n_last, n_chunks);
