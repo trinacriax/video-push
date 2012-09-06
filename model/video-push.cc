@@ -887,12 +887,18 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 			{
 				NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast("<<destination<<") hello from " << sender << " #Chunks="<< n_chunks << " Ratio="<< n_ratio);
 				Neighbor nt (sender, PUSH_PORT);
-				if(!m_neighbors.IsNeighbor (nt) && GetHelloActive() > 1)
+				if (m_neighbors.IsNeighbor (nt))
+				{
+//					Simulator::ScheduleNow (&VideoPushApplication::SendHelloUnicast, this, sender);
+					m_neighbors.GetNeighbor(nt)->Update(n_last, n_chunks);
+				}
+				else if(!m_neighbors.IsNeighbor (nt) && GetHelloActive() > 1 && n_neighborhood < 10)
 				{
 //					double delayv = rint(UniformVariable().GetValue (1, m_helloNeighborsTime.GetMilliSeconds()));
 		//			NS_ASSERT_MSG (delayv > 0, "HandleHello pulltime is 0");
 //					Time delay = Time::FromDouble (delayv, Time::MS);
-					Simulator::ScheduleNow (&VideoPushApplication::SendHelloUnicast, this, sender);
+					if (UniformVariable().GetValue(0,1) > .50)
+						Simulator::ScheduleNow (&VideoPushApplication::SendHelloUnicast, this, sender);
 //					NS_LOG_INFO ("Node " << GetLocalAddress() << " reply to " << sender << " in "<< delay.GetSeconds() << "sec");
 				}
 			}
