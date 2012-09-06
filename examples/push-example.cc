@@ -61,6 +61,7 @@ std::vector<uint32_t> msgControl;
 std::vector<uint32_t> msgVideo;
 uint32_t msgVideoT;
 uint32_t msgControlT = 0;
+uint32_t msgControlP = 0;
 
 std::vector<uint32_t> neighbors;
 uint32_t neighborsT = 0;
@@ -184,8 +185,9 @@ VideoControlSent (std::string context, Ptr<const Packet> p)
 	struct mycontext mc = GetContextInfo (context);
 	msgControl[mc.id] += (p->GetSize() + 20 + 8 );
 	msgControlT += (p->GetSize() + 20 + 8 );
-}
+	msgControlP++;
 
+}
 void StatisticControl ()
 {
 	for (uint32_t i = 0; i < msgControl.size(); i++)
@@ -193,8 +195,8 @@ void StatisticControl ()
 		std::cout << "ControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgControl[i] << "\n";
 		msgControl[i] = 0;
 	}
-	std::cout << "ControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgControlT<< "\n";
-	msgControlT = 0;
+	std::cout << "ControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgControlT<< "\t" << msgControlP << "\n";
+	msgControlT = msgControlP = 0;
 }
 
 void
