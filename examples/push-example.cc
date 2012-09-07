@@ -615,7 +615,7 @@ int main(int argc, char **argv) {
 		videoC.SetAttribute ("PeerType", EnumValue (PEER));
 		videoC.SetAttribute ("LocalPort", UintegerValue (PUSH_PORT));
 		videoC.SetAttribute ("Local", AddressValue(interfaces.GetAddress(source.GetN()+n)));
-		videoC.SetAttribute ("PeerPolicy", EnumValue (PS_RANDOM));
+		videoC.SetAttribute ("PeerPolicy", EnumValue (PS_RSSI));
 		videoC.SetAttribute ("ChunkPolicy", EnumValue (CS_LATEST));
 
 		ApplicationContainer appC = videoC.Install (nodes.Get(n));
