@@ -887,51 +887,10 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 			double n_ratio = (helloheader.GetChunksRatio()/1000.0);
 			Ipv4Address destination = helloheader.GetDestination();
 			Ipv4Mask mask ("255.0.0.0");
-			if (destination.IsSubnetDirectedBroadcast(mask))
-			{
-				NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast("<<destination<<") hello from " << sender << " #Chunks="<< n_chunks << " Ratio="<< n_ratio);
-				Neighbor nt (sender, PUSH_PORT);
-				if (m_neighbors.IsNeighbor (nt))
-				{
-//					Simulator::ScheduleNow (&VideoPushApplication::SendHelloUnicast, this, sender);
-					m_neighbors.GetNeighbor(nt)->Update(n_last, n_chunks);
-				}
-				else if(!m_neighbors.IsNeighbor (nt) && GetHelloActive() > 1 && n_neighborhood < 10)
-				{
-//					double delayv = rint(UniformVariable().GetValue (1, m_helloNeighborsTime.GetMilliSeconds()));
-		//			NS_ASSERT_MSG (delayv > 0, "HandleHello pulltime is 0");
-//					Time delay = Time::FromDouble (delayv, Time::MS);
-					if (UniformVariable().GetValue(0,1) > .50)
-						Simulator::ScheduleNow (&VideoPushApplication::SendHelloUnicast, this, sender);
-//					NS_LOG_INFO ("Node " << GetLocalAddress() << " reply to " << sender << " in "<< delay.GetSeconds() << "sec");
-				}
-			}
-			else if (destination.IsEqual(GetLocalAddress()))
-			{
-				Neighbor nt (sender, PUSH_PORT);
-				if(!m_neighbors.IsNeighbor (nt))
-				{
-					m_neighbors.AddNeighbor (nt);
-					m_neighborsTrace (m_neighbors.GetSize());
-				}
-				NeighborData* neighbor = m_neighbors.GetNeighbor(nt);
-				neighbor->Update(n_last, n_chunks);
-				uint32_t last = m_chunks.GetLastChunk();
-				double ratio = m_chunks.GetBufferSize() / (1.0 * n_last);
-				NS_LOG_INFO ("Node " << GetLocalAddress() << " receives hello from " << sender
-						<< ", Chunks="<< n_chunks << "("<<m_chunks.GetBufferSize()<<")"
-						<< ", Last="<<n_last<<"("<<last<<") "
-						<< ", Ratio="<<ratio<<", #Neighbors="<<m_neighbors.GetSize());
-				//TODO PULL WINDOW CHECK
-		//		if ( m_chunks.GetLastChunk() < n_last && !m_pullTimer.IsRunning() && GetPullActive())
-		//		{
-		//			NS_ASSERT (GetPullActive());
-		//			double delayv = rint(UniformVariable().GetValue (0, m_pullTime.GetMicroSeconds()*.30));
-		//			Time delay = Time::FromDouble(delayv, Time::US);
-		//			Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, n_last, sender);
-		//		}
-			}
-		break;
+			NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast("<<destination<<") hello from " << sender << " #Chunks="<< n_chunks << " Ratio="<< n_ratio);
+			Neighbor nt (sender, PUSH_PORT);
+			m_neighbors.GetNeighbor(nt)->Update(n_last, n_chunks);
+			break;
 		}
 		default:
 		{
@@ -939,7 +898,6 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 			break;
 		}
 	}
-		//TODO: If the source isn't a neighbor, subscribe to a node
 }
 
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
@@ -1234,20 +1192,21 @@ void VideoPushApplication::SendHello ()
 	}
 }
 
-void VideoPushApplication::SendHelloUnicast (Ipv4Address &neighbor)
-{
-	NS_LOG_FUNCTION (this);
-	ChunkHeader hello (MSG_HELLO);
-	hello.GetHelloMessage().SetLastChunk (m_chunks.GetLastChunk());
-	hello.GetHelloMessage().SetChunksReceived (m_chunks.GetBufferSize());
-	hello.GetHelloMessage().SetDestination (neighbor);
-	Ptr<Packet> packet = Create<Packet> ();
-	packet->AddHeader(hello);
-	m_txControlTrace (packet);
-	NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello directly to "<< neighbor);
-	NS_ASSERT (GetHelloActive());
-	m_socket->SendTo(packet, 0, InetSocketAddress (neighbor, PUSH_PORT));
-}
+//void
+//VideoPushApplication::SendHelloUnicast (Ipv4Address &neighbor)
+//{
+//	NS_LOG_FUNCTION (this);
+//	ChunkHeader hello (MSG_HELLO);
+//	hello.GetHelloMessage().SetLastChunk (m_chunks.GetLastChunk());
+//	hello.GetHelloMessage().SetChunksReceived (m_chunks.GetBufferSize());
+//	hello.GetHelloMessage().SetDestination (neighbor);
+//	Ptr<Packet> packet = Create<Packet> ();
+//	packet->AddHeader(hello);
+//	m_txControlTrace (packet);
+//	NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello directly to "<< neighbor);
+//	NS_ASSERT (GetHelloActive());
+//	m_socket->SendTo(packet, 0, InetSocketAddress (neighbor, PUSH_PORT));
+//}
 
 void
 VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
