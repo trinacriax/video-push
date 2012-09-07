@@ -437,7 +437,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_pullTimer.SetFunction (&VideoPushApplication::PeerLoop, this);
       m_helloTimer.SetDelay (GetHelloTime());
       m_helloTimer.SetFunction (&VideoPushApplication::SendHello, this);
-      Time start = Time::FromDouble (UniformVariable().GetValue (0, GetHelloTime().GetMilliSeconds()), Time::MS);
+      Time start = Time::FromDouble (UniformVariable().GetValue (0, GetHelloTime().GetMilliSeconds()*.5), Time::MS);
       if (GetHelloActive())
       {
     	  Simulator::Schedule (start, &VideoPushApplication::SendHello, this);
