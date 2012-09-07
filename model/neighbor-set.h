@@ -38,6 +38,7 @@ using namespace streaming;
 enum PeerPolicy {
 	PS_RANDOM,
 	PS_DELAY,
+	PS_RSSI,
 	PS_ROUNDROBIN
 };
 
@@ -48,10 +49,10 @@ enum PeerState {
 struct NeighborData{
 	NeighborData () :
 		n_contact (Simulator::Now()), n_state (ACTIVE),
-		n_bufferSize (0), n_latestChunk(0)
+		n_bufferSize (0), n_latestChunk(0), n_rssiPower (0)
 	{}
-	NeighborData (Time start, PeerState state, uint32_t size, uint32_t c_id):
-		n_contact (start), n_state (state), n_bufferSize (size), n_latestChunk(c_id)
+	NeighborData (Time start, PeerState state, uint32_t size, uint32_t c_id, double rssi):
+		n_contact (start), n_state (state), n_bufferSize (size), n_latestChunk(c_id), n_rssiPower (rssi)
 	{}
 	Time n_contact;
 	//bitmap
@@ -61,6 +62,7 @@ struct NeighborData{
 	enum PeerState n_state;
 	uint32_t n_bufferSize;
 	uint32_t n_latestChunk;
+	double n_rssiPower;
 	Time GetLastContact () const;
 	void SetLastContact (Time contact);
 	PeerState GetPeerState () const;
@@ -69,13 +71,21 @@ struct NeighborData{
 	void SetBufferSize (uint32_t size);
 	uint32_t GetLastChunk () const;
 	void SetLastChunk (uint32_t last);
+	double GetRssiPower () const;
+	void SetRssiPower (double rssi);
 	void Update (uint32_t size, uint32_t last);
 	};
+
+static inline std::ostream&
+operator <<(std::ostream& outStream, const NeighborData& neighbor)
+{
+	return outStream << "State="<<neighbor.n_state << " Contact="<<neighbor.n_contact<< " Rssi="<<neighbor.n_rssiPower;
+}
 
 class NeighborsSet {
 
 public:
-
+	typedef std::pair<Neighbor, NeighborData> NeigborPair;
 	NeighborsSet ();
 	virtual ~NeighborsSet ();
 
@@ -85,6 +95,8 @@ public:
 	Neighbor Get (uint32_t index);
 	Neighbor SelectNeighbor (PeerPolicy policy);
 	Neighbor SelectRandom ();
+	void SortRssi ();
+	Neighbor SelectRssi ();
 	bool AddNeighbor (const Neighbor neighbor, NeighborData data);
 	bool AddNeighbor (Neighbor neighbor);
 	bool DelNeighbor (Ipv4Address n_addr, uint32_t n_iface);
@@ -96,8 +108,18 @@ public:
 	Time GetExpire () const;
 
 protected:
+//	std::map<Neighbor, NeighborData> m_neighbor_set;
 	std::map<Neighbor, NeighborData> m_neighbor_set;
 	Time m_expire;
+	double *m_neighborRssi;
+	std::vector<NeigborPair> m_neighborPairRssi;
+
+	struct RssiCmp {
+	    bool operator()(const NeigborPair &lhs, const NeigborPair &rhs) {
+	        return lhs.second.GetRssiPower() > rhs.second.GetRssiPower();
+	    }
+	};
+
 };
 }
 #endif

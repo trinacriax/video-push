@@ -52,5 +52,12 @@ static inline bool
 operator < (const Neighbor &a, const Neighbor &b){
 	return (a.n_address < b.n_address );
 }
+
+static inline std::ostream&
+operator <<(std::ostream& outStream, const Neighbor& neighbor)
+{
+	return outStream << "IP="<<neighbor.n_address<<" Port="<<neighbor.n_port;
+}
+
 }
 #endif /* __NEIGHBOR_H__ */

@@ -45,6 +45,7 @@
 #include "ns3/address-utils.h"
 #include "ns3/inet-socket-address.h"
 #include "ns3/udp-socket.h"
+#include "ns3/rssi-tag.h"
 #include <memory.h>
 #include <math.h>
 #include <stdio.h>
@@ -109,7 +110,10 @@ VideoPushApplication::GetTypeId (void)
     .AddAttribute ("PeerPolicy", "Peer selection algorithm.",
 				   EnumValue(PS_RANDOM),
 				   MakeEnumAccessor(&VideoPushApplication::m_peerSelection),
-				   MakeEnumChecker (PS_RANDOM, "Random peer selection."))
+				   MakeEnumChecker (PS_RANDOM, "Random peer selection.",
+						   	   	    PS_RSSI, "RSSI based selection.",
+						   	   	    PS_DELAY, "Delay based selection.",
+						   	   	    PS_ROUNDROBIN, "RoundRobin selection."))
 	.AddAttribute ("ChunkPolicy", "Chunk selection algorithm.",
 				   EnumValue(CS_LATEST),
 				   MakeEnumAccessor(&VideoPushApplication::m_chunkSelection),
@@ -735,7 +739,7 @@ VideoPushApplication::PeerLoop ()
 					if (m_neighbors.GetSize() != 0 )
 					{
 						//TODO PULL WINDOW CHECK
-						Ipv4Address target = PeerSelection (PS_RANDOM);
+						Ipv4Address target = PeerSelection (m_peerSelection);
 						NS_ASSERT (target != Ipv4Address::GetAny());
 //						double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
 //						double delayv = rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.40));
@@ -951,14 +955,19 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           break;
         }
       ns3::pimdm::RelayTag relayTag;
+      RssiTag rssi;
       bool rtag = packet->RemovePacketTag(relayTag);
+      bool rssiTag = packet->RemovePacketTag(rssi);
       InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
       Ipv4Address sourceAddr = address.GetIpv4 ();
       uint32_t port = address.GetPort();
 //      Ipv4Address gateway = GetNextHop(sourceAddr);
       Ipv4Mask mask ("255.0.0.0");
+	  Neighbor nt (sourceAddr, port);
       Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(mask);
-      NS_LOG_DEBUG("Node " << GetLocalAddress() <<  " receives packet from "<< sourceAddr << /*" gw " << gateway<< */" Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast());
+      NS_LOG_DEBUG("Node " << GetLocalAddress() <<  " receives packet from "<< sourceAddr
+    		  << /*" gw " << gateway<< */" Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast()
+    		  << " Rssi "<< rssi.Get());
       if(rtag && subnet != relayTag.m_receiver)
       {
 //    	  // NS_LOG_DEBUG("Discarded: not for clients "<<relayTag.m_receiver);
@@ -992,6 +1001,9 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 			  case MSG_HELLO:
 			  {
 				  NS_ASSERT (GetHelloActive());
+				  m_neighbors.AddNeighbor(nt);
+				  if (rssiTag)
+					  m_neighbors.GetNeighbor (nt)->SetRssiPower (rssi.Get());
 				  m_rxControlTrace (packet, address);
 				  HandleHello(chunkH.GetHelloMessage(), sourceAddr);
 				  break;

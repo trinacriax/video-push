@@ -26,6 +26,9 @@
 
 #include "neighbor-set.h"
 #include "ns3/simulator.h"
+#include "ns3/log.h"
+
+NS_LOG_COMPONENT_DEFINE ("NeighborSet");
 
 namespace ns3{
 
@@ -88,6 +91,19 @@ NeighborData::Update (uint32_t size, uint32_t last)
 	SetLastChunk (last);
 }
 
+
+double
+NeighborData::GetRssiPower () const
+{
+	return n_rssiPower;
+}
+
+void
+NeighborData::SetRssiPower (double rssi)
+{
+	n_rssiPower = rssi;
+}
+
 Ipv4Address
 Neighbor::GetAddress ()
 {
@@ -141,6 +157,7 @@ NeighborsSet::AddNeighbor (Neighbor neighbor, NeighborData data){
 		return false;
 	std::pair<std::map<Neighbor, NeighborData>::iterator,bool> test;
 	test = m_neighbor_set.insert(std::pair<Neighbor,NeighborData> (neighbor,data));
+	m_neighborPairRssi.clear();
 	return test.second;
 }
 
@@ -205,6 +222,86 @@ NeighborsSet::SelectRandom ()
 	return iter->first;
 }
 
+void
+NeighborsSet::SortRssi ()
+{
+//	for (std::map<Neighbor, NeighborData>::const_iterator iter = m_neighbor_set.begin(); iter != m_neighbor_set.end(); iter++)
+//		NS_LOG_DEBUG ("Neighbor="<< iter->first <<" " << iter->second);
+	size_t nsize = m_neighbor_set.size();
+	m_neighborPairRssi.reserve (nsize);
+	m_neighborPairRssi = std::vector<NeigborPair> (m_neighbor_set.begin(), m_neighbor_set.end());
+	NS_ASSERT (m_neighborPairRssi.size() == nsize);
+	std::sort (m_neighborPairRssi.begin(), m_neighborPairRssi.end(), RssiCmp());
+//	for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborPairRssi.begin(); iter != m_neighborPairRssi.end(); iter++)
+//	{
+//			NS_LOG_DEBUG ("Neighbor="<< iter->first <<" Data=" << iter->second << " Size "<< m_neighborPairRssi.size());
+//	}
+    double weight[nsize];
+    double weights = 0;
+    double tot = 0;
+    m_neighborRssi = new double[nsize];
+    uint32_t i = 0;
+    for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborPairRssi.begin(); iter != m_neighborPairRssi.end(); iter++, i++)
+    {
+    	weight[i] = iter->second.GetRssiPower();
+//    	NS_LOG_DEBUG ("Neighbor "<< iter->first << " w=" << weight[i] << "/"<<weights);
+    	weights += weight[i];
+    }
+    for (i = 0; i < nsize; i++)
+    {
+    	m_neighborRssi[i] = weight[i] / weights;
+//    	NS_LOG_DEBUG ("Neighbor "<< i << " w=" << weight[i] << "/"<< weights << ": P=" << m_neighborRssi[i]);
+    	tot += m_neighborRssi[i];
+    }
+//    i = 0;
+//    for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborPairRssi.begin(); iter != m_neighborPairRssi.end(); iter++, i++)
+//	{
+//		NS_LOG_DEBUG ("Neighbor="<< iter->first <<" Data=" << iter->second << " Prob="<< (weight[i] / weights) );
+//	}
+//   	NS_LOG_DEBUG ("Neighbors P(all)=" << tot);
+    NS_ASSERT ((1-tot)< pow10(-6));
+}
+
+Neighbor
+NeighborsSet::SelectRssi ()
+{
+	Neighbor nt;
+	if (GetSize() == 0) return nt;
+//	uint32_t index = UniformVariable().GetInteger(0, GetSize()-1);
+//	std::map<Neighbor, NeighborData>::iterator iter = m_neighbor_set.begin();
+//	for (; iter != m_neighbor_set.end() && index>0; iter++, index--);
+//
+//	return iter->first;
+	if (m_neighborPairRssi.size() == 0 && m_neighbor_set.size() > 0)
+		SortRssi ();
+	double dice = UniformVariable().GetValue();
+	uint32_t id = 0;
+	size_t nsize = m_neighbor_set.size();
+    while (dice > 0 && nt.GetAddress() == Ipv4Address(Ipv4Address::GetAny()) && id < nsize)
+    {
+//           if (debug >= 8) {
+//               System.out.println("\t(" + id + ") Value " + value + ", Prob " + prob[id] + " (" + neighbors[id] + ")\n");
+//           }
+		dice -= m_neighborRssi[id];
+		if (dice <= 0) {
+		   nt = m_neighborPairRssi[id].first;
+		}
+		id++;
+	}
+	if (nt.GetAddress() == Ipv4Address() && id >= nsize) {
+	//           if (debug >= 10) {
+	//               System.out.println("Out of Candidate ID range: " + id + " -- " + candidate);
+	//           }
+	   id = 0;
+	   nt = m_neighborPairRssi[id].first;
+	}
+	//       if (debug >= 10) {
+	//           System.out.println("Return Candidate ID " + id + " -- " + candidate);
+	//       }
+	return nt;
+}
+
+
 Neighbor
 NeighborsSet::SelectNeighbor (PeerPolicy policy)
 {
@@ -226,6 +323,11 @@ NeighborsSet::SelectNeighbor (PeerPolicy policy)
 		case PS_ROUNDROBIN:
 		{
 			NS_ASSERT_MSG (false, "SelectNeighbor: Not yet implemented.");
+			break;
+		}
+		case PS_RSSI:
+		{
+			target = SelectRssi();
 			break;
 		}
 		default:
