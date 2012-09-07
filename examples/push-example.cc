@@ -430,6 +430,9 @@ int main(int argc, char **argv) {
 	source.Create (1);
 	NodeContainer nodes;
 	nodes.Create(size);
+	NodeContainer all;
+	all.Add (source);
+	all.Add (nodes);
 
 
 	for (int k=0; k<size; k++)
@@ -543,14 +546,14 @@ int main(int argc, char **argv) {
 
 //	NS_LOG_INFO ("Statically populate ARP cache!\n");
 	Ptr<ArpCache> arp;
-	for (uint32_t n = 0;  n < nodes.GetN() ; n++)
+	for (uint32_t n = 0;  n < all.GetN() ; n++)
 	{
 		if(arp == NULL){
 			arp = CreateObject<ArpCache> ();
 			arp->SetAliveTimeout (Seconds (3600 * 24 * 365));
 		}
 		NS_LOG_INFO ("Populate node \n");
-		Ptr<Ipv4L3Protocol> ip = nodes.Get(n)->GetObject<Ipv4L3Protocol> ();
+		Ptr<Ipv4L3Protocol> ip = all.Get(n)->GetObject<Ipv4L3Protocol> ();
 		NS_ASSERT (ip !=0);
 		ObjectVectorValue interfaces;
 		ip->GetAttribute ("InterfaceList", interfaces);
@@ -573,9 +576,9 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
-	for (uint32_t n = 0;  n < nodes.GetN() ; n++){
+	for (uint32_t n = 0;  n < all.GetN() ; n++){
 		NS_LOG_INFO ("Populate node");
-		Ptr<Ipv4L3Protocol> ip = nodes.Get(n)->GetObject<Ipv4L3Protocol> ();
+		Ptr<Ipv4L3Protocol> ip = all.Get(n)->GetObject<Ipv4L3Protocol> ();
 		NS_ASSERT (ip !=0);
 		ObjectVectorValue interfaces;
 		ip->GetAttribute ("InterfaceList", interfaces);
