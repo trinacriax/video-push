@@ -266,7 +266,7 @@ Neighbor
 NeighborsSet::SelectRssi ()
 {
 	Neighbor nt;
-	if (GetSize() == 0) return nt;
+	NS_ASSERT (GetSize() > 0);
 //	uint32_t index = UniformVariable().GetInteger(0, GetSize()-1);
 //	std::map<Neighbor, NeighborData>::iterator iter = m_neighbor_set.begin();
 //	for (; iter != m_neighbor_set.end() && index>0; iter++, index--);
@@ -308,6 +308,7 @@ NeighborsSet::SelectNeighbor (PeerPolicy policy)
 	NS_ASSERT (policy>=PS_RANDOM && policy <= PS_ROUNDROBIN);
 	Purge();
 	Neighbor target;
+	if (!GetSize()) return target;
 	switch (policy)
 	{
 		case PS_RANDOM:

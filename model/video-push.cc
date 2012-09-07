@@ -736,11 +736,11 @@ VideoPushApplication::PeerLoop ()
 						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " has no neighbors to pull chunk "<< missed);
 					}
 					AddPullRetry(missed);
-					if (m_neighbors.GetSize() != 0 )
+					//TODO PULL WINDOW CHECK
+					Ipv4Address target = PeerSelection (m_peerSelection);
+					if (target != Ipv4Address::GetAny())
 					{
-						//TODO PULL WINDOW CHECK
-						Ipv4Address target = PeerSelection (m_peerSelection);
-						NS_ASSERT (target != Ipv4Address::GetAny());
+						NS_ASSERT (target != Ipv4Address());
 //						double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
 //						double delayv = rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.40));
 //						double delayv = 0;
@@ -1056,9 +1056,7 @@ Ipv4Address
 VideoPushApplication::PeerSelection (PeerPolicy policy)
 {
 	NS_LOG_FUNCTION (this);
-	Ipv4Address target = m_neighbors.SelectNeighbor(policy).GetAddress();
-	NS_ASSERT (target != Ipv4Address() && target != Ipv4Address::GetAny());
-	return target;
+	return m_neighbors.SelectNeighbor(policy).GetAddress();
 }
 
 ChunkVideo*
