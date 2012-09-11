@@ -166,6 +166,8 @@ private:
 	bool IsPending (uint32_t chunkid);
 	bool RemovePending (uint32_t chunkid);
 	double GetReceived ();
+	void AddPullRequest ();
+	void AddPullHit ();
 
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
@@ -214,6 +216,8 @@ private:
 	uint32_t 		m_pullWindow;		// pull window
 	double	 		m_pullRatioMin;		// pull ratio activation
 	double	 		m_pullRatioMax;		// target pull
+	double	 		m_pullHit;			// success pull
+	uint32_t	 	m_pullReq;			// pull request
 	Time			m_pullSlot;
 
 	NeighborsSet 	m_neighbors;		// collect neighbors

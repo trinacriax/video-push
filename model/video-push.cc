@@ -190,7 +190,8 @@ VideoPushApplication::GetTypeId (void)
 VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
 		m_connected(false), m_ipv4(0), m_socket(0),
-		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY)
+		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY),
+		m_pullReq (0), m_pullHit (0)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
@@ -388,9 +389,9 @@ VideoPushApplication::StatisticChunk (void)
 	delay_avg_pull = MicroSeconds (0);
   }
   char buffer [1024];
-  sprintf(buffer, "Chunks Node %d Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f RecP %d AvgP %ld us sigmaP %.5f confP %.5f RecL %d AvgL %ld us sigmaL %.5f confL %.5f\n",
+  sprintf(buffer, "Chunks Node %d Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f RecP %d AvgP %ld us sigmaP %.5f confP %.5f RecL %d AvgL %ld us sigmaL %.5f confL %.5f PReq %d PHit %.4f\n",
 		  	  	    m_node->GetId(), rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence, dlate,
-		  receivedpush, delay_avg_push.ToInteger(Time::US), sigmaP, confidenceP, receivedpull, delay_avg_pull.ToInteger(Time::US), sigmaL, confidenceL);
+		  receivedpush, delay_avg_push.ToInteger(Time::US), sigmaP, confidenceP, receivedpull, delay_avg_pull.ToInteger(Time::US), sigmaL, confidenceL, m_pullReq, (m_pullHit/(1.0*m_pullReq)));
   std::cout << buffer;
 }
 
@@ -746,6 +747,7 @@ VideoPushApplication::PeerLoop ()
 //						double delayv = 0;
 //						Time delay = Time::FromDouble (delayv, Time::US);
 						Simulator::ScheduleNow (&VideoPushApplication::SendPull, this, missed, target);
+						AddPullRequest();
 						m_pullTimer.Schedule();
 					}
 				}
@@ -822,6 +824,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< missed);
 		m_pullTimer.Cancel();
 		m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
+		AddPullHit();
 	}
 	missed = m_chunks.GetLeastMissed();
 	//TODO PULL WINDOW CHECK
@@ -969,6 +972,18 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           }
         }
     }
+}
+
+void
+VideoPushApplication::AddPullRequest ()
+{
+	m_pullReq++;
+}
+
+void
+VideoPushApplication::AddPullHit ()
+{
+	m_pullHit++;
 }
 
 void
