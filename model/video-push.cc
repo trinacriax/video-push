@@ -776,16 +776,12 @@ VideoPushApplication::PeerLoop ()
 							<<GetPullMax()<<") New missed="<<missed);
 				}
 				ratio = GetReceived ();
-				NS_LOG_INFO ("Node=" <<m_node->GetId()<< " has ratio="<<ratio<<" ["<<GetPullRatioMin()<<":"<<GetPullRatioMax()<<"]");
+				NS_LOG_INFO ("Node=" << m_node->GetId() << " IP=" << GetLocalAddress()
+						<< " Ratio=" << ratio << " ["<<GetPullRatioMin() << ":" << GetPullRatioMax() << "]"
+						<< " Last=" << last << " Missed=" << missed << " ("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")"
+						<<" Timer="<<(m_pullTimer.IsRunning()?"Yes":"No"));
 				if (missed && ratio >= GetPullRatioMin() && ratio <= GetPullRatioMax())
 				{
-					uint32_t size = m_neighbors.GetSize();
-					m_neighbors.Purge();
-					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " purge neighbors, size="<<size<<"->"<<m_neighbors.GetSize());
-					if (m_neighbors.GetSize() == 0)
-					{
-						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " has no neighbors to pull chunk "<< missed);
-					}
 					AddPullRetry(missed);
 					//TODO PULL WINDOW CHECK
 					Neighbor target = PeerSelection (m_peerSelection);
@@ -796,6 +792,7 @@ VideoPushApplication::PeerLoop ()
 						Time delay = Time::FromDouble (delayv, Time::US);
 						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " pull "<< target.GetAddress() << " for chunk " << missed);
 						m_sendEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, missed, target.GetAddress());
+						SetPullTimes (missed);
 						AddPullRequest();
 						m_pullTimer.Schedule();
 					}
