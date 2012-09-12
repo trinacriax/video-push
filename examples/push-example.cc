@@ -336,6 +336,7 @@ int main(int argc, char **argv) {
 	if (pullactive)
 		NS_ASSERT (helloactive);
 
+	pulltime = 0.004;//((packetsize*8.0)/(54*pow10(6)));
 	SeedManager::SetRun (run);
 	SeedManager::SetSeed (seed);
 	Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2100"));
@@ -350,7 +351,7 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::VideoPushApplication::DataRate", DataRateValue(stream));
 	Config::SetDefault ("ns3::VideoPushApplication::PacketSize", UintegerValue(packetsize));
 	Config::SetDefault ("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
-	Config::SetDefault ("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
+	Config::SetDefault ("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::S)));
 	Config::SetDefault ("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
 	Config::SetDefault ("ns3::VideoPushApplication::PullRatioMin", DoubleValue(pullratiomin));
 	Config::SetDefault ("ns3::VideoPushApplication::PullRatioMax", DoubleValue(pullratiomax));
