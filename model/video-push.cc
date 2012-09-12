@@ -326,9 +326,10 @@ VideoPushApplication::StatisticChunk (void)
 	  received++;
   }
   received--;
-  delayavgB = received == 0 ? 0 : (delayavgB/(1.0*split)) + (received%1000==0?0:((1.0*delayavg)/(received%1000)));
-  delayavgP = receivedpush == 0 ? 0 : (splitP == 0 ? 0 : (delayavgP/(1.0*splitP))) + (receivedpush%1000==0 ? 0 : ((1.0*delayavgpush)/(receivedpush%1000)));
-  delayavgL = receivedpull == 0 ? 0 : (splitL == 0 ? 0 : (delayavgL/(1.0*splitL))) + (receivedpull%1000==0 ? 0 : ((1.0*delayavgpull)/(receivedpull%1000)));
+//  delayavgB = received == 0 ? 0 : (delayavg == 0 ? 0 : (received%1000 == 0 ? (delayavgB/1.0*split) : ((delayavgB/1.0*split) + ((1.0*delayavg)/(received%1000)))/2.0));
+  delayavgB = ((delayavgB/ (1.0 * (split > 0 ? split : 1))) + ((1.0*delayavg)/(received%1000==0?1:received%1000))) / (split > 0 && received%1000!=0 ? 2 : 1);
+  delayavgP = ((delayavgP/ (1.0 * (splitP > 0 ? splitP : 1))) + ((1.0*delayavgpush)/(receivedpush%1000==0?1:receivedpush%1000))) / (splitP > 0 && receivedpush%1000!=0 ? 2 : 1);
+  delayavgL = ((delayavgL/ (1.0 * (splitL > 0 ? splitL : 1))) + ((1.0*delayavgpull)/(receivedpull%1000==0?1:receivedpull%1000))) / (splitL > 0 && receivedpull%1000!=0 ? 2 : 1);
   delay_max = Time::FromInteger(delaymax, Time::US);
   delay_min = Time::FromInteger(delaymin, Time::US);
   current = received + missed;
