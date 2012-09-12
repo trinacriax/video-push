@@ -857,10 +857,15 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	// INDUCING MISSING CHUNKS END.
 	toolate = m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED;
 	duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
+	if (sender == GetSource() && m_chunks.GetBufferSize() == 1)
+	{
+		SetSlotStart (Simulator::Now());
+	}
 	if (toolate) // Chunk was pulled and received to late
 	{
 		m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
 		SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
+		NS_LOG_INFO ("Late chunk "<< (Simulator::Now()-GetPullTimes(chunk.c_id)).GetSeconds());
 	}
 	else if (duplicated) // Duplicated chunk
 	{
