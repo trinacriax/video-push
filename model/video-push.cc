@@ -1228,6 +1228,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 	Ptr<Packet> packet = Create<Packet> ();
 	packet->AddHeader(pull);
 	m_txDataTrace (packet);
+	NS_ASSERT( GetSlotStart() <= Simulator::Now() && (GetSlotStart() + m_pullSlot) > Simulator::Now());
 	NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
 	m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
 }
