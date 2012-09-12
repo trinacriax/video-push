@@ -364,6 +364,7 @@ NeighborsSet::Purge ()
 			{
 //				std::map<Neighbor, NeighborData>::iterator iter2 = iter;
 				m_neighbor_set.erase (iter++);
+				m_neighborPairRssi.clear();
 //				newset.insert (*iter);
 			}
 			else
