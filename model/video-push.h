@@ -160,7 +160,7 @@ private:
 //	void SendHelloUnicast (Ipv4Address &neighbor);
 	ChunkVideo* ForgeChunk ();
 	uint32_t ChunkSelection (ChunkPolicy policy);
-	Ipv4Address PeerSelection (PeerPolicy policy);
+	Neighbor PeerSelection (PeerPolicy policy);
 
 	void AddPending (uint32_t chunkid);
 	bool IsPending (uint32_t chunkid);

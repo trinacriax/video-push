@@ -743,17 +743,20 @@ VideoPushApplication::PeerLoop ()
 					}
 					AddPullRetry(missed);
 					//TODO PULL WINDOW CHECK
-					Ipv4Address target = PeerSelection (m_peerSelection);
-					if (target != Ipv4Address::GetAny())
+					Neighbor target = PeerSelection (m_peerSelection);
+					if (target.GetAddress() != Ipv4Address::GetAny())
 					{
-						NS_ASSERT (target != Ipv4Address());
-//						double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
-//						double delayv = rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.40));
-//						double delayv = 0;
-//						Time delay = Time::FromDouble (delayv, Time::US);
-						Simulator::ScheduleNow (&VideoPushApplication::SendPull, this, missed, target);
+						NS_ASSERT (m_neighbors.IsNeighbor(target));
+						double delayv = rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.03));
+						Time delay = Time::FromDouble (delayv, Time::US);
+						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " pull "<< target.GetAddress() << " for chunk " << missed);
+						m_sendEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, missed, target.GetAddress());
 						AddPullRequest();
 						m_pullTimer.Schedule();
+					}
+					else
+					{
+						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " has no neighbors to pull chunk "<< missed);
 					}
 				}
 			}
@@ -1084,11 +1087,11 @@ VideoPushApplication::GetDuplicate (uint32_t chunkid)
 }
 
 
-Ipv4Address
+Neighbor
 VideoPushApplication::PeerSelection (PeerPolicy policy)
 {
 	NS_LOG_FUNCTION (this);
-	return m_neighbors.SelectNeighbor(policy).GetAddress();
+	return m_neighbors.SelectNeighbor(policy);
 }
 
 ChunkVideo*
