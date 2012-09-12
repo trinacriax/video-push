@@ -347,7 +347,7 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::NakagamiPropagationLossModel::m0", DoubleValue(nak_m0));
 	Config::SetDefault ("ns3::NakagamiPropagationLossModel::m1", DoubleValue(nak_m1));
 	Config::SetDefault ("ns3::NakagamiPropagationLossModel::m2", DoubleValue(nak_m2));
-	Config::SetDefault ("ns3::VideoPushApplication::DataRate", UintegerValue(stream));
+	Config::SetDefault ("ns3::VideoPushApplication::DataRate", DataRateValue(stream));
 	Config::SetDefault ("ns3::VideoPushApplication::PacketSize", UintegerValue(packetsize));
 	Config::SetDefault ("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
 	Config::SetDefault ("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
