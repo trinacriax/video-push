@@ -841,6 +841,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	// Update Chunk Buffer START
 	uint32_t last = m_chunks.GetLastChunk();
 	uint32_t missed = ChunkSelection(m_chunkSelection);
+	double ratio = GetReceived();
 	bool duplicated = false;
 	bool toolate = false;
 //#define MISS // INDUCING MISSING CHUNKS START
