@@ -117,7 +117,10 @@ VideoPushApplication::GetTypeId (void)
 	.AddAttribute ("ChunkPolicy", "Chunk selection algorithm.",
 				   EnumValue(CS_LATEST),
 				   MakeEnumAccessor(&VideoPushApplication::m_chunkSelection),
-				   MakeEnumChecker (CS_LATEST, "Latest useful chunk"))
+				   MakeEnumChecker (CS_LATEST, "Latest chunk",
+				   	   	   	   	   	CS_LEAST_MISSED, "Least missed",
+				   	   	   	   	   	CS_LEAST_USEFUL, "Least useful missed",
+				   	   	   	   	   	CS_NEW_CHUNK, "New chunks"))
     .AddTraceSource ("TxData", "A new packet is created and is sent",
                    MakeTraceSourceAccessor (&VideoPushApplication::m_txDataTrace))
 	.AddTraceSource ("RxData", "A packet has been received",
@@ -1192,6 +1195,11 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		case CS_LEAST_USEFUL:
 		{
 			chunkid = m_chunks.GetLeastMissed(GetPullWindow());
+			break;
+		}
+		case CS_LATEST:
+		{
+			chunkid = m_chunks.GetLastChunk();
 			break;
 		}
 		default:
