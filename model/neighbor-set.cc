@@ -284,17 +284,20 @@ NeighborsSet::SelectRssi ()
 //	for (; iter != m_neighbor_set.end() && index>0; iter++, index--);
 //
 //	return iter->first;
-	if (m_neighborPairRssi.size() == 0 && m_neighbor_set.size() > 0)
+	size_t nsize = m_neighbor_set.size();
+	if ((m_neighborPairRssi.size() == 0 && m_neighbor_set.size() > 0) || (m_neighborPairRssi.size() != nsize) )
 		SortRssi ();
 	double dice = UniformVariable().GetValue();
 	uint32_t id = 0;
-	size_t nsize = m_neighbor_set.size();
     while (dice > 0 && nt.GetAddress() == Ipv4Address(Ipv4Address::GetAny()) && id < nsize)
     {
+    	NeighborData *nd = GetNeighbor (m_neighborPairRssi[id].first);
+    	NS_ASSERT (nd);
+    	double weight = nd->n_bufferSize/(nd->n_latestChunk*1.0);
 //           if (debug >= 8) {
 //               System.out.println("\t(" + id + ") Value " + value + ", Prob " + prob[id] + " (" + neighbors[id] + ")\n");
 //           }
-		dice -= m_neighborRssi[id];
+		dice -= (GetSelectionWeight() * m_neighborRssi[id]) + ((1-GetSelectionWeight()) * m_neighborRssi[id] * weight);
 		if (dice <= 0) {
 		   nt = m_neighborPairRssi[id].first;
 		}
