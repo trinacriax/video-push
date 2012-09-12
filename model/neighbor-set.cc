@@ -293,11 +293,11 @@ NeighborsSet::SelectRssi ()
     {
     	NeighborData *nd = GetNeighbor (m_neighborPairRssi[id].first);
     	NS_ASSERT (nd);
-    	double weight = nd->n_bufferSize/(nd->n_latestChunk*1.0);
+    	double weight = (nd->n_bufferSize == 0 ? 0 : nd->n_bufferSize/(nd->n_latestChunk*1.0) );
 //           if (debug >= 8) {
 //               System.out.println("\t(" + id + ") Value " + value + ", Prob " + prob[id] + " (" + neighbors[id] + ")\n");
 //           }
-		dice -= (GetSelectionWeight() * m_neighborRssi[id]) + ((1-GetSelectionWeight()) * m_neighborRssi[id] * weight);
+		dice -= ((1-GetSelectionWeight()) * m_neighborRssi[id]) + ((GetSelectionWeight()) * m_neighborRssi[id] * weight);
 		if (dice <= 0) {
 		   nt = m_neighborPairRssi[id].first;
 		}
