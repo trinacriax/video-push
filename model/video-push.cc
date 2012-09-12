@@ -755,7 +755,7 @@ VideoPushApplication::PullSlot ()
 {
 	NS_LOG_INFO ("Node=" <<m_node->GetId()<< " NextSlot="<<GetSlotEnd().GetSeconds());
 	NS_ASSERT (Simulator::Now() >= GetSlotStart() && Simulator::Now() < GetSlotStart()+m_pullSlot);
-	return (Simulator::Now() >= GetSlotStart() && Simulator::Now() < GetSlotEnd());
+	return (Simulator::Now() >= GetSlotStart() && (Simulator::Now() + MilliSeconds(1) < GetSlotEnd()));
 }
 
 void
