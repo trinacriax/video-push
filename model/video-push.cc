@@ -874,20 +874,27 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	}
 	if (missed == chunk.c_id)
 	{
-		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< missed);
 		m_pullTimer.Cancel();
+		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< missed<< " after "<< (Simulator::Now()-GetPullTimes(missed)).GetSeconds());
 		m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
 		AddPullHit();
 	}
 	missed = ChunkSelection(m_chunkSelection);
+	ratio = GetReceived();
 	//TODO PULL WINDOW CHECK
-	if (missed && !m_pullTimer.IsRunning() && GetPullActive())
+	if (missed && !m_pullTimer.IsRunning() && GetPullActive() && ratio >= GetPullRatioMin() && ratio <= GetPullRatioMax())
 	{
-	  Simulator::ScheduleNow (&VideoPushApplication::PeerLoop, this);
+		NS_LOG_INFO ("Node " << GetLocalAddress() << " activating pull for "<<missed<< " ratio="<<ratio);
+		Simulator::ScheduleNow (&VideoPushApplication::PeerLoop, this);
 	}
-	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate":" Received "))
-		  << chunk << "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"<<" from "
-		  << sender << " totalRx="<<m_totalRx<<" Timer "<< m_pullTimer.IsRunning()<<" Neighbors "<< m_neighbors.GetSize()<<" Missed="<<missed);
+	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate ":" Received "))
+		  << chunk.c_id //<< "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"
+		  <<" from " << sender //<< " totalRx="<<m_totalRx
+		  <<" Ratio="<<GetReceived()
+		  <<" Pull "<< m_pullTimer.IsRunning() << "(D="<<m_pullTimer.GetDelay()<<"/N=" << m_pullTimer.GetDelayLeft()<<")"
+		  <<" #Neighbors "<< m_neighbors.GetSize()
+		  <<" Missed="<<missed
+		  <<" Slot="<<GetSlotStart().GetSeconds());
 }
 
 void
