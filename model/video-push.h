@@ -233,6 +233,8 @@ private:
 	uint32_t		m_helloLoss;
 	uint32_t		m_helloActive;
 	uint32_t 		m_flag;
+	// support for neighbors
+	double			n_selectionWeight;
 
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	std::map<uint32_t, uint32_t> m_duplicates; // count chunks duplicated

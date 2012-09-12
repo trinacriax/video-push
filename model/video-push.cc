@@ -182,6 +182,10 @@ VideoPushApplication::GetTypeId (void)
 				   UintegerValue (0),
 				   MakeUintegerAccessor (&VideoPushApplication::m_flag),
 				   MakeUintegerChecker<uint32_t> (0))
+	.AddAttribute ("SelectionWeight", "Neighbor selection weight (w * RSSI ) + (1-w) * (%ChunkReceived).",
+				   DoubleValue (0),
+				   MakeDoubleAccessor (&VideoPushApplication::n_selectionWeight),
+				   MakeDoubleChecker<double> (0))
   ;
   return tid;
 }
@@ -444,6 +448,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
     	  Simulator::Schedule (start, &VideoPushApplication::SendHello, this);
       }
       m_neighbors.SetExpire (Time::FromDouble (GetHelloTime().GetSeconds() * (1.10 * (1.0 + GetHelloLoss())), Time::S));
+      m_neighbors.SetSelectionWeight (n_selectionWeight);
       double inter_time = 1 / (m_cbrRate.GetBitRate()/(8.0*m_pktSize));
       m_pullSlot = Time::FromDouble(inter_time,Time::S);
     }
