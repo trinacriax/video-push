@@ -220,10 +220,10 @@ private:
 	double	 		m_pullRatioMin;		// pull ratio activation
 	double	 		m_pullRatioMax;		// target pull
 	double	 		m_pullHit;			// success pull
-	uint32_t	 	m_pullRequest;			// pull request
-	uint32_t	 	m_pullReceived;			// pull request
-	double		 	m_pullReply;			// pull request
-	Time			m_pullSlot;
+	uint32_t	 	m_pullRequest;		// pull request
+	uint32_t	 	m_pullReceived;		// pull received
+	double		 	m_pullReply;		// pull reply
+	Time			m_pullSlot;			// slot duration for pull operations
 
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	Time 			m_helloTime;
