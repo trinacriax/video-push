@@ -191,7 +191,7 @@ VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
 		m_connected(false), m_ipv4(0), m_socket(0),
 		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY),
-		m_pullReq (0), m_pullHit (0)
+		m_pullRequest (0), m_pullHit (0), m_pullReceived (0), m_pullReply (0)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
@@ -389,9 +389,9 @@ VideoPushApplication::StatisticChunk (void)
 	delay_avg_pull = MicroSeconds (0);
   }
   char buffer [1024];
-  sprintf(buffer, "Chunks Node %d Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f RecP %d AvgP %ld us sigmaP %.5f confP %.5f RecL %d AvgL %ld us sigmaL %.5f confL %.5f PReq %d PHit %.4f\n",
+  sprintf(buffer, "Chunks Node %d Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f RecP %d AvgP %ld us sigmaP %.5f confP %.5f RecL %d AvgL %ld us sigmaL %.5f confL %.5f PRec %d PRep %.4f PReq %d PHit %.4f\n",
 		  	  	    m_node->GetId(), rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence, dlate,
-		  receivedpush, delay_avg_push.ToInteger(Time::US), sigmaP, confidenceP, receivedpull, delay_avg_pull.ToInteger(Time::US), sigmaL, confidenceL, m_pullReq, (m_pullHit/(1.0*m_pullReq)));
+		  receivedpush, delay_avg_push.ToInteger(Time::US), sigmaP, confidenceP, receivedpull, delay_avg_pull.ToInteger(Time::US), sigmaL, confidenceL, m_pullReceived, (m_pullReceived == 0 ? 0 : m_pullReply/(1.0*m_pullReceived)), m_pullRequest, (m_pullRequest == 0 ? 0 : m_pullHit/(1.0*m_pullRequest)) );
   std::cout << buffer;
 }
 
@@ -977,13 +977,25 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 void
 VideoPushApplication::AddPullRequest ()
 {
-	m_pullReq++;
+	m_pullRequest++;
 }
 
 void
 VideoPushApplication::AddPullHit ()
 {
 	m_pullHit++;
+}
+
+void
+VideoPushApplication::AddPullReceived ()
+{
+	m_pullReceived++;
+}
+
+void
+VideoPushApplication::AddPullReply ()
+{
+	m_pullReply++;
 }
 
 void
