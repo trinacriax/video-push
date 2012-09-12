@@ -806,7 +806,7 @@ VideoPushApplication::PeerLoop ()
 					if (target.GetAddress() != Ipv4Address::GetAny())
 					{
 						NS_ASSERT (m_neighbors.IsNeighbor(target));
-						double delayv = rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.03));
+						double delayv = 0;//rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.03));
 						Time delay = Time::FromDouble (delayv, Time::US);
 						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " pull "<< target.GetAddress() << " for chunk " << missed);
 						m_sendEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, missed, target.GetAddress());
