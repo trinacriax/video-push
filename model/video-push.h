@@ -176,6 +176,8 @@ private:
 	Time GetSlotEnd () const;
 	bool PullSlot ();
 
+	void SetPullTimes (uint32_t chunkid);
+	Time GetPullTimes (uint32_t chunkid);
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
 	void HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const Ipv4Address &sender);
@@ -246,6 +248,7 @@ private:
 	std::map<uint32_t, uint64_t> m_chunk_delay; // count chunk delay
 	std::map<uint32_t, uint32_t> m_pendingPull; // count pending pulls
 	std::map<uint32_t, uint32_t> m_pullRetries; // count chunks duplicated
+	std::map<uint32_t, Time> m_pullTimes; 		// trace pull time for chunks
 
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm
 	enum ChunkPolicy m_chunkSelection; // Chunk selection algorithm
