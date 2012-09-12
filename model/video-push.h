@@ -171,6 +171,10 @@ private:
 	void AddPullReceived ();
 	void AddPullReply ();
 
+	void SetSlotStart (Time start);
+	Time GetSlotStart () const;
+	Time GetSlotEnd () const;
+	bool PullSlot ();
 
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
@@ -233,6 +237,7 @@ private:
 	uint32_t		m_helloLoss;
 	uint32_t		m_helloActive;
 	uint32_t 		m_flag;
+	Time			m_slotStart;
 	// support for neighbors
 	double			n_selectionWeight;
 

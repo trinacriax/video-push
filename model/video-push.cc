@@ -684,6 +684,24 @@ VideoPushApplication::GetHelloLoss () const
 	return m_helloLoss;
 }
 
+Time
+VideoPushApplication::GetSlotStart () const
+{
+	return m_slotStart;
+}
+
+void
+VideoPushApplication::SetSlotStart (Time start)
+{
+	m_slotStart = start;
+	Simulator::Schedule (m_pullSlot, &VideoPushApplication::SetSlotStart, this, (m_slotStart + m_pullSlot));
+}
+
+Time
+VideoPushApplication::GetSlotEnd() const
+{
+	return GetSlotStart() + Time::FromDouble((m_pullSlot.GetSeconds()*.90),Time::S);
+}
 
 Ipv4Address
 VideoPushApplication::GetLocalAddress ()
@@ -704,6 +722,14 @@ VideoPushApplication::GetReceived ()
 	}
 	ratio = (ratio / window);
 	return  ratio;
+}
+
+bool
+VideoPushApplication::PullSlot ()
+{
+	NS_LOG_INFO ("Node=" <<m_node->GetId()<< " NextSlot="<<GetSlotEnd().GetSeconds());
+	NS_ASSERT (Simulator::Now() >= GetSlotStart() && Simulator::Now() < GetSlotStart()+m_pullSlot);
+	return (Simulator::Now() >= GetSlotStart() && Simulator::Now() < GetSlotEnd());
 }
 
 void
