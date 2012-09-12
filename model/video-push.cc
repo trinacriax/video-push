@@ -758,12 +758,21 @@ VideoPushApplication::PeerLoop ()
 	{
 		case PEER:
 		{
-			uint32_t last = m_chunks.GetLastChunk();
-			double ratio = GetReceived ();
-			NS_LOG_INFO ("Node=" <<m_node->GetId()<< " IP=" << GetLocalAddress() << " Last="<<last<<" Missed="<< missed <<" ("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")"<<" TimerRunning="<<(m_pullTimer.IsRunning()?"Yes":"No"));
+			if (!PullSlot())//no more time to pull
+			{
+				NS_ASSERT(GetSlotStart() < Simulator::Now());
+				NS_ASSERT(GetSlotStart() + m_pullSlot > Simulator::Now());
+				Time delay = GetSlotStart() + m_pullSlot - Simulator::Now();
+				NS_LOG_INFO ("Node=" <<m_node->GetId()<< " No time to pull: "<<GetSlotStart().GetSeconds()<< " < "<<Simulator::Now().GetSeconds() << " < "<<GetSlotEnd().GetSeconds() << " move for "<<delay.GetSeconds());
+				m_pullTimer.Schedule(delay);
+				break;
+			}
 			NS_ASSERT (GetPullActive());
 			NS_ASSERT (GetHelloActive());
+			NS_ASSERT (!m_pullTimer.IsRunning());
 			uint32_t missed = ChunkSelection(m_chunkSelection);
+			uint32_t last = m_chunks.GetLastChunk();
+			double ratio = GetReceived ();
 			if (missed && !m_pullTimer.IsRunning())
 			{
 				m_pullTimer.Cancel();
