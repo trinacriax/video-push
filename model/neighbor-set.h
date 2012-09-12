@@ -106,11 +106,14 @@ public:
 	void Purge ();
 	void SetExpire (Time time);
 	Time GetExpire () const;
+	void SetSelectionWeight (double weight);
+	double GetSelectionWeight () const;
 
 protected:
 //	std::map<Neighbor, NeighborData> m_neighbor_set;
 	std::map<Neighbor, NeighborData> m_neighbor_set;
 	Time m_expire;
+	double m_selectionWeight;
 	double *m_neighborRssi;
 	std::vector<NeigborPair> m_neighborPairRssi;
 

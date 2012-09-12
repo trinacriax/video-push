@@ -183,6 +183,18 @@ NeighborsSet::GetExpire () const
 	return m_expire;
 }
 
+void
+NeighborsSet::SetSelectionWeight (double weight)
+{
+	m_selectionWeight = weight;
+}
+
+double
+NeighborsSet::GetSelectionWeight () const
+{
+	return m_selectionWeight;
+}
+
 bool
 NeighborsSet::DelNeighbor (Ipv4Address n_addr, uint32_t n_port){
 	Neighbor *n = new Neighbor(n_addr, n_port);
