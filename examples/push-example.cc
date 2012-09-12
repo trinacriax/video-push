@@ -245,6 +245,10 @@ int main(int argc, char **argv) {
 	double ymax = 80;
 	/// Radius range
 	double radius = 120;
+	// Streaming rate
+	uint64_t stream = 1000000;
+	// Packet Size
+	uint64_t packetsize = 1500;
 	// Period between pull
 	double pulltime = 20;//in ms
 	// max number of pull to retrieve a chunk
@@ -313,6 +317,8 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("ymax", "Grid Y max", ymax);
 	cmd.AddValue ("radius", "Radius range", radius);
 	cmd.AddValue ("routing", "Unicast Routing Protocol (1 - AODV)", routing);
+	cmd.AddValue ("stream", "Streaming ", stream);
+	cmd.AddValue ("packetsize", "Packet Size", packetsize);
 	cmd.AddValue ("hellotime", "Hello time", hellotime);
 	cmd.AddValue ("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
 	cmd.AddValue ("helloactive", "Hello activation", helloactive);
@@ -338,6 +344,8 @@ int main(int argc, char **argv) {
 	Config::SetDefault ("ns3::NakagamiPropagationLossModel::m0", DoubleValue(nak_m0));
 	Config::SetDefault ("ns3::NakagamiPropagationLossModel::m1", DoubleValue(nak_m1));
 	Config::SetDefault ("ns3::NakagamiPropagationLossModel::m2", DoubleValue(nak_m2));
+	Config::SetDefault ("ns3::VideoPushApplication::DataRate", UintegerValue(stream));
+	Config::SetDefault ("ns3::VideoPushApplication::PacketSize", UintegerValue(packetsize));
 	Config::SetDefault ("ns3::VideoPushApplication::PullActive", BooleanValue(pullactive));
 	Config::SetDefault ("ns3::VideoPushApplication::PullTime", TimeValue(Time::FromDouble(pulltime,Time::MS)));
 	Config::SetDefault ("ns3::VideoPushApplication::PullMax", UintegerValue(pullmax));
@@ -404,6 +412,8 @@ int main(int argc, char **argv) {
 			<< " --ymax=" << ymax
 			<< " --radius=" << radius
 			<< " --routing=" << routing
+			<< " --stream=" << stream
+			<< " --packetsize=" << packetsize
 			<< " --hellotime=" << hellotime
 			<< " --helloloss=" << helloloss
 			<< " --helloactive=" << helloactive
@@ -589,7 +599,6 @@ int main(int argc, char **argv) {
 		}
 	}
 	//Source streaming rate
-	uint64_t stream = 1000000;
 	Ipv4Address subnet ("10.255.255.255");
 	NS_LOG_INFO ("Create Source");
 	for(uint32_t s = 0; s < source.GetN() ; s++){
@@ -597,7 +606,7 @@ int main(int argc, char **argv) {
 		Config::SetDefault ("ns3::UdpSocket::IpMulticastTtl", UintegerValue (1));
 		VideoHelper video = VideoHelper ("ns3::UdpSocketFactory", dst);
 		video.SetAttribute ("DataRate", DataRateValue (DataRate (stream)));
-		video.SetAttribute ("PacketSize", UintegerValue (1500));
+		video.SetAttribute ("PacketSize", UintegerValue (packetsize));
 		video.SetAttribute ("PeerType", EnumValue (SOURCE));
 		video.SetAttribute ("Local", AddressValue (interfaces.GetAddress(s)));
 		video.SetAttribute ("PeerPolicy", EnumValue (PS_RANDOM));
@@ -612,6 +621,8 @@ int main(int argc, char **argv) {
 		InetSocketAddress dstC = InetSocketAddress (subnet, PUSH_PORT);
 		Config::SetDefault ("ns3::UdpSocket::IpMulticastTtl", UintegerValue (1));
 		VideoHelper videoC = VideoHelper ("ns3::UdpSocketFactory", dstC);
+		videoC.SetAttribute ("DataRate", DataRateValue (DataRate (stream)));
+		videoC.SetAttribute ("PacketSize", UintegerValue (packetsize));
 		videoC.SetAttribute ("PeerType", EnumValue (PEER));
 		videoC.SetAttribute ("LocalPort", UintegerValue (PUSH_PORT));
 		videoC.SetAttribute ("Local", AddressValue(interfaces.GetAddress(source.GetN()+n)));
