@@ -713,12 +713,12 @@ VideoPushApplication::PeerLoop ()
 	{
 		case PEER:
 		{
-			uint32_t missed = m_chunks.GetLeastMissed();
 			uint32_t last = m_chunks.GetLastChunk();
 			double ratio = GetReceived ();
 			NS_LOG_INFO ("Node=" <<m_node->GetId()<< " IP=" << GetLocalAddress() << " Last="<<last<<" Missed="<< missed <<" ("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")"<<" TimerRunning="<<(m_pullTimer.IsRunning()?"Yes":"No"));
 			NS_ASSERT (GetPullActive());
 			NS_ASSERT (GetHelloActive());
+			uint32_t missed = ChunkSelection(m_chunkSelection);
 			if (missed && !m_pullTimer.IsRunning())
 			{
 				m_pullTimer.Cancel();
@@ -726,7 +726,7 @@ VideoPushApplication::PeerLoop ()
 				{
 					m_chunks.SetChunkState(missed, CHUNK_SKIPPED);
 					uint32_t lastmissed = missed;
-					missed = m_chunks.GetLeastMissed();
+					missed = ChunkSelection(m_chunkSelection);
 					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " is marking chunk "<< lastmissed <<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<","
 							<<GetPullMax()<<") New missed="<<missed);
 				}
@@ -792,7 +792,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
 	// Update Chunk Buffer START
 	uint32_t last = m_chunks.GetLastChunk();
-	uint32_t missed = m_chunks.GetLeastMissed();
+	uint32_t missed = ChunkSelection(m_chunkSelection);
 	bool duplicated = false;
 	bool toolate = false;
 //#define MISS // INDUCING MISSING CHUNKS START
@@ -831,7 +831,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
 		AddPullHit();
 	}
-	missed = m_chunks.GetLeastMissed();
+	missed = ChunkSelection(m_chunkSelection);
 	//TODO PULL WINDOW CHECK
 	if (missed && !m_pullTimer.IsRunning() && GetPullActive())
 	{
@@ -1119,7 +1119,7 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		}
 		case CS_LEAST_USEFUL:
 		{
-			chunkid = m_chunks.GetLeastMissed();
+			chunkid = m_chunks.GetLeastMissed(GetPullWindow());
 			break;
 		}
 		default:

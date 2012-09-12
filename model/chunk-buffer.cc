@@ -137,14 +137,17 @@ namespace ns3{
 	}
 
 	uint32_t
-	ChunkBuffer::GetLeastMissed ()
+	ChunkBuffer::GetLeastMissed (uint32_t window)
 	{
-		uint32_t missed = 1;
-		while (missed < last && (HasChunk(missed) || ChunkSkipped (missed)))
+		uint32_t missed = last;
+		int32_t low = last - window;
+		low = low < 1 ? 1 : low;
+		while (missed >= low && (HasChunk(missed) || ChunkSkipped (missed)))
 		{
-			missed++;
+			missed--;
 		}
 		missed = (missed<last?missed:0);
+		missed = (missed>=low?missed:0);
 		return missed;
 	}
 
