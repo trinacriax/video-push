@@ -789,8 +789,9 @@ VideoPushApplication::PeerLoop ()
 					m_chunks.SetChunkState(missed, CHUNK_SKIPPED);
 					uint32_t lastmissed = missed;
 					missed = ChunkSelection(m_chunkSelection);
+					Time shift = GetPullTimes(lastmissed);
 					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " is marking chunk "<< lastmissed <<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<","
-							<<GetPullMax()<<") New missed="<<missed);
+							<<GetPullMax()<<") New missed="<<missed << " Pulled "<<shift.GetSeconds());
 				}
 				ratio = GetReceived ();
 				NS_LOG_INFO ("Node=" << m_node->GetId() << " IP=" << GetLocalAddress()
@@ -895,7 +896,8 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	if (missed == chunk.c_id)
 	{
 		m_pullTimer.Cancel();
-		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< missed<< " after "<< (Simulator::Now()-GetPullTimes(missed)).GetSeconds());
+		Time shift = (Simulator::Now()-GetPullTimes(missed));
+		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< missed<< " after "<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
 		m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
 		AddPullHit();
 	}
