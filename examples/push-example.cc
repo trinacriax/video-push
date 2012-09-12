@@ -58,10 +58,15 @@ uint32_t aodvSentP = 0;
 uint32_t arpSent = 0;
 uint32_t videoBroadcast = 0;
 std::vector<uint32_t> msgControl;
+std::vector<uint32_t> msgPull;
 std::vector<uint32_t> msgVideo;
-uint32_t msgVideoT;
+std::vector<uint32_t> msgVideoPull;
+uint32_t msgVideoT = 0;
+uint32_t msgVideoP = 0;
 uint32_t msgControlT = 0;
+uint32_t msgControlL = 0;
 uint32_t msgControlP = 0;
+uint32_t msgControlLP = 0;
 
 std::vector<uint32_t> neighbors;
 uint32_t neighborsT = 0;
@@ -180,14 +185,33 @@ void StatisticVideo ()
 }
 
 void
+VideoTrafficPull (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	msgVideoPull[mc.id] += p->GetSize();
+	msgVideoP += p->GetSize();
+}
+
+void StatisticTrafficPull ()
+{
+	for (uint32_t i = 0; i < msgVideoPull.size(); i++)
+	{
+		std::cout << "VideoMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideoPull[i] << "\n";
+		msgVideoPull[i] = 0;
+	}
+	std::cout << "VideoMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideoP<< "\n";
+	msgVideoP = 0;
+}
+
+void
 VideoControlSent (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
 	msgControl[mc.id] += (p->GetSize() + 20 + 8 );
 	msgControlT += (p->GetSize() + 20 + 8 );
 	msgControlP++;
-
 }
+
 void StatisticControl ()
 {
 	for (uint32_t i = 0; i < msgControl.size(); i++)
@@ -197,6 +221,26 @@ void StatisticControl ()
 	}
 	std::cout << "ControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgControlT<< "\t" << msgControlP << "\n";
 	msgControlT = msgControlP = 0;
+}
+
+void
+VideoPullSent (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	msgPull[mc.id] += (p->GetSize() + 20 + 8 );
+	msgControlL += (p->GetSize() + 20 + 8 );
+	msgControlLP++;
+}
+
+void StatisticPullSent ()
+{
+	for (uint32_t i = 0; i < msgPull.size(); i++)
+	{
+		std::cout << "PullMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgPull[i] << "\n";
+		msgPull[i] = 0;
+	}
+	std::cout << "PullMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgControlL<< "\t" << msgControlLP << "\n";
+	msgControlL = msgControlLP = 0;
 }
 
 void
@@ -454,7 +498,9 @@ int main(int argc, char **argv) {
 	for (int k=0; k<size; k++)
 	{
 	    msgControl.push_back(0);
+	    msgPull.push_back(0);
 	    msgVideo.push_back(0);
+	    msgVideoPull.push_back(0);
 	    neighbors.push_back(0);
 	}
 
@@ -658,6 +704,8 @@ int main(int argc, char **argv) {
 		Config::ConnectWithoutContext ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficSent", MakeCallback (&AodvTrafficSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxData", MakeCallback (&VideoTrafficSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxControl", MakeCallback (&VideoControlSent));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxPull", MakeCallback (&VideoPullSent));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxDataPull", MakeCallback (&VideoTrafficPull));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/NeighborTrace", MakeCallback (&Neighbors));
 		Simulator::Schedule (Seconds(1), &ResetValues);
 	}

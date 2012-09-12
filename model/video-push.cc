@@ -126,6 +126,10 @@ VideoPushApplication::GetTypeId (void)
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_txControlTrace))
 	.AddTraceSource ("RxControl", "A packet has been received",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxControlTrace))
+	.AddTraceSource ("TxPull", "A new pull has been sent",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_txPullTrace))
+	.AddTraceSource ("TxDataPull", "A data packet has been sent in reply to a pull request",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_txDataPullTrace))
 	.AddTraceSource ("NeighborTrace", "Neighbors",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_neighborsTrace))
 	.AddAttribute ("PullTime", "Time between two consecutive pulls.",
@@ -1247,7 +1251,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 	pull.GetPullMessage ().SetChunk (chunkid);
 	Ptr<Packet> packet = Create<Packet> ();
 	packet->AddHeader(pull);
-	m_txDataTrace (packet);
+	m_txPullTrace (packet);
 	NS_ASSERT( GetSlotStart() <= Simulator::Now() && (GetSlotStart() + m_pullSlot) > Simulator::Now());
 	NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
 	m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
@@ -1329,7 +1333,7 @@ VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
 			chunk.GetChunkMessage().SetChunk(*copy);
 			packet->AddHeader(chunk);
 			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies pull to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
-			m_txDataTrace (packet);
+			m_txDataPullTrace (packet);
 			m_socket->SendTo (packet, 0, InetSocketAddress(target, PUSH_PORT));
 			break;
 		}
