@@ -164,7 +164,7 @@ VideoPushApplication::GetTypeId (void)
 				   DoubleValue (0.80),
 				   MakeDoubleAccessor (&VideoPushApplication::SetPullRatioMin,
 									   &VideoPushApplication::GetPullRatioMin),
-				   MakeDoubleChecker<double> (0.70, .80))
+				   MakeDoubleChecker<double> (0.50, .80))
 	.AddAttribute ("PullRatioMax", "Max ratio to stop pull.",
 				   DoubleValue (0.90),
 				   MakeDoubleAccessor (&VideoPushApplication::SetPullRatioMax,
