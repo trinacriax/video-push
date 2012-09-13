@@ -142,11 +142,11 @@ namespace ns3{
 		uint32_t missed = last;
 		int32_t low = last - window;
 		low = low < 1 ? 1 : low;
-		while (missed >= low && (HasChunk(missed) || ChunkSkipped (missed)))
+		while (missed >= low && (HasChunk(missed) || ChunkSkipped (missed) || ChunkDelayed (missed)))
 		{
 			missed--;
 		}
-		missed = (missed<last?missed:0);
+		missed = (missed<=last?missed:0);
 		missed = (missed>=low?missed:0);
 		return missed;
 	}
@@ -157,11 +157,11 @@ namespace ns3{
 		uint32_t missed = 1;
 		int32_t low = last - window;
 		missed = low < 1 ? 1 : low;
-		while (missed < last && (HasChunk(missed) || ChunkSkipped (missed)))
+		while (missed <= last && (HasChunk(missed) || ChunkSkipped (missed) || ChunkDelayed (missed)))
 		{
 			missed++;
 		}
-		missed = (missed<last?missed:0);
+		missed = (missed<=last?missed:0);
 		missed = (missed>=low?missed:0);
 		return missed;
 	}
@@ -192,6 +192,7 @@ namespace ns3{
 			{
 				NS_ASSERT(!HasChunk(chunkid));
 				chunk_state.find(chunkid)->second = state;
+				NS_ASSERT (ChunkSkipped(chunkid)||ChunkMissed(chunkid)||ChunkDelayed(chunkid));
 				break;
 			}
 			default:
