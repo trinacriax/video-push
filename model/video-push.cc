@@ -766,15 +766,7 @@ VideoPushApplication::PeerLoop ()
 	{
 		case PEER:
 		{
-			if (!PullSlot())//no more time to pull
-			{
-				NS_ASSERT(GetSlotStart() < Simulator::Now());
-				NS_ASSERT(GetSlotStart() + m_pullSlot > Simulator::Now());
-				Time delay = GetSlotStart() + m_pullSlot - Simulator::Now();
-				NS_LOG_INFO ("Node=" <<m_node->GetId()<< " No time to pull: "<<GetSlotStart().GetSeconds()<< " < "<<Simulator::Now().GetSeconds() << " < "<<GetSlotEnd().GetSeconds() << " move for "<<delay.GetSeconds());
-				m_pullTimer.Schedule(delay);
-				break;
-			}
+			NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLSTART");
 			NS_ASSERT (GetPullActive());
 			NS_ASSERT (GetHelloActive());
 			NS_ASSERT (!m_pullTimer.IsRunning());
@@ -784,42 +776,59 @@ VideoPushApplication::PeerLoop ()
 			if (missed && !m_pullTimer.IsRunning())
 			{
 				m_pullTimer.Cancel();
-				while (missed && GetPullRetry(missed) >= GetPullMax())
+				while (missed && GetPullRetry(missed) >= GetPullMax())/* Mark chunks as skipped*/
 				{
 					m_chunks.SetChunkState(missed, CHUNK_SKIPPED);
 					uint32_t lastmissed = missed;
 					missed = ChunkSelection(m_chunkSelection);
-					Time shift = GetPullTimes(lastmissed);
-					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " is marking chunk "<< lastmissed <<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<","
-							<<GetPullMax()<<") New missed="<<missed << " Pulled "<<shift.GetSeconds());
+					GetPullTimes(missed);
+					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " is marking chunk "<< lastmissed
+							<<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<","<<GetPullMax()<<") New missed="<<missed);
+				}
+				if (!PullSlot())/*Check whether the node is within a pull slot or not*/
+				{
+					NS_ASSERT(GetSlotStart() < Simulator::Now());
+					NS_ASSERT(GetSlotStart() + m_pullSlot > Simulator::Now());
+					Time delay = GetSlotStart() + m_pullSlot - Simulator::Now();
+					m_pullTimer.Schedule(delay);
+					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " No time to pull: "<<GetSlotStart().GetSeconds()
+							<< " < "<<Simulator::Now().GetSeconds() << " < "<<GetSlotEnd().GetSeconds() << " move for "<<delay.GetSeconds());
+					NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
+					break;
 				}
 				ratio = GetReceived ();
 				NS_LOG_INFO ("Node=" << m_node->GetId() << " IP=" << GetLocalAddress()
 						<< " Ratio=" << ratio << " ["<<GetPullRatioMin() << ":" << GetPullRatioMax() << "]"
 						<< " Last=" << last << " Missed=" << missed << " ("<<(missed?GetPullRetry(missed):0)<<","<<GetPullMax()<<")"
 						<<" Timer="<<(m_pullTimer.IsRunning()?"Yes":"No"));
-				if (missed && ratio >= GetPullRatioMin() && ratio <= GetPullRatioMax())
+				if (missed && ratio >= GetPullRatioMin() && ratio <= GetPullRatioMax())/*check whether the node is within Pull-allowed range*/
 				{
 					AddPullRetry(missed);
-					//TODO PULL WINDOW CHECK
 					Neighbor target = PeerSelection (m_peerSelection);
 					if (target.GetAddress() != Ipv4Address::GetAny())
 					{
 						NS_ASSERT (m_neighbors.IsNeighbor(target));
 						double delayv = 0;//rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.03));
 						Time delay = Time::FromDouble (delayv, Time::US);
-						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " pull "<< target.GetAddress() << " for chunk " << missed);
-						m_sendEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, missed, target.GetAddress());
 						SetPullTimes (missed);
 						AddPullRequest();
 						m_pullTimer.Schedule();
+						m_sendEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, missed, target.GetAddress());
+						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " pull "<< target.GetAddress() << " for chunk " << missed << " next "<< m_pullTimer.GetDelay());
+						NS_LOG_INFO ("LOADING "<< missed);
+
 					}
 					else
 					{
 						NS_LOG_INFO ("Node=" <<m_node->GetId()<< " has no neighbors to pull chunk "<< missed);
+						NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
 					}
 				}
+				else
+					NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
 			}
+			else
+				NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
 			break;
 		}
 		case SOURCE:
