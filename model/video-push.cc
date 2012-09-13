@@ -753,11 +753,10 @@ VideoPushApplication::GetReceived ()
 void
 VideoPushApplication::SetPullMissed (uint32_t chunkid)
 {
-	NS_ASSERT(chunkid>0);
-	NS_ASSERT(!m_chunks.HasChunk(chunkid));
-	NS_ASSERT(!m_chunks.ChunkDelayed(chunkid));
-	NS_ASSERT(!m_chunks.ChunkSkipped(chunkid));
-	NS_ASSERT(m_chunks.ChunkMissed(chunkid));
+	NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
+	NS_ASSERT(!chunkid||!m_chunks.ChunkDelayed(chunkid));
+	NS_ASSERT(!chunkid||!m_chunks.ChunkSkipped(chunkid));
+	NS_ASSERT(!chunkid|| m_chunks.ChunkMissed(chunkid));
 	m_pullMissed = chunkid;
 }
 
