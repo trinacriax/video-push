@@ -196,10 +196,10 @@ void StatisticTrafficPull ()
 {
 	for (uint32_t i = 0; i < msgVideoPull.size(); i++)
 	{
-		std::cout << "VideoMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideoPull[i] << "\n";
+		std::cout << "VideoPull Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideoPull[i] << "\n";
 		msgVideoPull[i] = 0;
 	}
-	std::cout << "VideoMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideoP<< "\n";
+	std::cout << "VideoPulls\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideoP<< "\n";
 	msgVideoP = 0;
 }
 
@@ -224,7 +224,7 @@ void StatisticControl ()
 }
 
 void
-VideoPullSent (std::string context, Ptr<const Packet> p)
+VideoControlPull (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
 	msgPull[mc.id] += (p->GetSize() + 20 + 8 );
@@ -232,7 +232,7 @@ VideoPullSent (std::string context, Ptr<const Packet> p)
 	msgControlLP++;
 }
 
-void StatisticPullSent ()
+void StatisticControlPull ()
 {
 	for (uint32_t i = 0; i < msgPull.size(); i++)
 	{
@@ -265,7 +265,9 @@ void
 ResetValues ()
 {
 	StatisticControl ();
+	StatisticControlPull ();
 	StatisticVideo ();
+	StatisticTrafficPull ();
 	StatisticNeighbors ();
 	StatisticPhy();
 	StatisticMac();
@@ -704,7 +706,7 @@ int main(int argc, char **argv) {
 		Config::ConnectWithoutContext ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficSent", MakeCallback (&AodvTrafficSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxData", MakeCallback (&VideoTrafficSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxControl", MakeCallback (&VideoControlSent));
-		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxPull", MakeCallback (&VideoPullSent));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxPull", MakeCallback (&VideoControlPull));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxDataPull", MakeCallback (&VideoTrafficPull));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/NeighborTrace", MakeCallback (&Neighbors));
 		Simulator::Schedule (Seconds(1), &ResetValues);
