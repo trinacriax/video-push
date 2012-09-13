@@ -794,11 +794,12 @@ VideoPushApplication::PeerLoop ()
 				while (GetPullMissed() && GetPullRetry(GetPullMissed()) >= GetPullMax())/* Mark chunks as skipped*/
 				{
 					m_chunks.SetChunkState(GetPullMissed(), CHUNK_SKIPPED);
-					GetPullTimes(GetPullMissed());
+					Time shift = Simulator::Now() - GetPullTimes(GetPullMissed());
 					uint32_t lastmissed = GetPullMissed();
 					SetPullMissed(ChunkSelection(m_chunkSelection));
 					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " is marking chunk "<< lastmissed
-							<<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<","<<GetPullMax()<<") New missed="<<GetPullMissed());
+							<<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<","<<GetPullMax()<<") New missed="<<GetPullMissed()
+							<<" Pulled at "<< shift.GetSeconds() << "("<< shift.GetSeconds()<<")");
 				}
 			}
 			if (!PullSlot())/*Check whether the node is within a pull slot or not*/
