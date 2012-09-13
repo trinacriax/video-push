@@ -679,7 +679,7 @@ int main(int argc, char **argv) {
 		videoC.SetAttribute ("LocalPort", UintegerValue (PUSH_PORT));
 		videoC.SetAttribute ("Local", AddressValue(interfaces.GetAddress(source.GetN()+n)));
 		videoC.SetAttribute ("PeerPolicy", EnumValue (PS_RSSI));
-		videoC.SetAttribute ("ChunkPolicy", EnumValue (CS_LEAST_USEFUL));
+		videoC.SetAttribute ("ChunkPolicy", EnumValue (CS_LATEST_MISSED));
 
 		ApplicationContainer appC = videoC.Install (nodes.Get(n));
 		appC.Start (Seconds (clientStart));

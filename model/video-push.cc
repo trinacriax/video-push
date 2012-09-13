@@ -119,7 +119,7 @@ VideoPushApplication::GetTypeId (void)
 				   MakeEnumAccessor(&VideoPushApplication::m_chunkSelection),
 				   MakeEnumChecker (CS_LATEST, "Latest chunk",
 				   	   	   	   	   	CS_LEAST_MISSED, "Least missed",
-				   	   	   	   	   	CS_LEAST_USEFUL, "Least useful missed",
+				   	   	   	   	   	CS_LATEST_MISSED, "Latest missed",
 				   	   	   	   	   	CS_NEW_CHUNK, "New chunks"))
     .AddTraceSource ("TxData", "A new packet is created and is sent",
                    MakeTraceSourceAccessor (&VideoPushApplication::m_txDataTrace))
@@ -1194,7 +1194,12 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 			NS_ASSERT (m_duplicates.find(cv->c_id) == m_duplicates.end());
 			break;
 		}
-		case CS_LEAST_USEFUL:
+		case CS_LATEST_MISSED:
+		{
+			chunkid = m_chunks.GetLatestMissed(GetPullWindow());
+			break;
+		}
+		case CS_LEAST_MISSED:
 		{
 			chunkid = m_chunks.GetLeastMissed(GetPullWindow());
 			break;

@@ -59,6 +59,7 @@ enum ChunkPolicy {
 	//
 	CS_LATEST, //latest chunk received
 	CS_LEAST_USEFUL,
+	CS_LATEST_MISSED,
 	CS_LEAST_MISSED
 
 };

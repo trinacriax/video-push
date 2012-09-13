@@ -54,6 +54,7 @@ public:
 	bool ChunkDelayed (uint32_t chunkid);
 	bool ChunkSkipped (uint32_t chunkid);
 	uint32_t GetLeastMissed (uint32_t window);
+	uint32_t GetLatestMissed (uint32_t window);
 	uint32_t GetLastChunk ();
 
 protected:
