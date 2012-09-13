@@ -1225,11 +1225,15 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		case CS_LATEST_MISSED:
 		{
 			chunkid = m_chunks.GetLatestMissed(GetPullWindow());
+			NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
+			NS_ASSERT(!chunkid||!m_chunks.ChunkSkipped(chunkid));
 			break;
 		}
 		case CS_LEAST_MISSED:
 		{
 			chunkid = m_chunks.GetLeastMissed(GetPullWindow());
+			NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
+			NS_ASSERT(!chunkid||!m_chunks.ChunkSkipped(chunkid));
 			break;
 		}
 		case CS_LATEST:
