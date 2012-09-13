@@ -176,6 +176,9 @@ private:
 	Time GetSlotEnd () const;
 	bool PullSlot ();
 
+	void SetPullMissed (uint32_t chunkid);
+	uint32_t GetPullMissed () const;
+
 	void SetPullTimes (uint32_t chunkid);
 	Time GetPullTimes (uint32_t chunkid);
 	// Event handlers
@@ -230,6 +233,7 @@ private:
 	uint32_t	 	m_pullReceived;		// pull received
 	double		 	m_pullReply;		// pull reply
 	Time			m_pullSlot;			// slot duration for pull operations
+	uint32_t	 	m_pullMissed;		// missed chunk just pulled
 
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	Time 			m_helloTime;

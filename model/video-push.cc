@@ -750,6 +750,23 @@ VideoPushApplication::GetReceived ()
 	return  ratio;
 }
 
+void
+VideoPushApplication::SetPullMissed (uint32_t chunkid)
+{
+	NS_ASSERT(chunkid>0);
+	NS_ASSERT(!m_chunks.HasChunk(chunkid));
+	NS_ASSERT(!m_chunks.ChunkDelayed(chunkid));
+	NS_ASSERT(!m_chunks.ChunkSkipped(chunkid));
+	NS_ASSERT(m_chunks.ChunkMissed(chunkid));
+	m_pullMissed = chunkid;
+}
+
+uint32_t
+inline VideoPushApplication::GetPullMissed () const
+{
+	return m_pullMissed;
+}
+
 bool
 VideoPushApplication::PullSlot ()
 {
