@@ -131,8 +131,12 @@ VideoPushApplication::GetTypeId (void)
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxControlTrace))
 	.AddTraceSource ("TxPull", "A new pull has been sent",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_txPullTrace))
+    .AddTraceSource ("RxPull", "A new pull has been received",
+    			   MakeTraceSourceAccessor (&VideoPushApplication::m_rxPullTrace))
 	.AddTraceSource ("TxDataPull", "A data packet has been sent in reply to a pull request",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_txDataPullTrace))
+	.AddTraceSource ("RxDataPull", "A data packet has been received after a pull request",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxDataPullTrace))
 	.AddTraceSource ("NeighborTrace", "Neighbors",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_neighborsTrace))
 	.AddAttribute ("PullTime", "Time between two consecutive pulls.",
@@ -1058,14 +1062,21 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           {
           	  case MSG_CHUNK:
 			  {
-				  m_rxDataTrace (packet, address);
+				  if (sourceAddr == GetSource())
+				  {
+					  m_rxDataTrace (packet, address);
+				  }
+				  else
+				  {
+					  m_rxDataPullTrace (packet, address);
+				  }
 				  HandleChunk(chunkH.GetChunkMessage(), sourceAddr);
 				  break;
 			  }
 			  case MSG_PULL:
 			  {
 				  NS_ASSERT (GetPullActive());
-				  m_rxControlTrace (packet, address);
+				  m_rxPullTrace (packet, address);
 				  HandlePull(chunkH.GetPullMessage(), sourceAddr);
 				  break;
 			  }
