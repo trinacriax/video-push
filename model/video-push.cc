@@ -973,8 +973,16 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 //		  double delayv = 0;
 	//	  NS_ASSERT_MSG (delayv > 1, "HandlePull: pulltime is 0");
 //		  delay = Time::FromDouble (delayv, Time::US);
-		  Simulator::ScheduleNow (&VideoPushApplication::SendChunk, this, chunkid, sender);
-		  AddPending(chunkid);
+			if (PullSlot ())
+			{
+				Simulator::ScheduleNow (&VideoPushApplication::SendChunk, this, chunkid, sender);
+				AddPending(chunkid);
+			}
+			else
+			{
+//				NS_ASSERT_MSG(false, "Node " << GetLocalAddress() << " no more time to reply for " <<  chunkid << (hasChunk?"(Y)":"(N)") <<" from " << sender<< " TIMEOUT");
+				NS_LOG_INFO("Node " << GetLocalAddress() << " no more time to reply for " <<  chunkid << (hasChunk?"(Y)":"(N)") <<" from " << sender<< " TIMEOUT");
+			}
 		}
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " Received pull for " <<  chunkid << (hasChunk?"(Y)":"(N)") <<" from " << sender << ", reply in "<<delay.GetSeconds());\
 		break;
