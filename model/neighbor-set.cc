@@ -91,6 +91,17 @@ NeighborData::Update (uint32_t size, uint32_t last)
 	SetLastChunk (last);
 }
 
+double
+NeighborData::GetSINR () const
+{
+	return n_sinr;
+}
+
+void
+NeighborData::SetSINR (double sinr)
+{
+	n_sinr = sinr;
+}
 
 double
 NeighborData::GetRssiPower () const
@@ -157,7 +168,7 @@ NeighborsSet::AddNeighbor (Neighbor neighbor, NeighborData data){
 		return false;
 	std::pair<std::map<Neighbor, NeighborData>::iterator,bool> test;
 	test = m_neighbor_set.insert(std::pair<Neighbor,NeighborData> (neighbor,data));
-	m_neighborPairRssi.clear();
+	m_neighborProbVector.clear();
 	return test.second;
 }
 
@@ -235,15 +246,15 @@ NeighborsSet::SelectRandom ()
 }
 
 void
-NeighborsSet::SortRssi ()
+NeighborsSet::SortNeighborhood (PeerPolicy policy)
 {
 //	for (std::map<Neighbor, NeighborData>::const_iterator iter = m_neighbor_set.begin(); iter != m_neighbor_set.end(); iter++)
 //		NS_LOG_DEBUG ("Neighbor="<< iter->first <<" " << iter->second);
 	size_t nsize = m_neighbor_set.size();
-	m_neighborPairRssi.reserve (nsize);
-	m_neighborPairRssi = std::vector<NeigborPair> (m_neighbor_set.begin(), m_neighbor_set.end());
-	NS_ASSERT (m_neighborPairRssi.size() == nsize);
-	std::sort (m_neighborPairRssi.begin(), m_neighborPairRssi.end(), RssiCmp());
+	m_neighborProbVector.reserve (nsize);
+	m_neighborProbVector = std::vector<NeigborPair> (m_neighbor_set.begin(), m_neighbor_set.end());
+	NS_ASSERT (m_neighborProbVector.size() == nsize);
+	std::sort (m_neighborProbVector.begin(), m_neighborProbVector.end(), RssiCmp());
 //	for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborPairRssi.begin(); iter != m_neighborPairRssi.end(); iter++)
 //	{
 //			NS_LOG_DEBUG ("Neighbor="<< iter->first <<" Data=" << iter->second << " Size "<< m_neighborPairRssi.size());
@@ -251,19 +262,30 @@ NeighborsSet::SortRssi ()
     double weight[nsize];
     double weights = 0;
     double tot = 0;
-    m_neighborRssi = new double[nsize];
+    m_neighborProbability = new double[nsize];
     uint32_t i = 0;
-    for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborPairRssi.begin(); iter != m_neighborPairRssi.end(); iter++, i++)
+    for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborProbVector.begin(); iter != m_neighborProbVector.end(); iter++, i++)
     {
-    	weight[i] = iter->second.GetRssiPower();
+		switch (policy){
+			case PS_SINR:
+			{
+				weight[i] = iter->second.GetSINR ();
+				break;
+			}
+			default:
+			{
+				NS_ASSERT_MSG(false, "INVALID PEER SELECTION");
+				break;
+			}
+		}
 //    	NS_LOG_DEBUG ("Neighbor "<< iter->first << " w=" << weight[i] << "/"<<weights);
     	weights += weight[i];
     }
     for (i = 0; i < nsize; i++)
     {
-    	m_neighborRssi[i] = weight[i] / weights;
+    	m_neighborProbability[i] = weight[i] / weights;
 //    	NS_LOG_DEBUG ("Neighbor "<< i << " w=" << weight[i] << "/"<< weights << ": P=" << m_neighborRssi[i]);
-    	tot += m_neighborRssi[i];
+    	tot += m_neighborProbability[i];
     }
 //    i = 0;
 //    for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborPairRssi.begin(); iter != m_neighborPairRssi.end(); iter++, i++)
@@ -275,7 +297,7 @@ NeighborsSet::SortRssi ()
 }
 
 Neighbor
-NeighborsSet::SelectRssi ()
+NeighborsSet::SelectPeer (PeerPolicy policy)
 {
 	Neighbor nt;
 	NS_ASSERT (GetSize() > 0);
@@ -285,21 +307,34 @@ NeighborsSet::SelectRssi ()
 //
 //	return iter->first;
 	size_t nsize = m_neighbor_set.size();
-	if ((m_neighborPairRssi.size() == 0 && m_neighbor_set.size() > 0) || (m_neighborPairRssi.size() != nsize) )
-		SortRssi ();
+	if ((m_neighborProbVector.size() == 0 && m_neighbor_set.size() > 0) || (m_neighborProbVector.size() != nsize) )
+	{
+		switch (policy){
+			case PS_SINR:
+			{
+				SortNeighborhood (PS_SINR);
+				break;
+			}
+			default:
+			{
+				NS_ASSERT_MSG(false, "INVALID PEER SELECTION");
+				break;
+			}
+		}
+	}
 	double dice = UniformVariable().GetValue();
 	uint32_t id = 0;
     while (dice > 0 && nt.GetAddress() == Ipv4Address(Ipv4Address::GetAny()) && id < nsize)
     {
-    	NeighborData *nd = GetNeighbor (m_neighborPairRssi[id].first);
+    	NeighborData *nd = GetNeighbor (m_neighborProbVector[id].first);
     	NS_ASSERT (nd);
     	double weight = (nd->n_bufferSize == 0 ? 0 : nd->n_bufferSize/(nd->n_latestChunk*1.0) );
 //           if (debug >= 8) {
 //               System.out.println("\t(" + id + ") Value " + value + ", Prob " + prob[id] + " (" + neighbors[id] + ")\n");
 //           }
-		dice -= ((1-GetSelectionWeight()) * m_neighborRssi[id]) + ((GetSelectionWeight()) * m_neighborRssi[id] * weight);
+		dice -= ((1-GetSelectionWeight()) * m_neighborProbability[id]) + ((GetSelectionWeight()) * m_neighborProbability[id] * weight);
 		if (dice <= 0) {
-		   nt = m_neighborPairRssi[id].first;
+		   nt = m_neighborProbVector[id].first;
 		}
 		id++;
 	}
@@ -308,7 +343,7 @@ NeighborsSet::SelectRssi ()
 	//               System.out.println("Out of Candidate ID range: " + id + " -- " + candidate);
 	//           }
 	   id = 0;
-	   nt = m_neighborPairRssi[id].first;
+	   nt = m_neighborProbVector[id].first;
 	}
 	//       if (debug >= 10) {
 	//           System.out.println("Return Candidate ID " + id + " -- " + candidate);
@@ -341,9 +376,9 @@ NeighborsSet::SelectNeighbor (PeerPolicy policy)
 			NS_ASSERT_MSG (false, "SelectNeighbor: Not yet implemented.");
 			break;
 		}
-		case PS_RSSI:
+		case PS_SINR:
 		{
-			target = SelectRssi();
+			target = SelectPeer (PS_SINR);
 			break;
 		}
 		default:
@@ -367,7 +402,7 @@ NeighborsSet::Purge ()
 			{
 //				std::map<Neighbor, NeighborData>::iterator iter2 = iter;
 				m_neighbor_set.erase (iter++);
-				m_neighborPairRssi.clear();
+				m_neighborProbVector.clear();
 //				newset.insert (*iter);
 			}
 			else

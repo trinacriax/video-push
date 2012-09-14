@@ -45,7 +45,7 @@
 #include "ns3/address-utils.h"
 #include "ns3/inet-socket-address.h"
 #include "ns3/udp-socket.h"
-#include "ns3/rssi-tag.h"
+#include "ns3/info-x-tag.h"
 #include <memory.h>
 #include <math.h>
 #include <stdio.h>
@@ -111,7 +111,7 @@ VideoPushApplication::GetTypeId (void)
 				   EnumValue(PS_RANDOM),
 				   MakeEnumAccessor(&VideoPushApplication::m_peerSelection),
 				   MakeEnumChecker (PS_RANDOM, "Random peer selection.",
-						   	   	    PS_RSSI, "RSSI based selection.",
+						   	   	    PS_SINR, "SINR based selection.",
 						   	   	    PS_DELAY, "Delay based selection.",
 						   	   	    PS_ROUNDROBIN, "RoundRobin selection."))
 	.AddAttribute ("ChunkPolicy", "Chunk selection algorithm.",
@@ -1006,7 +1006,8 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 			Ipv4Mask mask ("255.0.0.0");
 			NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast("<<destination<<") hello from " << sender << " #Chunks="<< n_chunks << " Ratio="<< n_ratio);
 			Neighbor nt (sender, PUSH_PORT);
-			m_neighbors.GetNeighbor(nt)->Update(n_last, n_chunks);
+			if (m_neighbors.IsNeighbor(nt))
+				m_neighbors.GetNeighbor(nt)->Update(n_last, n_chunks);
 			break;
 		}
 		default:
@@ -1030,9 +1031,9 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           break;
         }
       ns3::pimdm::RelayTag relayTag;
-      RssiTag rssi;
+      InfoXTag ptag;
       bool rtag = packet->RemovePacketTag(relayTag);
-      bool rssiTag = packet->RemovePacketTag(rssi);
+      bool packetTag = packet->RemovePacketTag(ptag);
       InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
       Ipv4Address sourceAddr = address.GetIpv4 ();
       uint32_t port = address.GetPort();
@@ -1042,7 +1043,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
       Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(mask);
       NS_LOG_DEBUG("Node " << GetLocalAddress() <<  " receives packet from "<< sourceAddr
     		  << /*" gw " << gateway<< */" Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast()
-    		  << " Rssi "<< rssi.Get());
+    		  << " SINR "<< ptag.GetSinr());
       if(rtag && subnet != relayTag.m_receiver)
       {
 //    	  // NS_LOG_DEBUG("Discarded: not for clients "<<relayTag.m_receiver);
@@ -1083,9 +1084,15 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 			  case MSG_HELLO:
 			  {
 				  NS_ASSERT (GetHelloActive());
-				  m_neighbors.AddNeighbor(nt);
-				  if (rssiTag)
-					  m_neighbors.GetNeighbor (nt)->SetRssiPower (rssi.Get());
+				  if (packetTag)
+				  {
+					  double sinr = ptag.GetSinr();
+//					  if (sinr > 20)
+					  {
+						  m_neighbors.AddNeighbor(nt);
+						  m_neighbors.GetNeighbor (nt)->SetSINR(sinr);
+					  }
+				  }
 				  m_rxControlTrace (packet, address);
 				  HandleHello(chunkH.GetHelloMessage(), sourceAddr);
 				  break;

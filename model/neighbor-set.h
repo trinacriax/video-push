@@ -38,7 +38,7 @@ using namespace streaming;
 enum PeerPolicy {
 	PS_RANDOM,
 	PS_DELAY,
-	PS_RSSI,
+	PS_SINR,
 	PS_ROUNDROBIN
 };
 
@@ -62,6 +62,7 @@ struct NeighborData{
 	enum PeerState n_state;
 	uint32_t n_bufferSize;
 	uint32_t n_latestChunk;
+	double n_sinr;
 	double n_rssiPower;
 	Time GetLastContact () const;
 	void SetLastContact (Time contact);
@@ -71,6 +72,8 @@ struct NeighborData{
 	void SetBufferSize (uint32_t size);
 	uint32_t GetLastChunk () const;
 	void SetLastChunk (uint32_t last);
+	double GetSINR () const;
+	void SetSINR (double sinr);
 	double GetRssiPower () const;
 	void SetRssiPower (double rssi);
 	void Update (uint32_t size, uint32_t last);
@@ -95,8 +98,8 @@ public:
 	Neighbor Get (uint32_t index);
 	Neighbor SelectNeighbor (PeerPolicy policy);
 	Neighbor SelectRandom ();
-	void SortRssi ();
-	Neighbor SelectRssi ();
+	void SortNeighborhood (PeerPolicy policy);
+	Neighbor SelectPeer (PeerPolicy policy);
 	bool AddNeighbor (const Neighbor neighbor, NeighborData data);
 	bool AddNeighbor (Neighbor neighbor);
 	bool DelNeighbor (Ipv4Address n_addr, uint32_t n_iface);
@@ -114,8 +117,8 @@ protected:
 	std::map<Neighbor, NeighborData> m_neighbor_set;
 	Time m_expire;
 	double m_selectionWeight;
-	double *m_neighborRssi;
-	std::vector<NeigborPair> m_neighborPairRssi;
+	double *m_neighborProbability;
+	std::vector<NeigborPair> m_neighborProbVector;
 
 	struct RssiCmp {
 	    bool operator()(const NeigborPair &lhs, const NeigborPair &rhs) {
