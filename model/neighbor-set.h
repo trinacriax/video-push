@@ -120,9 +120,9 @@ protected:
 	double *m_neighborProbability;
 	std::vector<NeigborPair> m_neighborProbVector;
 
-	struct RssiCmp {
+	struct SnrCmp {
 	    bool operator()(const NeigborPair &lhs, const NeigborPair &rhs) {
-	        return lhs.second.GetRssiPower() > rhs.second.GetRssiPower();
+	        return lhs.second.GetSINR() > rhs.second.GetSINR();
 	    }
 	};
 
