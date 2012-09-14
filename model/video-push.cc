@@ -843,6 +843,7 @@ VideoPushApplication::PeerLoop ()
 				{
 					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " has no neighbors to pull chunk "<< GetPullMissed());
 					NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
+					SetPullTimes (GetPullMissed());
 				}
 			}
 			else
