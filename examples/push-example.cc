@@ -57,16 +57,30 @@ uint32_t aodvSent = 0;
 uint32_t aodvSentP = 0;
 uint32_t arpSent = 0;
 uint32_t videoBroadcast = 0;
-std::vector<uint32_t> msgControl;
-std::vector<uint32_t> msgPull;
+
 std::vector<uint32_t> msgVideo;
-std::vector<uint32_t> msgVideoPull;
-uint32_t msgVideoT = 0;
-uint32_t msgVideoP = 0;
-uint32_t msgControlT = 0;
-uint32_t msgControlL = 0;
+uint32_t msgTxVideoT = 0;
+uint32_t msgTxVideoP = 0;
+
+std::vector<uint32_t> msgControl;
+uint32_t msgTxControlT = 0;
 uint32_t msgControlP = 0;
-uint32_t msgControlLP = 0;
+
+std::vector<uint32_t> msgTxControlPull;
+uint32_t msgTxControlL = 0;
+uint32_t msgTxControlLP = 0;
+
+std::vector<uint32_t> msgRxControlPull;
+uint32_t msgRxControlL = 0;
+uint32_t msgRxControlLP = 0;
+
+std::vector<uint32_t> msgTxDataPull;
+uint32_t msgTxDataL = 0;
+uint32_t msgTxDataLP = 0;
+
+std::vector<uint32_t> msgRxDataPull;
+uint32_t msgRxDataL = 0;
+uint32_t msgRxDataLP = 0;
 
 std::vector<uint32_t> neighbors;
 uint32_t neighborsT = 0;
@@ -170,7 +184,7 @@ VideoTrafficSent (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
 	msgVideo[mc.id] += p->GetSize();
-	msgVideoT += p->GetSize();
+	msgTxVideoT += p->GetSize();
 }
 
 void StatisticVideo ()
@@ -180,27 +194,46 @@ void StatisticVideo ()
 		std::cout << "VideoMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideo[i] << "\n";
 		msgVideo[i] = 0;
 	}
-	std::cout << "VideoMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideoT<< "\n";
-	msgVideoT = 0;
+	std::cout << "VideoMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoT<< "\n";
+	msgTxVideoT = 0;
 }
 
 void
-VideoTrafficPull (std::string context, Ptr<const Packet> p)
+TxDataPull (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
-	msgVideoPull[mc.id] += p->GetSize();
-	msgVideoP += p->GetSize();
+	msgTxDataPull[mc.id] += p->GetSize();
+	msgTxDataLP += p->GetSize();
 }
 
-void StatisticTrafficPull ()
+void StatisticTxDataPull ()
 {
-	for (uint32_t i = 0; i < msgVideoPull.size(); i++)
+	for (uint32_t i = 0; i < msgTxDataPull.size(); i++)
 	{
-		std::cout << "VideoPull Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideoPull[i] << "\n";
-		msgVideoPull[i] = 0;
+		std::cout << "TxDataPull Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxDataPull[i] << "\n";
+		msgTxDataPull[i] = 0;
 	}
-	std::cout << "VideoPulls\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideoP<< "\n";
-	msgVideoP = 0;
+	std::cout << "TxDataPulls\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoP<< "\n";
+	msgTxDataLP = 0;
+}
+
+void
+RxDataPull (std::string context, Ptr<const Packet> p, const Address & address)
+{
+	struct mycontext mc = GetContextInfo (context);
+	msgRxDataPull[mc.id] += p->GetSize();
+	msgRxDataLP += p->GetSize();
+}
+
+void StatisticRxDataPull ()
+{
+	for (uint32_t i = 0; i < msgRxDataPull.size(); i++)
+	{
+		std::cout << "RxDataPull Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxDataPull[i] << "\n";
+		msgRxDataPull[i] = 0;
+	}
+	std::cout << "RxDataPulls\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxDataLP<< "\n";
+	msgRxDataLP = 0;
 }
 
 void
@@ -208,7 +241,7 @@ VideoControlSent (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
 	msgControl[mc.id] += (p->GetSize() + 20 + 8 );
-	msgControlT += (p->GetSize() + 20 + 8 );
+	msgTxControlT += (p->GetSize() + 20 + 8 );
 	msgControlP++;
 }
 
@@ -219,28 +252,48 @@ void StatisticControl ()
 		std::cout << "ControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgControl[i] << "\n";
 		msgControl[i] = 0;
 	}
-	std::cout << "ControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgControlT<< "\t" << msgControlP << "\n";
-	msgControlT = msgControlP = 0;
+	std::cout << "ControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlT<< "\t" << msgControlP << "\n";
+	msgTxControlT = msgControlP = 0;
 }
 
 void
-VideoControlPull (std::string context, Ptr<const Packet> p)
+TxControlPull (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
-	msgPull[mc.id] += (p->GetSize() + 20 + 8 );
-	msgControlL += (p->GetSize() + 20 + 8 );
-	msgControlLP++;
+	msgTxControlPull[mc.id] += (p->GetSize() + 20 + 8 );
+	msgTxControlL += (p->GetSize() + 20 + 8 );
+	msgTxControlLP++;
 }
 
-void StatisticControlPull ()
+void StatisticTxControlPull ()
 {
-	for (uint32_t i = 0; i < msgPull.size(); i++)
+	for (uint32_t i = 0; i < msgTxControlPull.size(); i++)
 	{
-		std::cout << "PullMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgPull[i] << "\n";
-		msgPull[i] = 0;
+		std::cout << "TxPullMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlPull[i] << "\n";
+		msgTxControlPull[i] = 0;
 	}
-	std::cout << "PullMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgControlL<< "\t" << msgControlLP << "\n";
-	msgControlL = msgControlLP = 0;
+	std::cout << "TxPullMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlL<< "\t" << msgTxControlLP << "\n";
+	msgTxControlL = msgTxControlLP = 0;
+}
+
+void
+RxControlPull (std::string context, Ptr<const Packet> p, const Address & address)
+{
+	struct mycontext mc = GetContextInfo (context);
+	msgRxControlPull[mc.id] += (p->GetSize() + 20 + 8 );
+	msgRxControlL += (p->GetSize() + 20 + 8 );
+	msgRxControlLP++;
+}
+
+void StatisticRxControlPull ()
+{
+	for (uint32_t i = 0; i < msgRxControlPull.size(); i++)
+	{
+		std::cout << "RxPullMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxControlPull[i] << "\n";
+		msgRxControlPull[i] = 0;
+	}
+	std::cout << "RxPullMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxControlL<< "\t" << msgRxControlLP << "\n";
+	msgRxControlL = msgRxControlLP = 0;
 }
 
 void
@@ -265,18 +318,21 @@ void
 ResetValues ()
 {
 	StatisticControl ();
-	StatisticControlPull ();
+	StatisticTxControlPull ();
+	StatisticRxControlPull ();
 	StatisticVideo ();
-	StatisticTrafficPull ();
+	StatisticTxDataPull ();
+	StatisticRxDataPull ();
 	StatisticNeighbors ();
-	StatisticPhy();
-	StatisticMac();
-	StatisticArp();
-	StatisticAodv();
+	StatisticPhy ();
+	StatisticMac ();
+	StatisticArp ();
+	StatisticAodv ();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 	/// Number of nodes
 	uint32_t size = 5;
 	/// Simulation time in seconds
@@ -500,9 +556,11 @@ int main(int argc, char **argv) {
 	for (int k=0; k<size; k++)
 	{
 	    msgControl.push_back(0);
-	    msgPull.push_back(0);
+	    msgTxControlPull.push_back(0);
+	    msgRxControlPull.push_back(0);
 	    msgVideo.push_back(0);
-	    msgVideoPull.push_back(0);
+	    msgTxDataPull.push_back(0);
+	    msgRxDataPull.push_back(0);
 	    neighbors.push_back(0);
 	}
 
@@ -706,8 +764,10 @@ int main(int argc, char **argv) {
 		Config::ConnectWithoutContext ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficSent", MakeCallback (&AodvTrafficSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxData", MakeCallback (&VideoTrafficSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxControl", MakeCallback (&VideoControlSent));
-		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxPull", MakeCallback (&VideoControlPull));
-		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxDataPull", MakeCallback (&VideoTrafficPull));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxPull", MakeCallback (&TxControlPull));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/RxPull", MakeCallback (&RxControlPull));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxDataPull", MakeCallback (&TxDataPull));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/RxDataPull", MakeCallback (&RxDataPull));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/NeighborTrace", MakeCallback (&Neighbors));
 		Simulator::Schedule (Seconds(1), &ResetValues);
 	}
