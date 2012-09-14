@@ -665,6 +665,7 @@ VideoPushApplication::GetPullRatioMax () const
 void
 VideoPushApplication::SetPullTimes (uint32_t chunkid)
 {
+	NS_LOG_INFO("LOADING "<<chunkid);
 	NS_ASSERT (m_pullTimes.find(chunkid)==m_pullTimes.end());
 	std::pair<uint32_t,Time> pair (chunkid, Simulator::Now());
 	m_pullTimes.insert(pair);
@@ -673,6 +674,7 @@ VideoPushApplication::SetPullTimes (uint32_t chunkid)
 Time
 VideoPushApplication::GetPullTimes (uint32_t chunkid)
 {
+	NS_LOG_INFO("UNLOADING "<<chunkid);
 	NS_ASSERT (m_pullTimes.find(chunkid)!=m_pullTimes.end());
 	Time p = m_pullTimes.find(chunkid)->second;
 	m_pullTimes.erase(chunkid);
