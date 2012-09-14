@@ -251,8 +251,10 @@ NeighborsSet::SortNeighborhood (PeerPolicy policy)
 //	for (std::map<Neighbor, NeighborData>::const_iterator iter = m_neighbor_set.begin(); iter != m_neighbor_set.end(); iter++)
 //		NS_LOG_DEBUG ("Neighbor="<< iter->first <<" " << iter->second);
 	size_t nsize = m_neighbor_set.size();
+	nsize = (nsize<10?nsize:10);
 	m_neighborProbVector.reserve (nsize);
 	m_neighborProbVector = std::vector<NeigborPair> (m_neighbor_set.begin(), m_neighbor_set.end());
+	m_neighbor_set = std::map<Neighbor, NeighborData> (m_neighborProbVector.begin(), m_neighborProbVector.end());
 	NS_ASSERT (m_neighborProbVector.size() == nsize);
 	std::sort (m_neighborProbVector.begin(), m_neighborProbVector.end(), SnrCmp());
 //	for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborPairRssi.begin(); iter != m_neighborPairRssi.end(); iter++)
@@ -264,7 +266,7 @@ NeighborsSet::SortNeighborhood (PeerPolicy policy)
     double tot = 0;
     m_neighborProbability = new double[nsize];
     uint32_t i = 0;
-    for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborProbVector.begin(); iter != m_neighborProbVector.end(); iter++, i++)
+    for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborProbVector.begin(); i<nsize && iter != m_neighborProbVector.end(); iter++, i++)
     {
 		switch (policy){
 			case PS_SINR:
