@@ -829,6 +829,7 @@ VideoPushApplication::PeerLoop ()
 			{
 				AddPullRetry(GetPullMissed());
 				Neighbor target = PeerSelection (m_peerSelection);
+				m_neighborsTrace (m_neighbors.GetSize());
 				if (target.GetAddress() != Ipv4Address::GetAny())
 				{
 					NS_ASSERT (m_neighbors.IsNeighbor(target));
@@ -1100,7 +1101,6 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 					  double sinr = ptag.GetSinr();
 					  m_neighbors.AddNeighbor(nt);
 					  m_neighbors.GetNeighbor (nt)->SetSINR(sinr);
-					  m_neighborsTrace (m_neighbors.GetSize());
 				  }
 				  m_rxControlTrace (packet, address);
 				  HandleHello(chunkH.GetHelloMessage(), sourceAddr);
