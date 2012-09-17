@@ -1321,15 +1321,24 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 {
 	NS_LOG_FUNCTION (this<<chunkid);
 	NS_ASSERT (chunkid>0);
-	ChunkHeader pull (MSG_PULL);
-	pull.GetPullMessage ().SetChunk (chunkid);
-	Ptr<Packet> packet = Create<Packet> ();
-	packet->AddHeader(pull);
-	m_txControlPullTrace (packet);
-	NS_ASSERT( GetSlotStart() <= Simulator::Now() && (GetSlotStart() + m_pullSlot) > Simulator::Now());
-	NS_ASSERT (PullSlot());
-	NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
-	m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
+	if (!PullSlot())/*Check whether the node is within a pull slot or not*/
+	{
+//		NS_ASSERT(GetSlotStart() < Simulator::Now());
+//		NS_ASSERT(GetSlotStart() + m_pullSlot > Simulator::Now());
+//		Time delay = GetSlotStart() + m_pullSlot - Simulator::Now();
+//		Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, chunkid, target);
+	}
+	else
+	{
+		ChunkHeader pull (MSG_PULL);
+		pull.GetPullMessage ().SetChunk (chunkid);
+		Ptr<Packet> packet = Create<Packet> ();
+		packet->AddHeader(pull);
+		m_txControlPullTrace (packet);
+		NS_ASSERT( GetSlotStart() <= Simulator::Now() && (GetSlotStart() + m_pullSlot) > Simulator::Now());
+		NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
+		m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
+	}
 }
 
 void VideoPushApplication::SendHello ()
