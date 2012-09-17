@@ -833,8 +833,7 @@ VideoPushApplication::PeerLoop ()
 				if (target.GetAddress() != Ipv4Address::GetAny())
 				{
 					NS_ASSERT (m_neighbors.IsNeighbor(target));
-					double delayv = 0;//rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.03));
-					Time delay = Time::FromDouble (delayv, Time::US);
+					Time delay = Time::FromDouble (UniformVariable().GetValue (0, 1000), Time::US); //[0-1000]us random
 					SetPullTimes (GetPullMissed());
 					AddPullRequest();
 					m_pullTimer.Schedule();
