@@ -1100,6 +1100,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 					  double sinr = ptag.GetSinr();
 					  m_neighbors.AddNeighbor(nt);
 					  m_neighbors.GetNeighbor (nt)->SetSINR(sinr);
+					  m_neighborsTrace (m_neighbors.GetSize());
 				  }
 				  m_rxControlTrace (packet, address);
 				  HandleHello(chunkH.GetHelloMessage(), sourceAddr);
