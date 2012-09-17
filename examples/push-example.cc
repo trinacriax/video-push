@@ -541,7 +541,7 @@ int main(int argc, char **argv)
 	/// Client start
 	double clientStart = 1;
 	/// Client stop
-	double clientStop = 150;
+	double clientStop = 140;
 
 	NodeContainer fake;
 	fake.Create(1);
