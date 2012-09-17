@@ -257,11 +257,11 @@ NeighborsSet::SortNeighborhood (PeerPolicy policy)
 	NS_ASSERT (m_neighborProbVector.size() == nsize);
 	std::sort (m_neighborProbVector.begin(), m_neighborProbVector.end(), SnrCmp());
 	nsize = (nsize<10?nsize:10);
-	while (m_neighborProbVector.size() > nsize)
-	{
-		m_neighborProbVector.pop_back();
-	}
-	m_neighbor_set = std::map<Neighbor, NeighborData> (m_neighborProbVector.begin(), m_neighborProbVector.end());
+//	while (m_neighborProbVector.size() > nsize)
+//	{
+//		m_neighborProbVector.pop_back();
+//	}
+	m_neighbor_set = std::map<Neighbor, NeighborData> (m_neighborProbVector.begin(), m_neighborProbVector.begin() + nsize);
 	NS_ASSERT (m_neighbor_set.size() == nsize);
 //	for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborPairRssi.begin(); iter != m_neighborPairRssi.end(); iter++)
 //	{
