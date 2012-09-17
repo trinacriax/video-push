@@ -179,6 +179,7 @@ NeighborsSet::AddNeighbor (Neighbor neighbor){
 	std::pair<std::map<Neighbor, NeighborData>::iterator,bool> test;
 	NeighborData data;
 	test = m_neighbor_set.insert(std::pair<Neighbor,NeighborData> (neighbor,data));
+	m_neighborProbVector.clear();
 	return test.second;
 }
 
@@ -251,12 +252,17 @@ NeighborsSet::SortNeighborhood (PeerPolicy policy)
 //	for (std::map<Neighbor, NeighborData>::const_iterator iter = m_neighbor_set.begin(); iter != m_neighbor_set.end(); iter++)
 //		NS_LOG_DEBUG ("Neighbor="<< iter->first <<" " << iter->second);
 	size_t nsize = m_neighbor_set.size();
-	nsize = (nsize<10?nsize:10);
 	m_neighborProbVector.reserve (nsize);
 	m_neighborProbVector = std::vector<NeigborPair> (m_neighbor_set.begin(), m_neighbor_set.end());
-	m_neighbor_set = std::map<Neighbor, NeighborData> (m_neighborProbVector.begin(), m_neighborProbVector.end());
 	NS_ASSERT (m_neighborProbVector.size() == nsize);
 	std::sort (m_neighborProbVector.begin(), m_neighborProbVector.end(), SnrCmp());
+//	nsize = (nsize<10?nsize:10);
+	while (m_neighborProbVector.size() > nsize)
+	{
+		m_neighborProbVector.pop_back();
+	}
+	m_neighbor_set = std::map<Neighbor, NeighborData> (m_neighborProbVector.begin(), m_neighborProbVector.end());
+	NS_ASSERT (m_neighbor_set.size() == nsize);
 //	for (std::vector<std::pair<Neighbor, NeighborData> >::const_iterator iter = m_neighborPairRssi.begin(); iter != m_neighborPairRssi.end(); iter++)
 //	{
 //			NS_LOG_DEBUG ("Neighbor="<< iter->first <<" Data=" << iter->second << " Size "<< m_neighborPairRssi.size());
@@ -308,8 +314,8 @@ NeighborsSet::SelectPeer (PeerPolicy policy)
 //	for (; iter != m_neighbor_set.end() && index>0; iter++, index--);
 //
 //	return iter->first;
-	size_t nsize = m_neighbor_set.size();
-	if ((m_neighborProbVector.size() == 0 && m_neighbor_set.size() > 0) || (m_neighborProbVector.size() != nsize) )
+	size_t msize = m_neighbor_set.size();
+	if (m_neighborProbVector.empty() && m_neighborProbVector.size() != msize)
 	{
 		switch (policy){
 			case PS_SINR:
@@ -324,6 +330,7 @@ NeighborsSet::SelectPeer (PeerPolicy policy)
 			}
 		}
 	}
+	size_t nsize = m_neighbor_set.size();
 	double dice = UniformVariable().GetValue();
 	uint32_t id = 0;
     while (dice > 0 && nt.GetAddress() == Ipv4Address(Ipv4Address::GetAny()) && id < nsize)
