@@ -260,8 +260,8 @@ private:
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxDataTrace;
 	TracedCallback<Ptr<const Packet> > m_txControlTrace;
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxControlTrace;
-	TracedCallback<Ptr<const Packet> > m_txPullTrace;
-	TracedCallback<Ptr<const Packet>, const Address &> m_rxPullTrace;
+	TracedCallback<Ptr<const Packet> > m_txControlPullTrace;
+	TracedCallback<Ptr<const Packet>, const Address &> m_rxControlPullTrace;
 	TracedCallback<Ptr<const Packet> > m_txDataPullTrace;
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxDataPullTrace;
 	TracedCallback<uint32_t> m_neighborsTrace;

@@ -130,9 +130,9 @@ VideoPushApplication::GetTypeId (void)
 	.AddTraceSource ("RxControl", "A packet has been received",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxControlTrace))
 	.AddTraceSource ("TxPull", "A new pull has been sent",
-				   MakeTraceSourceAccessor (&VideoPushApplication::m_txPullTrace))
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_txControlPullTrace))
     .AddTraceSource ("RxPull", "A new pull has been received",
-    			   MakeTraceSourceAccessor (&VideoPushApplication::m_rxPullTrace))
+    			   MakeTraceSourceAccessor (&VideoPushApplication::m_rxControlPullTrace))
 	.AddTraceSource ("TxDataPull", "A data packet has been sent in reply to a pull request",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_txDataPullTrace))
 	.AddTraceSource ("RxDataPull", "A data packet has been received after a pull request",
@@ -1088,7 +1088,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 			  case MSG_PULL:
 			  {
 				  NS_ASSERT (GetPullActive());
-				  m_rxPullTrace (packet, address);
+				  m_rxControlPullTrace (packet, address);
 				  HandlePull(chunkH.GetPullMessage(), sourceAddr);
 				  break;
 			  }
@@ -1324,7 +1324,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 	pull.GetPullMessage ().SetChunk (chunkid);
 	Ptr<Packet> packet = Create<Packet> ();
 	packet->AddHeader(pull);
-	m_txPullTrace (packet);
+	m_txControlPullTrace (packet);
 	NS_ASSERT( GetSlotStart() <= Simulator::Now() && (GetSlotStart() + m_pullSlot) > Simulator::Now());
 	NS_ASSERT (PullSlot());
 	NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
