@@ -213,8 +213,8 @@ void StatisticTxDataPull ()
 		std::cout << "TxDataPull Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxDataPull[i] << "\n";
 		msgTxDataPull[i] = 0;
 	}
-	std::cout << "TxDataPulls\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoP<< "\n";
-	msgTxDataLP = 0;
+	std::cout << "TxDataPulls\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxDataLP<< "\t"<< msgTxDataL <<  "\n";
+	msgTxDataLP = msgTxDataL = 0;
 }
 
 void
@@ -223,6 +223,7 @@ RxDataPull (std::string context, Ptr<const Packet> p, const Address & address)
 	struct mycontext mc = GetContextInfo (context);
 	msgRxDataPull[mc.id] += p->GetSize();
 	msgRxDataLP += p->GetSize();
+	msgRxDataL++;
 }
 
 void StatisticRxDataPull ()
@@ -232,8 +233,8 @@ void StatisticRxDataPull ()
 		std::cout << "RxDataPull Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxDataPull[i] << "\n";
 		msgRxDataPull[i] = 0;
 	}
-	std::cout << "RxDataPulls\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxDataLP<< "\n";
-	msgRxDataLP = 0;
+	std::cout << "RxDataPulls\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxDataLP << "\t"<< msgRxDataL<< "\n";
+	msgRxDataLP = msgRxDataL = 0;
 }
 
 void
