@@ -355,18 +355,18 @@ ChunkHeader::HelloMessage::GetSerializedSize (void) const
 void
 ChunkHeader::HelloMessage::Print (std::ostream &os) const
 {
-  os<< "Destination: " << m_destination << ", Last Chunk: " << m_lastChunk<< ", Received: "<< m_chunksRec << ", Ratio: " << m_chunksRatio << ", Neighborhood: " << m_neighborhoodSize << "\n";
+  os<< /*"Destination: " << m_destination <<*/ ", Last Chunk: " << m_lastChunk<< ", Received: "<< m_chunksRec << ", Ratio: " << m_chunksRatio << /*", Neighborhood: " << m_neighborhoodSize << */"\n";
 }
 
 void
 ChunkHeader::HelloMessage::Serialize (Buffer::Iterator start) const
 {
   Buffer::Iterator i = start;
-  i.WriteHtonU32 (m_destination.Get());
+//  i.WriteHtonU32 (m_destination.Get());
   i.WriteHtonU32 (m_lastChunk);
   i.WriteHtonU32 (m_chunksRec);
   i.WriteHtonU32 (m_chunksRatio);
-  i.WriteHtonU32 (m_neighborhoodSize);
+//  i.WriteHtonU32 (m_neighborhoodSize);
 }
 
 uint32_t
@@ -374,25 +374,25 @@ ChunkHeader::HelloMessage::Deserialize (Buffer::Iterator start)
 {
   Buffer::Iterator i = start;
   uint32_t size = MSG_HELLO_SIZE;
-  m_destination = Ipv4Address(i.ReadNtohU32());
+//  m_destination = Ipv4Address(i.ReadNtohU32());
   m_lastChunk = i.ReadNtohU32();
   m_chunksRec = i.ReadNtohU32();
   m_chunksRatio = i.ReadNtohU32();
-  m_neighborhoodSize = i.ReadNtohU32();
+//  m_neighborhoodSize = i.ReadNtohU32();
   return size;
 }
 
-Ipv4Address
-ChunkHeader::HelloMessage::GetDestination()
-{
-	return m_destination;
-}
-
-void
-ChunkHeader::HelloMessage::SetDestination (Ipv4Address destination)
-{
-	m_destination = destination;
-}
+//Ipv4Address
+//ChunkHeader::HelloMessage::GetDestination()
+//{
+//	return m_destination;
+//}
+//
+//void
+//ChunkHeader::HelloMessage::SetDestination (Ipv4Address destination)
+//{
+//	m_destination = destination;
+//}
 
 uint32_t
 ChunkHeader::HelloMessage::GetLastChunk ()
@@ -433,17 +433,17 @@ ChunkHeader::HelloMessage::SetChunksRatio (uint32_t chunks)
 	m_chunksRatio = chunks;
 }
 
-uint32_t
-ChunkHeader::HelloMessage::GetNeighborhoodSize ()
-{
-	return m_neighborhoodSize;
-}
-
-void
-ChunkHeader::HelloMessage::SetNeighborhoodSize (uint32_t neighSize)
-{
-	m_neighborhoodSize = neighSize;
-}
+//uint32_t
+//ChunkHeader::HelloMessage::GetNeighborhoodSize ()
+//{
+//	return m_neighborhoodSize;
+//}
+//
+//void
+//ChunkHeader::HelloMessage::SetNeighborhoodSize (uint32_t neighSize)
+//{
+//	m_neighborhoodSize = neighSize;
+//}
 
 } // namespace pidm
 } // namespace ns3

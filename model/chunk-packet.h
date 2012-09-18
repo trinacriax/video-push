@@ -35,7 +35,7 @@
 #define CHUNK_HEADER_SIZE 4
 #define MSG_CHUNK_SIZE (4 + 8 + 2 + 2)
 #define MSG_PULL_SIZE 4
-#define MSG_HELLO_SIZE 4*5
+#define MSG_HELLO_SIZE 4*3
 
 enum ChunkMessageType
 {
@@ -142,25 +142,25 @@ public:
 
   struct HelloMessage
     {
-	  Ipv4Address m_destination; // Destination Address
+//	  Ipv4Address m_destination; // Destination Address
   	  uint32_t m_lastChunk; // Chunks received
   	  uint32_t m_chunksRec; // Chunks received
   	  uint32_t m_chunksRatio; // Chunks ratio
-  	  uint32_t m_neighborhoodSize; // Neighborhood size
+//  	  uint32_t m_neighborhoodSize; // Neighborhood size
   	  virtual void Print (std::ostream &os) const;
   	  virtual uint32_t GetSerializedSize (void) const;
   	  virtual void Serialize (Buffer::Iterator start) const;
   	  virtual uint32_t Deserialize (Buffer::Iterator start);
-  	  virtual Ipv4Address GetDestination ();
-	  virtual void SetDestination (Ipv4Address destination);
+//  	  virtual Ipv4Address GetDestination ();
+//	  virtual void SetDestination (Ipv4Address destination);
   	  virtual uint32_t GetLastChunk ();
 	  virtual void SetLastChunk (uint32_t last);
   	  virtual uint32_t GetChunksReceived ();
   	  virtual void SetChunksReceived (uint32_t chunksRec);
   	  virtual uint32_t GetChunksRatio ();
   	  virtual void SetChunksRatio (uint32_t chunksRec);
-  	  virtual uint32_t GetNeighborhoodSize ();
-  	  virtual void SetNeighborhoodSize (uint32_t neighSize);
+//  	  virtual uint32_t GetNeighborhoodSize ();
+//  	  virtual void SetNeighborhoodSize (uint32_t neighSize);
     };
 
 private:
