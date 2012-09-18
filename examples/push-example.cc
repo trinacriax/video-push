@@ -204,6 +204,7 @@ TxDataPull (std::string context, Ptr<const Packet> p)
 	struct mycontext mc = GetContextInfo (context);
 	msgTxDataPull[mc.id] += p->GetSize();
 	msgTxDataLP += p->GetSize();
+	msgTxDataL++;
 }
 
 void StatisticTxDataPull ()
