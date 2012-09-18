@@ -645,9 +645,9 @@ VideoPushApplication::SetPullWBase (uint32_t base)
 }
 
 uint32_t
-VideoPushApplication::GetPullWBase () const
+VideoPushApplication::GetPullWBase ()
 {
-	return m_pullWBase;
+	return (m_pullWBase<1?1:m_pullWBase);
 }
 
 void
@@ -756,11 +756,11 @@ double
 VideoPushApplication::GetReceived ()
 {
 	uint32_t last = m_chunks.GetLastChunk();
-	int32_t window = GetPullWindow();
-	window = (last - window);
-	window = window > 0 ? window : last;
+	int32_t base = GetPullWBase ();
+	uint32_t window = GetPullWindow ();
+	window = last < window ? last : window;
 	double ratio = 0.0;
-	for (int32_t i = last; i > (last - window); i--)
+	for (int32_t i = base ; i < (base + window); i++)
 	{
 		ratio += (m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PUSH || m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PULL ? 1.0 : 0.0);
 	}
@@ -832,7 +832,7 @@ VideoPushApplication::PeerLoop ()
 				break;
 			}
 			ratio = GetReceived ();
-			SetPullMissed( !GetPullMissed()? ChunkSelection(m_chunkSelection) : GetPullMissed());
+			SetPullMissed(!GetPullMissed() || GetPullMissed() < GetPullWBase() ? ChunkSelection(m_chunkSelection) : GetPullMissed());
 			NS_LOG_INFO ("Node=" << m_node->GetId() << " IP=" << GetLocalAddress()
 					<< " Ratio=" << ratio << " ["<<GetPullRatioMin() << ":" << GetPullRatioMax() << "]"
 					<< " Last=" << last << " Missed=" << GetPullMissed() << " ("<<(GetPullMissed()?GetPullRetry(GetPullMissed()):0)<<","<<GetPullMax()<<")"
@@ -948,7 +948,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		AddPullHit();
 	  }
 	}
-	SetPullMissed(!GetPullMissed() ? ChunkSelection(m_chunkSelection) : GetPullMissed());
+	SetPullMissed(!GetPullMissed() || GetPullMissed() < GetPullWBase() ? ChunkSelection(m_chunkSelection) : GetPullMissed());
 	ratio = GetReceived();
 	//TODO PULL WINDOW CHECK
 	if (GetPullMissed() && !m_pullTimer.IsRunning() && GetPullActive() && ratio >= GetPullRatioMin() && ratio <= GetPullRatioMax())
@@ -979,9 +979,10 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 	{
 		NS_ASSERT (GetPullActive());
 		uint32_t chunkid = pullheader.GetChunk();
+		NS_ASSERT (chunkid <= (GetPullWBase()+GetPullWindow()));
 		bool hasChunk = m_chunks.HasChunk (chunkid);
 		Time delay (0);
-		if (hasChunk)
+		if (hasChunk && chunkid >= GetPullWBase())
 		{
 //		  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
 //		  double delayv = rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.40));
@@ -1000,8 +1001,8 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 				Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
 				AddPending(chunkid);
 			}
-			NS_LOG_INFO ("Node " << GetLocalAddress() << " Received pull for " <<  chunkid << (hasChunk?"(Y)":"(N)") <<" from " << sender << ", reply in "<<delay.GetSeconds());\
 		}
+		NS_LOG_INFO ("Node " << GetLocalAddress() << " Received pull for " <<  chunkid << (hasChunk?"(Y)":"(N)") <<" from " << sender << ", reply in "<<delay.GetSeconds());\
 		break;
 	}
 	default:
@@ -1257,6 +1258,7 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		{
 			ChunkVideo *cv = ForgeChunk();
 			chunkid = cv->c_id;
+			SetPullWBase (chunkid<GetPullWindow()?1:chunkid-GetPullWindow());
 			if(!m_chunks.AddChunk(*cv, CHUNK_RECEIVED_PUSH))
 			{
 				AddDuplicate(cv->c_id);
@@ -1267,14 +1269,14 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		}
 		case CS_LATEST_MISSED:
 		{
-			chunkid = m_chunks.GetLatestMissed(GetPullWindow());
+			chunkid = m_chunks.GetLatestMissed(GetPullWBase(), GetPullWindow());
 			NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
 			NS_ASSERT(!chunkid||!m_chunks.ChunkSkipped(chunkid));
 			break;
 		}
 		case CS_LEAST_MISSED:
 		{
-			chunkid = m_chunks.GetLeastMissed(GetPullWindow());
+			chunkid = m_chunks.GetLeastMissed(GetPullWBase(), GetPullWindow());
 			NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
 			NS_ASSERT(!chunkid||!m_chunks.ChunkSkipped(chunkid));
 			break;
@@ -1353,6 +1355,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 		m_txControlPullTrace (packet);
 		NS_ASSERT( GetSlotStart() <= Simulator::Now() && (GetSlotStart() + m_pullSlot) > Simulator::Now());
 		NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
+		NS_ASSERT (chunkid >= GetPullWBase() && chunkid <= (GetPullWBase()+GetPullWindow()));
 		m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
 	}
 }

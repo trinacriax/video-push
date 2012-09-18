@@ -99,7 +99,7 @@ ChunkBufferStateTestCase::DoRun (void)
 	}
 	for (uint32_t i = 1; i<1000; i++)
 	{
-		uint32_t missed = m_chunks.GetLeastMissed(1);
+		uint32_t missed = m_chunks.GetLeastMissed(0,1);
 		if(i%25==0)
 		{
 			NS_TEST_ASSERT_MSG_EQ (i, missed,"LeastMissed");
