@@ -836,7 +836,8 @@ VideoPushApplication::PeerLoop ()
 			NS_LOG_INFO ("Node=" << m_node->GetId() << " IP=" << GetLocalAddress()
 					<< " Ratio=" << ratio << " ["<<GetPullRatioMin() << ":" << GetPullRatioMax() << "]"
 					<< " Last=" << last << " Missed=" << GetPullMissed() << " ("<<(GetPullMissed()?GetPullRetry(GetPullMissed()):0)<<","<<GetPullMax()<<")"
-					<<" Timer="<<(m_pullTimer.IsRunning()?"Yes":"No"));
+					<< " Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
+					<< " Timer="<<(m_pullTimer.IsRunning()?"Yes":"No"));
 			if (GetPullMissed() && ratio >= GetPullRatioMin() && ratio <= GetPullRatioMax())/*check whether the node is within Pull-allowed range*/
 			{
 				AddPullRetry(GetPullMissed());
