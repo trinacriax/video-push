@@ -99,6 +99,7 @@ public:
 	Neighbor SelectNeighbor (PeerPolicy policy);
 	Neighbor SelectRandom ();
 	void SortNeighborhood (PeerPolicy policy);
+	void ClearNeighborhood ();
 	Neighbor SelectPeer (PeerPolicy policy);
 	bool AddNeighbor (const Neighbor neighbor, NeighborData data);
 	bool AddNeighbor (Neighbor neighbor);

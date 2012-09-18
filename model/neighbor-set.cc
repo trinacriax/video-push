@@ -169,7 +169,7 @@ NeighborsSet::AddNeighbor (Neighbor neighbor, NeighborData data){
 		return false;
 	std::pair<std::map<Neighbor, NeighborData>::iterator,bool> test;
 	test = m_neighbor_set.insert(std::pair<Neighbor,NeighborData> (neighbor,data));
-	m_neighborProbVector.clear();
+	ClearNeighborhood ();
 	return test.second;
 }
 
@@ -180,7 +180,7 @@ NeighborsSet::AddNeighbor (Neighbor neighbor){
 	std::pair<std::map<Neighbor, NeighborData>::iterator,bool> test;
 	NeighborData data;
 	test = m_neighbor_set.insert(std::pair<Neighbor,NeighborData> (neighbor,data));
-	m_neighborProbVector.clear();
+	ClearNeighborhood ();
 	return test.second;
 }
 
@@ -247,6 +247,11 @@ NeighborsSet::SelectRandom ()
 	return iter->first;
 }
 
+void NeighborsSet::ClearNeighborhood ()
+{
+	m_neighborProbVector.clear();
+}
+
 void
 NeighborsSet::SortNeighborhood (PeerPolicy policy)
 {
@@ -268,8 +273,10 @@ NeighborsSet::SortNeighborhood (PeerPolicy policy)
 //	{
 //			NS_LOG_DEBUG ("Neighbor="<< iter->first <<" Data=" << iter->second << " Size "<< m_neighborPairRssi.size());
 //	}
-    double weight[nsize];
-    double weights = 0;
+    double weight1[nsize];
+    double weights1 = 0;
+    double weight2[nsize];
+    double weights2 = 0;
     double tot = 0;
     m_neighborProbability = new double[nsize];
     uint32_t i = 0;
@@ -278,7 +285,8 @@ NeighborsSet::SortNeighborhood (PeerPolicy policy)
 		switch (policy){
 			case PS_SINR:
 			{
-				weight[i] = iter->second.GetSINR ();
+				weight1[i] = iter->second.GetSINR ();
+				weight2[i] = iter->second.GetChunkRatio ();
 				break;
 			}
 			default:
@@ -288,11 +296,12 @@ NeighborsSet::SortNeighborhood (PeerPolicy policy)
 			}
 		}
 //    	NS_LOG_DEBUG ("Neighbor "<< iter->first << " w=" << weight[i] << "/"<<weights);
-    	weights += weight[i];
+    	weights1 += weight1[i];
+    	weights2 += weight2[i];
     }
     for (i = 0; i < nsize; i++)
     {
-    	m_neighborProbability[i] = weight[i] / weights;
+    	m_neighborProbability[i] = (weights1 == 0 ? (1.0 - GetSelectionWeight() ) * 1/nsize : ((1.0-GetSelectionWeight()) * weight1[i] / weights1))  + (weights2 == 0 ? GetSelectionWeight() * 1/nsize : (GetSelectionWeight() * weight2[i] / weights2));
 //    	NS_LOG_DEBUG ("Neighbor "<< i << " w=" << weight[i] << "/"<< weights << ": P=" << m_neighborRssi[i]);
     	tot += m_neighborProbability[i];
     }
@@ -302,7 +311,7 @@ NeighborsSet::SortNeighborhood (PeerPolicy policy)
 //		NS_LOG_DEBUG ("Neighbor="<< iter->first <<" Data=" << iter->second << " Prob="<< (weight[i] / weights) );
 //	}
 //   	NS_LOG_DEBUG ("Neighbors P(all)=" << tot);
-    NS_ASSERT ((1-tot)< pow10(-6));
+    NS_ASSERT_MSG((1-tot)< pow10(-6), "Error in computing probabilities");
 }
 
 Neighbor
@@ -342,7 +351,7 @@ NeighborsSet::SelectPeer (PeerPolicy policy)
 //           if (debug >= 8) {
 //               System.out.println("\t(" + id + ") Value " + value + ", Prob " + prob[id] + " (" + neighbors[id] + ")\n");
 //           }
-		dice -= ((1-GetSelectionWeight()) * m_neighborProbability[id]) + ((GetSelectionWeight()) * m_neighborProbability[id] * weight);
+		dice -= m_neighborProbability[id];
 		if (dice <= 0) {
 		   nt = m_neighborProbVector[id].first;
 		}
@@ -412,7 +421,7 @@ NeighborsSet::Purge ()
 			{
 //				std::map<Neighbor, NeighborData>::iterator iter2 = iter;
 				m_neighbor_set.erase (iter++);
-				m_neighborProbVector.clear();
+				ClearNeighborhood ();
 //				newset.insert (*iter);
 			}
 			else

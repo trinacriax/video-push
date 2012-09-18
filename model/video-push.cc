@@ -1034,6 +1034,7 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 			if (m_neighbors.IsNeighbor(nt))
 			{
 				m_neighbors.GetNeighbor(nt)->Update (n_last, n_chunks, n_ratio);
+				m_neighbors.ClearNeighborhood();
 			}
 			break;
 		}
