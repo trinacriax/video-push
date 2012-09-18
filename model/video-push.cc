@@ -964,6 +964,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		  <<" Pull "<< m_pullTimer.IsRunning() << "(D="<<m_pullTimer.GetDelay()<<"/N=" << m_pullTimer.GetDelayLeft()<<")"
 		  <<" #Neighbors "<< m_neighbors.GetSize()
 		  <<" Missed="<<GetPullMissed()
+		  <<" Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
 		  <<" Slot="<<GetSlotStart().GetSeconds());
 }
 
