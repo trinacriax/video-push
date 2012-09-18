@@ -49,10 +49,10 @@ enum PeerState {
 struct NeighborData{
 	NeighborData () :
 		n_contact (Simulator::Now()), n_state (ACTIVE),
-		n_bufferSize (0), n_latestChunk(0), n_rssiPower (0)
+		n_bufferSize (0), n_latestChunk(0), n_sinr (0), n_chunksRatio (0.0)
 	{}
-	NeighborData (Time start, PeerState state, uint32_t size, uint32_t c_id, double rssi):
-		n_contact (start), n_state (state), n_bufferSize (size), n_latestChunk(c_id), n_rssiPower (rssi)
+	NeighborData (Time start, PeerState state, uint32_t size, uint32_t c_id, double sinr, double cratio):
+		n_contact (start), n_state (state), n_bufferSize (size), n_latestChunk(c_id), n_sinr (sinr), n_chunksRatio (cratio)
 	{}
 	Time n_contact;
 	//bitmap
@@ -63,7 +63,7 @@ struct NeighborData{
 	uint32_t n_bufferSize;
 	uint32_t n_latestChunk;
 	double n_sinr;
-	double n_rssiPower;
+	double n_chunksRatio;
 	Time GetLastContact () const;
 	void SetLastContact (Time contact);
 	PeerState GetPeerState () const;
@@ -74,15 +74,15 @@ struct NeighborData{
 	void SetLastChunk (uint32_t last);
 	double GetSINR () const;
 	void SetSINR (double sinr);
-	double GetRssiPower () const;
-	void SetRssiPower (double rssi);
-	void Update (uint32_t size, uint32_t last);
+	double GetChunkRatio () const;
+	void SetChunkRatio (double ratio);
+	void Update (uint32_t size, uint32_t last, double ratio);
 	};
 
 static inline std::ostream&
 operator <<(std::ostream& outStream, const NeighborData& neighbor)
 {
-	return outStream << "State="<<neighbor.n_state << " Contact="<<neighbor.n_contact<< " Rssi="<<neighbor.n_rssiPower;
+	return outStream << "State="<<neighbor.n_state << " Contact="<<neighbor.n_contact<< " Sinr="<<neighbor.n_sinr<< " Ratio="<<neighbor.n_chunksRatio;
 }
 
 class NeighborsSet {

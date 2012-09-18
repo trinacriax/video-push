@@ -82,13 +82,14 @@ NeighborData::SetLastChunk (uint32_t last)
 }
 
 void
-NeighborData::Update (uint32_t size, uint32_t last)
+NeighborData::Update (uint32_t size, uint32_t last, double ratio)
 {
 	NS_ASSERT (size >= 0);
 	NS_ASSERT (last >= 0);
 	SetLastContact (Simulator::Now());
 	SetBufferSize (size);
 	SetLastChunk (last);
+	SetChunkRatio (ratio);
 }
 
 double
@@ -104,15 +105,15 @@ NeighborData::SetSINR (double sinr)
 }
 
 double
-NeighborData::GetRssiPower () const
+NeighborData::GetChunkRatio () const
 {
-	return n_rssiPower;
+	return n_chunksRatio;
 }
 
 void
-NeighborData::SetRssiPower (double rssi)
+NeighborData::SetChunkRatio (double ratio)
 {
-	n_rssiPower = rssi;
+	n_chunksRatio = ratio;
 }
 
 Ipv4Address

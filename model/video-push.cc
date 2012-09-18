@@ -1032,7 +1032,9 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 			NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast hello from " << sender << " #Chunks="<< n_chunks << " Ratio="<< n_ratio);
 			Neighbor nt (sender, PUSH_PORT);
 			if (m_neighbors.IsNeighbor(nt))
-				m_neighbors.GetNeighbor(nt)->Update(n_last, n_chunks);
+			{
+				m_neighbors.GetNeighbor(nt)->Update (n_last, n_chunks, n_ratio);
+			}
 			break;
 		}
 		default:
