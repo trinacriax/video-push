@@ -639,6 +639,18 @@ VideoPushApplication::GetPullWindow () const
 }
 
 void
+VideoPushApplication::SetPullWBase (uint32_t base)
+{
+	m_pullWBase = base;
+}
+
+uint32_t
+VideoPushApplication::GetPullWBase () const
+{
+	return m_pullWBase;
+}
+
+void
 VideoPushApplication::SetPullRatioMin (double ratio)
 {
 	m_pullRatioMin = ratio;

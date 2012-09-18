@@ -64,6 +64,8 @@ enum ChunkPolicy {
 
 };
 
+static uint32_t	m_pullWBase;		// pull window
+
 class VideoPushApplication : public Application
 {
 
@@ -197,6 +199,9 @@ private:
 	void Ignore (Ptr<Socket>);
 	Ipv4Address GetLocalAddress ();
 	void StatisticChunk (void);
+
+	static void SetPullWBase (uint32_t base);
+	static uint32_t GetPullWBase ();
 
 	Ptr<Socket>     m_socket;       // Associated socket
 	std::list<Ptr<Socket> > m_socketList; //the accepted sockets
