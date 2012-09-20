@@ -348,10 +348,6 @@ NeighborsSet::SelectPeer (PeerPolicy policy)
     {
     	NeighborData *nd = GetNeighbor (m_neighborProbVector[id].first);
     	NS_ASSERT (nd);
-    	double weight = (nd->n_bufferSize == 0 ? 0 : nd->n_bufferSize/(nd->n_latestChunk*1.0) );
-//           if (debug >= 8) {
-//               System.out.println("\t(" + id + ") Value " + value + ", Prob " + prob[id] + " (" + neighbors[id] + ")\n");
-//           }
 		dice -= m_neighborProbability[id];
 		if (dice <= 0) {
 		   nt = m_neighborProbVector[id].first;
