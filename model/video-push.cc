@@ -477,6 +477,10 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_neighbors.SetSelectionWeight (n_selectionWeight);
       double inter_time = 1 / (m_cbrRate.GetBitRate()/(8.0*m_pktSize));
       m_pullSlot = Time::FromDouble(inter_time,Time::S);
+      double v = ceil(m_pullSlot.ToDouble(Time::US)/m_pullTime.ToDouble(Time::US));
+      SetPullMReply((uint32_t) v);
+      m_pullCTimer.SetDelay (m_pullSlot);
+      m_pullCTimer.SetFunction (&VideoPushApplication::ResetPullCReply, this);
     }
   // Insure no pending event
   StartSending ();
@@ -971,8 +975,8 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	if (sender == GetSource() && m_chunks.GetBufferSize() == 1)
 	{
 		SetSlotStart (Simulator::Now());
+		m_pullCTimer.Schedule();
 	}
-
 	if (toolate) // Chunk was pulled and received to late
 	{
 		m_pullTimer.Cancel();
@@ -1037,7 +1041,8 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		NS_ASSERT (chunkid <= (GetPullWBase()+GetPullWindow()));
 		bool hasChunk = m_chunks.HasChunk (chunkid);
 		Time delay (0);
-		if (hasChunk && chunkid >= GetPullWBase())
+		SetPullCReply(GetPullCReply()+1);
+		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply())
 		{
 //		  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
 //		  double delayv = rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.40));
@@ -1050,6 +1055,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 			}
 			else
 			{
+				SetPullCReply(0);
 //				NS_ASSERT(GetSlotStart() < Simulator::Now());
 //				NS_ASSERT(GetSlotStart() + m_pullSlot > Simulator::Now());
 //				delay = GetSlotStart() + m_pullSlot - Simulator::Now();
