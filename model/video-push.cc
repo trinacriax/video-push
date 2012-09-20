@@ -211,8 +211,10 @@ VideoPushApplication::VideoPushApplication ():
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
   m_duplicates.clear();
-  m_sendEvent.Cancel();
-  m_peerLoop.Cancel();
+  m_helloEvent.Cancel();
+  m_loopEvent.Cancel();
+  m_pullEvent.Cancel();
+  m_chunkEvent.Cancel();
 }
 
 VideoPushApplication::~VideoPushApplication()
@@ -432,6 +434,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
   NS_LOG_FUNCTION_NOARGS ();
   m_ipv4 = m_node->GetObject<Ipv4>();
   // Create the socket if not already
+  CancelEvents ();
   if (!m_socket)
     {
       m_socket = Socket::CreateSocket (GetNode (), m_tid);
@@ -457,7 +460,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       Time start = Time::FromDouble (UniformVariable().GetValue (0, GetHelloTime().GetMilliSeconds()*.5), Time::MS);
       if (GetHelloActive())
       {
-    	  Simulator::Schedule (start, &VideoPushApplication::SendHello, this);
+    	  m_helloEvent = Simulator::Schedule (start, &VideoPushApplication::SendHello, this);
       }
       m_neighbors.SetExpire (Time::FromDouble (GetHelloTime().GetSeconds() * (1.10 * (1.0 + GetHelloLoss())), Time::S));
       m_neighbors.SetSelectionWeight (n_selectionWeight);
@@ -465,7 +468,6 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_pullSlot = Time::FromDouble(inter_time,Time::S);
     }
   // Insure no pending event
-  CancelEvents ();
   StartSending ();
 }
 
@@ -531,15 +533,17 @@ void VideoPushApplication::CancelEvents ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  if (m_sendEvent.IsRunning ())
+  if (m_chunkEvent.IsRunning ())
     { // Cancel the pending send packet event
       // Calculate residual bits since last packet sent
       Time delta (Simulator::Now () - m_lastStartTime);
       int64x64_t bits = delta.To (Time::S) * m_cbrRate.GetBitRate ();
       m_residualBits += bits.GetHigh ();
     }
-  Simulator::Cancel (m_sendEvent);
-  Simulator::Cancel (m_peerLoop);
+  Simulator::Cancel (m_helloEvent);
+  Simulator::Cancel (m_loopEvent);
+  Simulator::Cancel (m_pullEvent);
+  Simulator::Cancel (m_chunkEvent);
 }
 
 void VideoPushApplication::StartSending ()
@@ -554,7 +558,7 @@ void VideoPushApplication::StartSending ()
 	}
 	case SOURCE:
 	{
-		Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
+		m_loopEvent = Simulator::ScheduleNow(&VideoPushApplication::PeerLoop, this);
 		break;
 	}
   }
@@ -563,7 +567,6 @@ void VideoPushApplication::StartSending ()
 void VideoPushApplication::StopSending ()
 {
   NS_LOG_FUNCTION_NOARGS ();
-  CancelEvents ();
 }
 
 void
@@ -850,7 +853,7 @@ VideoPushApplication::PeerLoop ()
 					SetPullTimes (GetPullMissed());
 					AddPullRequest();
 					m_pullTimer.Schedule();
-					m_sendEvent = Simulator::ScheduleNow (&VideoPushApplication::SendPull, this, GetPullMissed(), target.GetAddress());
+					m_pullEvent = Simulator::ScheduleNow (&VideoPushApplication::SendPull, this, GetPullMissed(), target.GetAddress());
 					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " pull "<< target.GetAddress() << " for chunk " << GetPullMissed() << " next "<< m_pullTimer.GetDelay());
 
 				}
@@ -872,8 +875,8 @@ VideoPushApplication::PeerLoop ()
 			  uint32_t bits = m_pktSize * 8 - m_residualBits;
 			  NS_LOG_LOGIC ("bits = " << bits);
 			  Time nextTime (Seconds (bits / static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
-			  m_sendEvent = Simulator::ScheduleNow (&VideoPushApplication::SendPacket, this);
-			  m_peerLoop = Simulator::Schedule (nextTime, &VideoPushApplication::PeerLoop, this);
+			  m_chunkEvent = Simulator::ScheduleNow (&VideoPushApplication::SendPacket, this);
+			  m_loopEvent = Simulator::Schedule (nextTime, &VideoPushApplication::PeerLoop, this);
 			}
 		  else
 			{ // All done, cancel any pending events
@@ -955,7 +958,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	if (GetPullMissed() && !m_pullTimer.IsRunning() && GetPullActive() && ratio >= GetPullRatioMin() && ratio <= GetPullRatioMax())
 	{
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " activating pull for "<<GetPullMissed()<< " ratio="<<ratio);
-		Simulator::ScheduleNow (&VideoPushApplication::PeerLoop, this);
+		m_loopEvent = Simulator::ScheduleNow (&VideoPushApplication::PeerLoop, this);
 	}
 	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate ":" Received "))
 		  << chunk.c_id //<< "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"
@@ -992,7 +995,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 //		  delay = Time::FromDouble (delayv, Time::US);
 			if (PullSlot ())
 			{
-				Simulator::ScheduleNow (&VideoPushApplication::SendChunk, this, chunkid, sender);
+				m_chunkEvent = Simulator::ScheduleNow (&VideoPushApplication::SendChunk, this, chunkid, sender);
 				AddPending(chunkid);
 			}
 			else
@@ -1309,7 +1312,7 @@ void VideoPushApplication::SendPacket ()
 		}
 		case SOURCE:
 		{
-			NS_ASSERT (m_sendEvent.IsExpired ());
+			NS_ASSERT (m_chunkEvent.IsExpired ());
 			uint32_t new_chunk = ChunkSelection(CS_NEW_CHUNK);
 			ChunkVideo *copy = m_chunks.GetChunk(new_chunk);
 			ChunkHeader chunk (MSG_CHUNK);
