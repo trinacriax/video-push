@@ -1005,7 +1005,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	SetPullMissed(!GetPullMissed() || GetPullMissed() < GetPullWBase() ? ChunkSelection(m_chunkSelection) : GetPullMissed());
 	ratio = GetReceived();
 	//TODO PULL WINDOW CHECK
-	if (GetPullMissed() && !m_pullTimer.IsRunning() && GetPullActive() && ratio >= GetPullRatioMin() && ratio <= GetPullRatioMax())
+	if (GetPullActive() && GetPullMissed() && !m_pullTimer.IsRunning() && PullRange())
 	{
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " activating pull for "<<GetPullMissed()<< " ratio="<<ratio);
 		m_loopEvent = Simulator::ScheduleNow (&VideoPushApplication::PeerLoop, this);
