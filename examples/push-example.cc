@@ -367,6 +367,8 @@ int main(int argc, char **argv)
 	double pullratiomin = .70;
 	// pull ratio for de-activation
 	double pullratiomax = .90;
+	// max number of pull reply
+	uint32_t pullmreply = 1;
 	// Time in seconds between hellos
 	uint32_t helloactive = 0;
 	// Time in seconds between hellos
@@ -439,6 +441,7 @@ int main(int argc, char **argv)
 	cmd.AddValue ("pullratiomin", "Ratio to activate pull", pullratiomin);
 	cmd.AddValue ("pullratiomax", "Ratio to de-activate pull", pullratiomax);
 	cmd.AddValue ("pulltime", "Time between pull in ms (e.g., 100ms = 0.100s)", pulltime);
+	cmd.AddValue ("pullmreply", "Max pull replies", pullmreply);
 	cmd.AddValue ("selectionw", "Selection Weight [0-1]", selectionWeight);
 	cmd.AddValue ("v", "Verbose", verbose);
 	cmd.AddValue ("ff", "flag", flag);
@@ -471,6 +474,7 @@ int main(int argc, char **argv)
 	Config::SetDefault ("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
 	Config::SetDefault ("ns3::VideoPushApplication::Flag", UintegerValue(flag));
 	Config::SetDefault ("ns3::VideoPushApplication::SelectionWeight", DoubleValue(selectionWeight));
+	Config::SetDefault ("ns3::VideoPushApplication::MaxPullReply", UintegerValue(pullmreply));
 	Config::SetDefault ("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
 	Config::SetDefault ("ns3::Ipv4::IpForward", BooleanValue (false));
 	Config::SetDefault ("ns3::YansWifiPhy::TxGain",DoubleValue(TxGain));

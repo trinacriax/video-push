@@ -197,6 +197,11 @@ VideoPushApplication::GetTypeId (void)
 				   DoubleValue (0),
 				   MakeDoubleAccessor (&VideoPushApplication::n_selectionWeight),
 				   MakeDoubleChecker<double> (0))
+	.AddAttribute ("MaxPullReply", "Max number of pull to reply.",
+				   UintegerValue (0),
+				   MakeUintegerAccessor (&VideoPushApplication::SetPullMReply,
+						   	   	   	   	 &VideoPushApplication::GetPullMReply),
+				   MakeUintegerChecker<uint32_t> (0))
   ;
   return tid;
 }
@@ -477,8 +482,8 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_neighbors.SetSelectionWeight (n_selectionWeight);
       double inter_time = 1 / (m_cbrRate.GetBitRate()/(8.0*m_pktSize));
       m_pullSlot = Time::FromDouble(inter_time,Time::S);
-      double v = ceil(m_pullSlot.ToDouble(Time::US)/m_pullTime.ToDouble(Time::US));
-      SetPullMReply((uint32_t) v);
+//      double v = ceil(m_pullSlot.ToDouble(Time::US)/m_pullTime.ToDouble(Time::US));
+//      SetPullMReply((uint32_t) v);
       m_pullCTimer.SetDelay (m_pullSlot);
       m_pullCTimer.SetFunction (&VideoPushApplication::ResetPullCReply, this);
     }
