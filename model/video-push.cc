@@ -859,9 +859,8 @@ VideoPushApplication::PeerLoop ()
 			NS_ASSERT (GetPullActive());
 			NS_ASSERT (GetHelloActive());
 			NS_ASSERT (!m_pullTimer.IsRunning());
-			uint32_t last = m_chunks.GetLastChunk();
-			double ratio = GetReceived ();
-			if (GetPullMissed() && !m_pullTimer.IsRunning()) /*abbiamo un chunk pullato pendente*/
+			std::cout << "C1 = " << m_loopEvent.PeekEventImpl()->IsCancelled()<< " "<<m_loopEvent.IsExpired()<< " " << m_loopEvent.IsRunning()<<"\n";
+			if (GetPullMissed()) /*abbiamo un chunk pullato pendente*/
 			{
 				m_pullTimer.Cancel();
 				while (GetPullMissed() && GetPullRetry(GetPullMissed()) >= GetPullMax())/* Mark chunks as skipped*/
@@ -886,28 +885,27 @@ VideoPushApplication::PeerLoop ()
 				NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
 				break;
 			}
-			ratio = GetReceived ();
+			double ratio = GetReceived ();
 			SetPullMissed(!GetPullMissed() || GetPullMissed() < GetPullWBase() ? ChunkSelection(m_chunkSelection) : GetPullMissed());
 			NS_LOG_INFO ("Node=" << m_node->GetId() << " IP=" << GetLocalAddress()
 					<< " Ratio=" << ratio << " ["<<GetPullRatioMin() << ":" << GetPullRatioMax() << "]"
-					<< " Last=" << last << " Missed=" << GetPullMissed() << " ("<<(GetPullMissed()?GetPullRetry(GetPullMissed()):0)<<","<<GetPullMax()<<")"
+					<< " Last=" << m_chunks.GetLastChunk() << " Missed=" << GetPullMissed() << " ("<<(GetPullMissed()?GetPullRetry(GetPullMissed()):0)<<","<<GetPullMax()<<")"
 					<< " Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
 					<< " Timer="<<(m_pullTimer.IsRunning()?"Yes":"No"));
-			if (GetPullMissed() && ratio >= GetPullRatioMin() && ratio <= GetPullRatioMax())/*check whether the node is within Pull-allowed range*/
+			if (GetPullMissed() && PullRange())/*check whether the node is within Pull-allowed range*/
 			{
-				AddPullRetry(GetPullMissed());
 				Neighbor target = PeerSelection (m_peerSelection);
 				m_neighborsTrace (m_neighbors.GetSize());
 				if (target.GetAddress() != Ipv4Address::GetAny())
 				{
 					NS_ASSERT (m_neighbors.IsNeighbor(target));
-//					Time delay = Time::FromDouble (UniformVariable().GetValue (0, 1000), Time::US); //[0-1000]us random
+					Time delay = Time::FromDouble (UniformVariable().GetValue (0, 1000), Time::US); //[0-1000]us random
 					SetPullTimes (GetPullMissed());
 					AddPullRequest();
 					m_pullTimer.Schedule();
-					m_pullEvent = Simulator::ScheduleNow (&VideoPushApplication::SendPull, this, GetPullMissed(), target.GetAddress());
+					m_pullEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, GetPullMissed(), target.GetAddress());
+					AddPullRetry(GetPullMissed());
 					NS_LOG_INFO ("Node=" <<m_node->GetId()<< " pull "<< target.GetAddress() << " for chunk " << GetPullMissed() << " next "<< m_pullTimer.GetDelay());
-
 				}
 				else
 				{
