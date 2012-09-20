@@ -542,13 +542,13 @@ int main(int argc, char **argv)
 			<< "\n";
 
 	/// Video start
-	double sourceStart = 40;
+	double sourceStart = 30;
 	/// Video stop
-	double sourceStop = 140;
+	double sourceStop = totalTime - 10;
 	/// Client start
 	double clientStart = 1;
 	/// Client stop
-	double clientStop = 140;
+	double clientStop = totalTime - 10;
 
 	NodeContainer fake;
 	fake.Create(1);
