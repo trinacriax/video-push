@@ -300,10 +300,13 @@ NeighborsSet::SortNeighborhood (PeerPolicy policy)
     	weights1 += weight1[i];
     	weights2 += weight2[i];
     }
+    double q = GetSelectionWeight();
     for (i = 0; i < nsize; i++)
     {
-    	m_neighborProbability[i] = (weights1 == 0 ? (1.0 - GetSelectionWeight() ) * 1/nsize : ((1.0-GetSelectionWeight()) * weight1[i] / weights1))  + (weights2 == 0 ? GetSelectionWeight() * 1/nsize : (GetSelectionWeight() * weight2[i] / weights2));
-//    	NS_LOG_DEBUG ("Neighbor "<< i << " w=" << weight[i] << "/"<< weights << ": P=" << m_neighborRssi[i]);
+    	double w1 = ((1.0 - q ) * (weights1 == 0 ? 1.0/nsize : weight1[i] / weights1));
+    	double w2 = (q * (weights2 == 0 ? 1.0/nsize : weight2[i] / weights2));
+    	m_neighborProbability[i] = w1+w2;
+    	NS_LOG_DEBUG ("Neighbor "<< i << " w1=" <<w1<< "("<< weight1[i] << "/"<< weights1 <<") w2=" << w2 <<"("<<weight2[i] << "/"<< weights2 << ") P=" << m_neighborProbability[i]);
     	tot += m_neighborProbability[i];
     }
 //    i = 0;
@@ -312,7 +315,7 @@ NeighborsSet::SortNeighborhood (PeerPolicy policy)
 //		NS_LOG_DEBUG ("Neighbor="<< iter->first <<" Data=" << iter->second << " Prob="<< (weight[i] / weights) );
 //	}
 //   	NS_LOG_DEBUG ("Neighbors P(all)=" << tot);
-    NS_ASSERT_MSG((1-tot)< pow10(-6), "Error in computing probabilities");
+    NS_ASSERT_MSG(abs(1-tot)< pow10(-6), "Error in computing probabilities");
 }
 
 Neighbor
