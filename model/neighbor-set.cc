@@ -319,6 +319,10 @@ Neighbor
 NeighborsSet::SelectPeer (PeerPolicy policy)
 {
 	Neighbor nt;
+	if (m_neighbor_set.empty())
+	{
+		return nt;
+	}
 	NS_ASSERT (GetSize() > 0);
 //	uint32_t index = UniformVariable().GetInteger(0, GetSize()-1);
 //	std::map<Neighbor, NeighborData>::iterator iter = m_neighbor_set.begin();
