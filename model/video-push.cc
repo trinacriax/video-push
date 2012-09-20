@@ -206,7 +206,7 @@ VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
 		m_connected(false), m_ipv4(0), m_socket(0),
 		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY),
-		m_pullRequest (0), m_pullHit (0), m_pullReceived (0), m_pullReply (0)
+		m_pullRequest (0), m_pullHit (0), m_pullReceived (0), m_pullReply (0), m_pullCTimer (Timer::CANCEL_ON_DESTROY)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
@@ -579,6 +579,37 @@ bool
 VideoPushApplication::GetPullActive () const
 {
 	return m_pullActive;
+}
+
+uint32_t
+VideoPushApplication::GetPullCReply () const
+{
+	return m_pullCReply;
+}
+
+void
+VideoPushApplication::SetPullCReply (uint32_t value)
+{
+	m_pullCReply = value;
+}
+
+void
+VideoPushApplication::ResetPullCReply ()
+{
+	m_pullCReply = 0;
+	m_pullCTimer.Schedule();
+}
+
+uint32_t
+VideoPushApplication::GetPullMReply () const
+{
+	return m_pullMReply;
+}
+
+void
+VideoPushApplication::SetPullMReply (uint32_t value)
+{
+	m_pullMReply = value;
 }
 
 void

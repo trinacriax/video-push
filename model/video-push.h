@@ -118,6 +118,11 @@ public:
 
 	void SetPullActive (bool pull);
 	bool GetPullActive () const;
+	uint32_t GetPullCReply () const;
+	void SetPullCReply (uint32_t value);
+	void ResetPullCReply ();
+	uint32_t GetPullMReply () const;
+	void SetPullMReply (uint32_t value);
 	void SetHelloActive (uint32_t hello);
 	uint32_t GetHelloActive () const;
 	void SetChunkDelay (uint32_t chunkid, Time delay);
@@ -242,6 +247,9 @@ private:
 	double		 	m_pullReply;		// pull reply
 	Time			m_pullSlot;			// slot duration for pull operations
 	uint32_t	 	m_pullMissed;		// missed chunk just pulled
+	uint32_t		m_pullCReply;
+	Timer			m_pullCTimer;
+	uint32_t		m_pullMReply;
 
 	NeighborsSet 	m_neighbors;		// collect neighbors
 	Time 			m_helloTime;
