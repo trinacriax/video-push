@@ -176,7 +176,7 @@ private:
 	void SetSlotStart (Time start);
 	Time GetSlotStart () const;
 	Time GetSlotEnd () const;
-	bool PullSlot ();
+	double PullSlot ();
 
 	void SetPullMissed (uint32_t chunkid);
 	uint32_t GetPullMissed () const;

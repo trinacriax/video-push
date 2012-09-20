@@ -787,12 +787,15 @@ inline VideoPushApplication::GetPullMissed () const
 	return m_pullMissed;
 }
 
-bool
+double
 VideoPushApplication::PullSlot ()
 {
 	NS_LOG_INFO ("Node=" <<m_node->GetId()<< " NextSlot="<<GetSlotEnd().GetSeconds());
 	NS_ASSERT (Simulator::Now() >= GetSlotStart() && Simulator::Now() < GetSlotStart()+m_pullSlot);
-	return (Simulator::Now() >= GetSlotStart() && (Simulator::Now() + MilliSeconds(1) < GetSlotEnd()));
+	double n = (Simulator::Now() - GetSlotStart()).ToDouble(Time::US);
+	double m = (m_pullSlot - MilliSeconds(2)).ToDouble(Time::US);
+	double r = n/m;
+	return r;
 }
 
 void
@@ -993,7 +996,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 //		  double delayv = rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.40));
 //		  NS_ASSERT_MSG (delayv > 1, "HandlePull: pulltime is 0");
 //		  delay = Time::FromDouble (delayv, Time::US);
-			if (PullSlot ())
+			if (PullSlot () < .90)
 			{
 				m_chunkEvent = Simulator::ScheduleNow (&VideoPushApplication::SendChunk, this, chunkid, sender);
 				AddPending(chunkid);
@@ -1344,14 +1347,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 {
 	NS_LOG_FUNCTION (this<<chunkid);
 	NS_ASSERT (chunkid>0);
-	if (!PullSlot())/*Check whether the node is within a pull slot or not*/
-	{
-//		NS_ASSERT(GetSlotStart() < Simulator::Now());
-//		NS_ASSERT(GetSlotStart() + m_pullSlot > Simulator::Now());
-//		Time delay = GetSlotStart() + m_pullSlot - Simulator::Now();
-//		Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, chunkid, target);
-	}
-	else
+	if (PullSlot() < .80)/*Check whether the node is within a pull slot or not*/
 	{
 		ChunkHeader pull (MSG_PULL);
 		pull.GetPullMessage ().SetChunk (chunkid);
@@ -1362,6 +1358,10 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 		NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
 		NS_ASSERT (chunkid >= GetPullWBase() && chunkid <= (GetPullWBase()+GetPullWindow()));
 		m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
+	}
+	else
+	{
+		m_pullTimer.Cancel();
 	}
 }
 
