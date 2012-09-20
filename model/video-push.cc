@@ -863,7 +863,7 @@ VideoPushApplication::PeerLoop ()
 			NS_ASSERT (GetPullActive());
 			NS_ASSERT (GetHelloActive());
 			NS_ASSERT (!m_pullTimer.IsRunning());
-			std::cout << "C1 = " << m_loopEvent.PeekEventImpl()->IsCancelled()<< " "<<m_loopEvent.IsExpired()<< " " << m_loopEvent.IsRunning()<<"\n";
+//			std::cout << "C1 = " << m_loopEvent.PeekEventImpl()->IsCancelled()<< " "<<m_loopEvent.IsExpired()<< " " << m_loopEvent.IsRunning()<<"\n";
 			if (GetPullMissed()) /*abbiamo un chunk pullato pendente*/
 			{
 				m_pullTimer.Cancel();
@@ -878,17 +878,17 @@ VideoPushApplication::PeerLoop ()
 							<<" Pulled at "<< shift.GetSeconds() << "("<< shift.GetSeconds()<<")");
 				}
 			}
-			if (!PullSlot())/*Check whether the node is within a pull slot or not*/
-			{
-				NS_ASSERT(GetSlotStart() < Simulator::Now());
-				NS_ASSERT(GetSlotStart() + m_pullSlot > Simulator::Now());
-				Time delay = GetSlotStart() + m_pullSlot - Simulator::Now();
-				m_pullTimer.Schedule(delay);
-				NS_LOG_INFO ("Node=" <<m_node->GetId()<< " No time to pull: "<<GetSlotStart().GetSeconds()
-						<< " < "<<Simulator::Now().GetSeconds() << " < "<<GetSlotEnd().GetSeconds() << " move for "<<delay.GetSeconds());
-				NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
-				break;
-			}
+//			if (!PullSlot())/*Check whether the node is within a pull slot or not*/
+//			{
+//				NS_ASSERT(GetSlotStart() < Simulator::Now());
+//				NS_ASSERT(GetSlotStart() + m_pullSlot > Simulator::Now());
+//				Time delay = GetSlotStart() + m_pullSlot - Simulator::Now();
+//				m_pullTimer.Schedule(delay);
+//				NS_LOG_INFO ("Node=" <<m_node->GetId()<< " No time to pull: "<<GetSlotStart().GetSeconds()
+//						<< " < "<<Simulator::Now().GetSeconds() << " < "<<GetSlotEnd().GetSeconds() << " move for "<<delay.GetSeconds());
+//				NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
+//				break;
+//			}
 			double ratio = GetReceived ();
 			SetPullMissed(!GetPullMissed() || GetPullMissed() < GetPullWBase() ? ChunkSelection(m_chunkSelection) : GetPullMissed());
 			NS_LOG_INFO ("Node=" << m_node->GetId() << " IP=" << GetLocalAddress()
