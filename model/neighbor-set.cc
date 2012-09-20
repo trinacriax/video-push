@@ -262,7 +262,8 @@ NeighborsSet::SortNeighborhood (PeerPolicy policy)
 	m_neighborProbVector = std::vector<NeigborPair> (m_neighbor_set.begin(), m_neighbor_set.end());
 	NS_ASSERT (m_neighborProbVector.size() == nsize);
 	std::sort (m_neighborProbVector.begin(), m_neighborProbVector.end(), SnrCmp());
-	nsize = (nsize<10?nsize:10);
+	uint32_t limit = 10;
+	nsize = (nsize<limit?nsize:limit);
 //	while (m_neighborProbVector.size() > nsize)
 //	{
 //		m_neighborProbVector.pop_back();
