@@ -273,6 +273,7 @@ VideoPushApplication::StatisticChunk (void)
   uint32_t received = 1, receivedpull = 0, receivedpush = 0, missed = 0, duplicates = 0, chunkID = 0, current = 1, late = 0, split = 0, splitP = 0, splitL = 0;
   uint64_t delay = 0, delaylate = 0, delayavg = 0, delayavgpush = 0, delayavgpull = 0;
   uint64_t delaymax = (tmp_buffer.empty() ? 0: GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds()), delaymin = (tmp_buffer.empty()?0:GetChunkDelay(tmp_buffer.begin()->first).GetMicroSeconds());
+  uint32_t missing[] = {0,0,0,0,0,0}, hole = 0; // hole size = 1 2 3 4 5 >5
   Time delay_max, delay_min, delay_avg, delay_avg_push, delay_avg_pull;
   double miss = 0.0, rec = 0.0, dups = 0.0, sigma = 0.0, sigmaP = 0.0, sigmaL = 0.0, delayavgB = 0.0, delayavgP = 0.0, delayavgL = 0.0, dlate = 0.0 ;
   for(std::map<uint32_t, ChunkVideo>::iterator iter = tmp_buffer.begin(); iter != tmp_buffer.end() ; iter++){
@@ -287,7 +288,14 @@ VideoPushApplication::StatisticChunk (void)
 			late++;
 		}
 		missed++;
+		hole++;
 		current = received + missed;
+	  }
+	  if (hole!=0)
+	  {
+		  hole = hole > 5?5:hole;
+		  missing [hole-1]++;
+		  hole = 0;
 	  }
 	  duplicates+= GetDuplicate (current);
 	  NS_ASSERT (m_chunks.HasChunk(current));
@@ -407,9 +415,12 @@ VideoPushApplication::StatisticChunk (void)
 	delay_avg_pull = MicroSeconds (0);
   }
   char buffer [1024];
-  sprintf(buffer, "Chunks Node %d Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f RecP %d AvgP %ld us sigmaP %.5f confP %.5f RecL %d AvgL %ld us sigmaL %.5f confL %.5f PRec %d PRep %.4f PReq %d PHit %.4f\n",
+  sprintf(buffer, "Chunks Node %d Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f RecP %d AvgP %ld us sigmaP %.5f confP %.5f RecL %d AvgL %ld us sigmaL %.5f confL %.5f PRec %d PRep %.4f PReq %d PHit %.4f H1 %d H2 %d H3 %d H4 %d H5 %d H6 %d\n",
 		  	  	    m_node->GetId(), rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence, dlate,
-		  receivedpush, delay_avg_push.ToInteger(Time::US), sigmaP, confidenceP, receivedpull, delay_avg_pull.ToInteger(Time::US), sigmaL, confidenceL, m_pullReceived, (m_pullReceived == 0 ? 0 : m_pullReply/(1.0*m_pullReceived)), m_pullRequest, (m_pullRequest == 0 ? 0 : m_pullHit/(1.0*m_pullRequest)) );
+		  receivedpush, delay_avg_push.ToInteger(Time::US), sigmaP, confidenceP,
+		  receivedpull, delay_avg_pull.ToInteger(Time::US), sigmaL, confidenceL,
+		  m_pullReceived, (m_pullReceived == 0 ? 0 : m_pullReply/(1.0*m_pullReceived)), m_pullRequest, (m_pullRequest == 0 ? 0 : m_pullHit/(1.0*m_pullRequest)),
+		  missing[0], missing[1], missing[2], missing[3], missing[4], missing[5]);
   std::cout << buffer;
 }
 
