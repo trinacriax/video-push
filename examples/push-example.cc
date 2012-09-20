@@ -120,27 +120,29 @@ GenericPacketTrace (std::string context, Ptr<const Packet> p)
 //	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
 	if ( mc.callback.compare("PhyTxBegin")==0 )
 	{
-		NS_LOG_DEBUG("PhyPacketTx "<< p->GetSize());
+		NS_LOG_INFO(mc.callback<<" ID="<<p->GetUid());
 		phyTxBegin += p->GetSize();
 		phyTxBeginP++;
 	}
 	else if ( mc.callback.compare("PhyTxEnd")==0 )
 	{
+		NS_LOG_INFO(mc.callback<<" ID="<<p->GetUid());
 		phyTxEnd += p->GetSize();
 	}
 	else if ( mc.callback.compare("PhyTxDrop")==0)
 	{
+		NS_LOG_INFO(mc.callback<<" ID="<<p->GetUid());
 		phyTxDrop += p->GetSize();
 	}
 	else if ( mc.callback.compare("MacTx")==0)
 	{
-		NS_LOG_DEBUG("MacPacketTx "<< p->GetSize());
+		NS_LOG_INFO(mc.callback<<" ID="<<p->GetUid());
 		macTx += p->GetSize();
 		macTxP++;
 	}
 	else if ( mc.callback.compare("TxArp")==0)
 	{
-		NS_LOG_DEBUG("ArpPacketTx "<< p->GetSize());
+		NS_LOG_INFO(mc.callback<<" ID="<<p->GetUid());
 		arpTx += p->GetSize();
 		arpTxP++;
 	}
@@ -202,6 +204,7 @@ void
 TxDataPull (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgTxDataPull[mc.id] += p->GetSize();
 	msgTxDataLP += p->GetSize();
 	msgTxDataL++;
@@ -222,6 +225,7 @@ void
 RxDataPull (std::string context, Ptr<const Packet> p, const Address & address)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgRxDataPull[mc.id] += p->GetSize();
 	msgRxDataLP += p->GetSize();
 	msgRxDataL++;
@@ -262,6 +266,7 @@ void
 TxControlPull (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgTxControlPull[mc.id] += (p->GetSize() + 20 + 8 );
 	msgTxControlL += (p->GetSize() + 20 + 8 );
 	msgTxControlLP++;
@@ -282,6 +287,7 @@ void
 RxControlPull (std::string context, Ptr<const Packet> p, const Address & address)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgRxControlPull[mc.id] += (p->GetSize() + 20 + 8 );
 	msgRxControlL += (p->GetSize() + 20 + 8 );
 	msgRxControlLP++;
