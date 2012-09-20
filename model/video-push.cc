@@ -677,6 +677,13 @@ VideoPushApplication::GetPullRatioMax () const
 	return m_pullRatioMax;
 }
 
+bool
+VideoPushApplication::PullRange ()
+{
+	double ratio = GetReceived();
+	return (ratio <= GetPullRatioMax() && ratio >= GetPullRatioMin());
+}
+
 void
 VideoPushApplication::SetPullTimes (uint32_t chunkid)
 {
