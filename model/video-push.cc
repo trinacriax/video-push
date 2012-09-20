@@ -1042,6 +1042,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		bool hasChunk = m_chunks.HasChunk (chunkid);
 		Time delay (0);
 		SetPullCReply(GetPullCReply()+1);
+		AddPullReceived ();
 		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply())
 		{
 //		  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
@@ -1052,6 +1053,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 			{
 				m_chunkEvent = Simulator::ScheduleNow (&VideoPushApplication::SendChunk, this, chunkid, sender);
 				AddPending(chunkid);
+				AddPullReply ();
 			}
 			else
 			{
