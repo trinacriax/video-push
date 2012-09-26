@@ -65,6 +65,31 @@ std::vector<uint32_t> msgRxControlAodv;
 uint32_t msgRxControlAodvT = 0;
 uint32_t msgRxControlAodvP = 0;
 
+std::vector<uint32_t> msgTxControlPim;
+uint32_t msgTxControlPimT = 0;
+uint32_t msgTxControlPimP = 0;
+
+std::vector<uint32_t> msgRxControlPim;
+uint32_t msgRxControlPimT = 0;
+uint32_t msgRxControlPimP = 0;
+
+std::vector<uint32_t> msgTxDataPim;
+uint32_t msgTxDataPimT = 0;
+uint32_t msgTxDataPimP = 0;
+
+std::vector<uint32_t> msgRxDataPim;
+uint32_t msgRxDataPimT = 0;
+uint32_t msgRxDataPimP = 0;
+
+std::vector<uint32_t> msgTxControlIgmp;
+uint32_t msgTxControlIgmpT = 0;
+uint32_t msgTxControlIgmpP = 0;
+
+std::vector<uint32_t> msgRxControlIgmp;
+uint32_t msgRxControlIgmpT = 0;
+uint32_t msgRxControlIgmpP = 0;
+
+
 uint32_t arpSent = 0;
 uint32_t videoBroadcast = 0;
 
@@ -218,6 +243,132 @@ void StatisticTxControlAodv ()
 	}
 	std::cout << "TxAodvMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlAodvT << "\t" << msgTxControlAodvP << "\n";
 	msgTxControlAodvT = msgTxControlAodvP = 0;
+}
+
+void
+RxControlPim (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
+	msgRxControlPim [mc.id] += (p->GetSize() + 20 + 8 );
+	msgRxControlPimT += (p->GetSize() + 20 + 8 );
+	msgRxControlPimP++;
+}
+
+void StatisticRxControlPim ()
+{
+	for (uint32_t i = 0; i < msgRxControlPim.size(); i++)
+	{
+		std::cout << "RxPimControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxControlPim[i] << "\n";
+		msgRxControlPim[i] = 0;
+	}
+	std::cout << "RxPimControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxControlPimT << "\t" << msgRxControlPimP << "\n";
+	msgRxControlPimT = msgRxControlPimP = 0;
+}
+
+void
+TxControlPim (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
+	msgTxControlPim [mc.id] += (p->GetSize() + 20 + 8 );
+	msgTxControlPimT += (p->GetSize() + 20 + 8 );
+	msgTxControlPimP++;
+}
+
+void StatisticTxControlPim ()
+{
+	for (uint32_t i = 0; i < msgTxControlPim.size(); i++)
+	{
+		std::cout << "TxPimControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlPim[i] << "\n";
+		msgTxControlPim[i] = 0;
+	}
+	std::cout << "TxPimControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlPimT << "\t" << msgTxControlPimP << "\n";
+	msgTxControlPimT = msgTxControlPimP = 0;
+}
+
+void
+RxDataPim (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
+	msgRxDataPim [mc.id] += (p->GetSize() + 20 + 8 );
+	msgRxDataPimT += (p->GetSize() + 20 + 8 );
+	msgRxDataPimP++;
+}
+
+void StatisticRxDataPim ()
+{
+	for (uint32_t i = 0; i < msgRxDataPim.size(); i++)
+	{
+		std::cout << "RxPimDataMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxDataPim[i] << "\n";
+		msgRxDataPim[i] = 0;
+	}
+	std::cout << "RxPimDataMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxDataPimT << "\t" << msgRxDataPimP << "\n";
+	msgRxDataPimT = msgRxDataPimP = 0;
+}
+
+void
+TxDataPim (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
+	msgTxDataPim [mc.id] += (p->GetSize() + 20 + 8 );
+	msgTxDataPimT += (p->GetSize() + 20 + 8 );
+	msgTxDataPimP++;
+}
+
+void StatisticTxDataPim ()
+{
+	for (uint32_t i = 0; i < msgTxDataPim.size(); i++)
+	{
+		std::cout << "TxPimDataMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxDataPim[i] << "\n";
+		msgTxDataPim[i] = 0;
+	}
+	std::cout << "TxPimDataMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxDataPimT << "\t" << msgTxDataPimP << "\n";
+	msgTxDataPimT = msgTxDataPimP = 0;
+}
+
+void
+RxControlIgmp (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
+	msgRxControlIgmp [mc.id] += (p->GetSize() + 20 + 8 );
+	msgRxControlIgmpT += (p->GetSize() + 20 + 8 );
+	msgRxControlIgmpP++;
+}
+
+void StatisticRxControlIgmp ()
+{
+	for (uint32_t i = 0; i < msgRxControlIgmp.size(); i++)
+	{
+		std::cout << "RxIgmpMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxControlIgmp[i] << "\n";
+		msgRxControlIgmp[i] = 0;
+	}
+	std::cout << "RxIgmpMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxControlIgmpT << "\t" << msgRxControlIgmpP << "\n";
+	msgRxControlIgmpT = msgRxControlIgmpP = 0;
+}
+
+void
+TxControlIgmp (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
+	msgTxControlIgmp [mc.id] += (p->GetSize() + 20 + 8 );
+	msgTxControlIgmpT += (p->GetSize() + 20 + 8 );
+	msgTxControlIgmpP++;
+}
+
+void StatisticTxControlIgmp ()
+{
+	for (uint32_t i = 0; i < msgTxControlIgmp.size(); i++)
+	{
+		std::cout << "TxIgmpMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlIgmp[i] << "\n";
+		msgTxControlIgmp[i] = 0;
+	}
+	std::cout << "TxIgmpMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlIgmpT << "\t" << msgTxControlIgmpP << "\n";
+	msgTxControlIgmpT = msgTxControlIgmpP = 0;
 }
 
 void
@@ -376,6 +527,12 @@ ResetValues ()
 	StatisticArp ();
 	StatisticTxControlAodv ();
 	StatisticRxControlAodv ();
+	StatisticTxControlPim ();
+	StatisticRxControlPim ();
+	StatisticTxDataPim ();
+	StatisticRxDataPim ();
+	StatisticTxControlIgmp ();
+	StatisticRxControlIgmp ();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
 
@@ -394,13 +551,13 @@ int main(int argc, char **argv)
 	// Simulation seed
 	uint32_t seed = 3945244811;
 	/// Grid xmax
-	double xmax = 100;
+	double xmax = 80;
 	/// Grid ymax
-	double ymax = 100;
+	double ymax = 80;
 	/// Radius range
 	double radius = 120;
 	// Streaming rate
-	uint64_t stream = 1000000;
+	uint64_t stream = 512000;
 	// Packet Size
 	uint64_t packetsize = 1500;
 	// Period between pull
@@ -627,8 +784,20 @@ int main(int argc, char **argv)
 	    msgTxDataPull.push_back(0);
 	    msgRxDataPull.push_back(0);
 	    neighbors.push_back(0);
+	}
+	for (int k=0; k<sizeRouter; k++)
+	{
 	    msgTxControlAodv.push_back(0);
 	    msgRxControlAodv.push_back(0);
+	    msgTxControlPim.push_back(0);
+	    msgRxControlPim.push_back(0);
+	    msgTxDataPim.push_back(0);
+		msgRxDataPim.push_back(0);
+	}
+	for (int k=0; k<sizeRouter+sizeClient; k++)
+	{
+		msgTxControlIgmp.push_back(0);
+		msgRxControlIgmp.push_back(0);
 	}
 
 	NS_LOG_INFO ("Create WiFi channel");
@@ -809,7 +978,7 @@ int main(int argc, char **argv)
 
 	NS_LOG_INFO ("Topology Source");
 	Ptr<ListPositionAllocator> positionAllocS = CreateObject<ListPositionAllocator> ();
-	positionAllocS->Add(Vector(-1.0, -1.0, 0.0));// Source
+	positionAllocS->Add(Vector(-10.0, -10.0, 0.0));// Source
 	MobilityHelper mobilityS;
 	mobilityS.SetPositionAllocator(positionAllocS);
 	mobilityS.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -959,12 +1128,12 @@ int main(int argc, char **argv)
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxDataPull", MakeCallback (&TxDataPull));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/RxDataPull", MakeCallback (&RxDataPull));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/NeighborTrace", MakeCallback (&Neighbors));
-		Config::Connect ("/NodeList/*/$ns3::igmpx::IGMPXRoutingProtocol/RxIgmpxControl",MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/$ns3::igmpx::IGMPXRoutingProtocol/TxIgmpxControl",MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/TxPimData",MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/RxPimData",MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/TxPimControl", MakeCallback (&GenericPacketTrace));
-		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/RxPimControl", MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/$ns3::igmpx::IGMPXRoutingProtocol/RxIgmpxControl",MakeCallback (&TxControlIgmp));
+		Config::Connect ("/NodeList/*/$ns3::igmpx::IGMPXRoutingProtocol/TxIgmpxControl",MakeCallback (&RxControlIgmp));
+		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/TxPimData",MakeCallback (&TxDataPim));
+		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/RxPimData",MakeCallback (&RxDataPim));
+		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/TxPimControl", MakeCallback (&TxControlPim));
+		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/RxPimControl", MakeCallback (&RxControlPim));
 		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/Drop", MakeCallback (&GenericPacketTrace));
 
 		Simulator::Schedule (Seconds(1), &ResetValues);
