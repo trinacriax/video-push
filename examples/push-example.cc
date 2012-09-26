@@ -53,8 +53,8 @@ NS_LOG_COMPONENT_DEFINE ("PushExample");
 
 /// Verbose
 uint32_t verbose = 0;
-uint32_t aodvSent = 0;
-uint32_t aodvSentP = 0;
+uint32_t aodvControlSent = 0;
+uint32_t msgTxControlAodvP = 0;
 uint32_t arpSent = 0;
 uint32_t videoBroadcast = 0;
 
@@ -62,7 +62,7 @@ std::vector<uint32_t> msgVideo;
 uint32_t msgTxVideoT = 0;
 uint32_t msgTxVideoP = 0;
 
-std::vector<uint32_t> msgControl;
+std::vector<uint32_t> msgTxVideoControl;
 uint32_t msgTxControlT = 0;
 uint32_t msgControlP = 0;
 
@@ -171,14 +171,14 @@ void StatisticArp()
 void
 AodvTrafficSent (Ptr<const Packet> p)
 {
-	aodvSent += p->GetSize();
-	aodvSentP++;
+	aodvControlSent += p->GetSize();
+	msgTxControlAodvP++;
 }
 
 void StatisticAodv ()
 {
-	std::cout << "AodvMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<aodvSent<<"\t"<< aodvSentP<< "\n";
-	aodvSent = aodvSentP= 0;
+	std::cout << "AodvMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<aodvControlSent<<"\t"<< msgTxControlAodvP<< "\n";
+	aodvControlSent = msgTxControlAodvP= 0;
 }
 
 void
@@ -246,17 +246,17 @@ void
 VideoControlSent (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
-	msgControl[mc.id] += (p->GetSize() + 20 + 8 );
+	msgTxVideoControl[mc.id] += (p->GetSize() + 20 + 8 );
 	msgTxControlT += (p->GetSize() + 20 + 8 );
 	msgControlP++;
 }
 
 void StatisticControl ()
 {
-	for (uint32_t i = 0; i < msgControl.size(); i++)
+	for (uint32_t i = 0; i < msgTxVideoControl.size(); i++)
 	{
-		std::cout << "ControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgControl[i] << "\n";
-		msgControl[i] = 0;
+		std::cout << "ControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoControl[i] << "\n";
+		msgTxVideoControl[i] = 0;
 	}
 	std::cout << "ControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlT<< "\t" << msgControlP << "\n";
 	msgTxControlT = msgControlP = 0;
@@ -567,7 +567,7 @@ int main(int argc, char **argv)
 
 	for (int k=0; k<size; k++)
 	{
-	    msgControl.push_back(0);
+	    msgTxVideoControl.push_back(0);
 	    msgTxControlPull.push_back(0);
 	    msgRxControlPull.push_back(0);
 	    msgVideo.push_back(0);
