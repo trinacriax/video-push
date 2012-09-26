@@ -189,6 +189,7 @@ private:
 
 	void SetPullTimes (uint32_t chunkid);
 	Time GetPullTimes (uint32_t chunkid);
+	bool Pulled (uint32_t chunkid);
 	// Event handlers
 	void HandleReceive (Ptr<Socket>);
 	void HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const Ipv4Address &sender);
@@ -260,6 +261,7 @@ private:
 	uint32_t		m_helloActive;
 	uint32_t 		m_flag;
 	Time			m_slotStart;
+	EventId 		m_slotEvent;
 	// support for neighbors
 	double			n_selectionWeight;
 

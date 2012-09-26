@@ -755,6 +755,15 @@ VideoPushApplication::GetPullTimes (uint32_t chunkid)
 }
 
 
+bool
+VideoPushApplication::Pulled (uint32_t chunkid)
+{
+	NS_LOG_INFO("Pulled "<<chunkid);
+	return (m_pullTimes.find(chunkid)!=m_pullTimes.end());
+}
+
+
+
 void
 VideoPushApplication::SetChunkDelay (uint32_t chunkid, Time delay)
 {
@@ -798,7 +807,9 @@ void
 VideoPushApplication::SetSlotStart (Time start)
 {
 	m_slotStart = start;
-	Simulator::Schedule (m_pullSlot, &VideoPushApplication::SetSlotStart, this, (m_slotStart + m_pullSlot));
+	if (m_slotEvent.IsRunning())
+		m_slotEvent.Cancel();
+	m_slotEvent = Simulator::Schedule (m_pullSlot, &VideoPushApplication::SetSlotStart, this, (m_slotStart + m_pullSlot));
 }
 
 Time
@@ -832,6 +843,7 @@ VideoPushApplication::GetReceived ()
 void
 VideoPushApplication::SetPullMissed (uint32_t chunkid)
 {
+	NS_LOG_FUNCTION(this<<chunkid);
 	NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
 	NS_ASSERT(!chunkid||!m_chunks.ChunkDelayed(chunkid));
 	NS_ASSERT(!chunkid||!m_chunks.ChunkSkipped(chunkid));
@@ -977,9 +989,11 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	// INDUCING MISSING CHUNKS END.
 	toolate = m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED;
 	duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
-	if (sender == GetSource() && m_chunks.GetBufferSize() == 1)
+	if (sender == GetSource())//&& m_chunks.GetBufferSize() == 1 && !duplicated)
 	{
 		SetSlotStart (Simulator::Now());
+		if(m_pullCTimer.IsRunning())
+			m_pullCTimer.Cancel();
 		m_pullCTimer.Schedule();
 	}
 	if (toolate) // Chunk was pulled and received to late
@@ -999,7 +1013,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	else //chunk received correctly
 	{
 	  SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
-	  if (GetPullMissed() && GetPullMissed() == chunk.c_id)
+	  if (GetPullMissed() && GetPullMissed() == chunk.c_id && Pulled (chunk.c_id) )
 	  {
 		m_pullTimer.Cancel();
 		NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
@@ -1011,7 +1025,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		AddPullHit();
 	  }
 	}
-	SetPullMissed(!GetPullMissed() || GetPullMissed() < GetPullWBase() ? ChunkSelection(m_chunkSelection) : GetPullMissed());
+	SetPullMissed(!GetPullMissed() || GetPullMissed() < GetPullWBase() || GetPullMissed() == chunk.c_id? ChunkSelection(m_chunkSelection) : GetPullMissed());
 	ratio = GetReceived();
 	//TODO PULL WINDOW CHECK
 	if (GetPullActive() && GetPullMissed() && !m_pullTimer.IsRunning() && PullRange())
