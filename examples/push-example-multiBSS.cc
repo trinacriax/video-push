@@ -578,11 +578,11 @@ int main(int argc, char **argv)
 	// Simulation seed
 	uint32_t seed = 3945244811;
 	/// Grid xmax
-	double xmax = 80;
+	double xmax = 35;
 	/// Grid ymax
-	double ymax = 80;
+	double ymax = 35;
 	/// Radius range
-	double radius = 120;
+	double radius = 100;
 	// Streaming rate
 	uint64_t stream = 512000;
 	// Packet Size
@@ -612,15 +612,15 @@ int main(int argc, char **argv)
 	// loss exponent
 	double log_n = 2.6;
 	// Tx power start
-	double TxStart = 20.0;
+	double TxStart = 18.0;
 	// Tx power end
-	double TxEnd = 20.0;
+	double TxEnd = 18.0;
 	// Tx power levels
 	uint32_t TxLevels = 1;
 	// Tx gain
-	double TxGain = 1.0;
+	double TxGain = 0.0;
 	// Rx gain
-	double RxGain = 1.0;
+	double RxGain = 0.0;
 	// Energy detection threshold
 	double EnergyDet= -95.0;
 	// CCA mode 1
