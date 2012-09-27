@@ -1093,8 +1093,6 @@ int main(int argc, char **argv)
 	      NS_LOG_INFO("Position Client ["<<i<<"] = ("<< apos.x << ", " << apos.y<<", "<< apos.z<<")");
 	}
 
-	//Source streaming rate
-	Ipv4Address subnet ("10.255.255.255");
 	NS_LOG_INFO ("Application: create source");
 	for(uint32_t s = 0; s < source.GetN() ; s++){
 		InetSocketAddress dst = InetSocketAddress (multicastGroup, PUSH_PORT);
