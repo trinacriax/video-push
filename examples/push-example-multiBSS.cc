@@ -707,6 +707,9 @@ int main(int argc, char **argv)
 	Config::SetDefault ("ns3::VideoPushApplication::Flag", UintegerValue(flag));
 	Config::SetDefault ("ns3::VideoPushApplication::SelectionWeight", DoubleValue(selectionWeight));
 	Config::SetDefault ("ns3::VideoPushApplication::MaxPullReply", UintegerValue(pullmreply));
+//	Config::SetDefault ("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(1)));
+//	Config::SetDefault ("ns3::aodv::RoutingProtocol::RreqRateLimit", UintegerValue(20));
+//	Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableHello", BooleanValue(true));
 	Config::SetDefault ("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
 	Config::SetDefault ("ns3::Ipv4::IpForward", BooleanValue (false));
 	Config::SetDefault ("ns3::YansWifiPhy::TxGain",DoubleValue(TxGain));
