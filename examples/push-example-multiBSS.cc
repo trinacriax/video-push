@@ -65,6 +65,10 @@ std::vector<uint32_t> msgRxControlAodv;
 uint32_t msgRxControlAodvT = 0;
 uint32_t msgRxControlAodvP = 0;
 
+std::vector<uint32_t> msgTxControlRoute;
+uint32_t msgTxControlRouteT = 0;
+uint32_t msgTxControlRouteP = 0;
+
 std::vector<uint32_t> msgTxControlPim;
 uint32_t msgTxControlPimT = 0;
 uint32_t msgTxControlPimP = 0;
@@ -288,6 +292,28 @@ void StatisticTxControlPim ()
 }
 
 void
+TxRouteControl (std::string context, Ptr<const Packet> p)
+{
+	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
+	msgTxControlRoute [mc.id] += (p->GetSize() + 20 + 8 );
+	msgTxControlRouteT += (p->GetSize() + 20 + 8 );
+	msgTxControlRouteP++;
+}
+
+void StatisticTxRouteControl ()
+{
+	for (uint32_t i = 0; i < msgTxControlRoute.size(); i++)
+	{
+		std::cout << "TxRouteControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlRoute[i] << "\n";
+		msgTxControlRoute[i] = 0;
+	}
+	std::cout << "TxRouteControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlRouteT << "\t" << msgTxControlRouteP << "\n";
+	msgTxControlRouteT = msgTxControlRouteP = 0;
+}
+
+
+void
 RxDataPim (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
@@ -383,10 +409,10 @@ void StatisticVideo ()
 {
 	for (uint32_t i = 0; i < msgVideo.size(); i++)
 	{
-		std::cout << "VideoMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideo[i] << "\n";
+		std::cout << "VideoDataMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideo[i] << "\n";
 		msgVideo[i] = 0;
 	}
-	std::cout << "VideoMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoT<< "\n";
+	std::cout << "VideoDataMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoT<< "\n";
 	msgTxVideoT = 0;
 }
 
@@ -445,10 +471,10 @@ void StatisticControl ()
 {
 	for (uint32_t i = 0; i < msgTxVideoControl.size(); i++)
 	{
-		std::cout << "ControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoControl[i] << "\n";
+		std::cout << "VideoControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoControl[i] << "\n";
 		msgTxVideoControl[i] = 0;
 	}
-	std::cout << "ControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlT<< "\t" << msgControlP << "\n";
+	std::cout << "VideoControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlT<< "\t" << msgControlP << "\n";
 	msgTxControlT = msgControlP = 0;
 }
 
@@ -533,6 +559,7 @@ ResetValues ()
 	StatisticRxDataPim ();
 	StatisticTxControlIgmp ();
 	StatisticRxControlIgmp ();
+	StatisticTxRouteControl ();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
 
@@ -793,6 +820,7 @@ int main(int argc, char **argv)
 	    msgRxControlPim.push_back(0);
 	    msgTxDataPim.push_back(0);
 		msgRxDataPim.push_back(0);
+		msgTxControlRoute.push_back(0);
 	}
 	for (int k=0; k<sizeRouter+sizeClient; k++)
 	{
