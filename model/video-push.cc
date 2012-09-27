@@ -399,7 +399,7 @@ VideoPushApplication::StatisticChunk (void)
   {
 	  miss = (missed/(1.0*m_latestChunkID));
 	  rec = (received/(1.0*m_latestChunkID));
-	  dups = (duplicates==0?0:duplicates/received);
+	  dups = (duplicates==0?0:(1.0*duplicates)/received);
 	  dlate = (late==0?0: delaylate/(1.0*late));
   }
   NS_ASSERT (m_latestChunkID==received+missed);
