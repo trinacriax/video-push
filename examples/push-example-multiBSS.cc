@@ -607,6 +607,10 @@ int main(int argc, char **argv)
 	bool pullactive = false;
 	// Unicast routing protocol to use
 	uint32_t routing = 0;
+	// mobility
+	uint32_t mobility = 0;
+	// scenario
+	uint32_t scenario = 0;
 	// reference loss
 	double log_r = 52.059796126;
 	// loss exponent
@@ -661,6 +665,8 @@ int main(int argc, char **argv)
 	cmd.AddValue ("xmax", "Grid X max", xmax);
 	cmd.AddValue ("ymax", "Grid Y max", ymax);
 	cmd.AddValue ("radius", "Radius range", radius);
+	cmd.AddValue ("mobility", "Mobility: 0)no, 1)client, 2) routers", mobility);
+	cmd.AddValue ("scenario", "Scenario: 0)chain, 1)grid", scenario);
 	cmd.AddValue ("routing", "Unicast Routing Protocol (1 - AODV)", routing);
 	cmd.AddValue ("stream", "Streaming ", stream);
 	cmd.AddValue ("packetsize", "Packet Size", packetsize);
@@ -677,12 +683,10 @@ int main(int argc, char **argv)
 	cmd.AddValue ("v", "Verbose", verbose);
 	cmd.AddValue ("ff", "flag", flag);
 	cmd.Parse(argc, argv);
+
 	if (pullactive)
 		NS_ASSERT (helloactive);
 
-
-
-//	pulltime = 0.004;//((packetsize*8.0)/(54*pow10(6)));
 	SeedManager::SetRun (run);
 	SeedManager::SetSeed (seed);
 	Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2100"));
@@ -769,6 +773,8 @@ int main(int argc, char **argv)
 			<< " --xmax=" << xmax
 			<< " --ymax=" << ymax
 			<< " --radius=" << radius
+			<< " --mobility="<<mobility
+			<< " --scenario="<<scenario
 			<< " --routing=" << routing
 			<< " --stream=" << stream
 			<< " --packetsize=" << packetsize
@@ -1018,19 +1024,33 @@ int main(int argc, char **argv)
 	NS_LOG_INFO ("Topology Routers");
     MobilityHelper mobilityR;
 	mobilityR.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-	mobilityR.SetPositionAllocator ("ns3::GridPositionAllocator",
-	  "MinX", DoubleValue (0.0),
-	  "MinY", DoubleValue (0.0),
-	  "DeltaX", DoubleValue (xmax),
-	  "DeltaY", DoubleValue (ymax),
-	  "GridWidth", UintegerValue ((uint32_t)sqrt(sizeRouter)),
-	  "LayoutType", StringValue ("RowFirst"));
+	if (scenario == 0)
+	{
+		mobilityR.SetPositionAllocator ("ns3::GridPositionAllocator",
+		  "MinX", DoubleValue (0.0),
+		  "MinY", DoubleValue (0.0),
+		  "DeltaX", DoubleValue (xmax),
+		  "DeltaY", DoubleValue (ymax),
+		  "GridWidth", UintegerValue (sizeRouter),
+		  "LayoutType", StringValue ("RowFirst"));
+	}
+	else if (scenario == 1)
+	{
+		mobilityR.SetPositionAllocator ("ns3::GridPositionAllocator",
+		  "MinX", DoubleValue (0.0),
+		  "MinY", DoubleValue (0.0),
+		  "DeltaX", DoubleValue (xmax),
+		  "DeltaY", DoubleValue (ymax),
+		  "GridWidth", UintegerValue ((uint32_t)sqrt(sizeRouter)),
+		  "LayoutType", StringValue ("RowFirst"));
+	}
+
 	mobilityR.Install(routers);
 
 	// number of waypoint groupModel
 	int groupModel = sizeClient;
 	// number of points
-	int32_t groupPoints = 1;
+	int32_t groupPoints = 4;
 
 	Vector pos[sizeRouter];
 	for(uint32_t i = 0; i < sizeRouter; i++){
@@ -1040,6 +1060,7 @@ int main(int argc, char **argv)
 	}
 
 	NS_LOG_INFO ("Topology Clients");
+
 	// var
 	double ve = radius * .5;
 	Ptr<ListPositionAllocator> positionAllocG[groupModel];
@@ -1082,14 +1103,22 @@ int main(int argc, char **argv)
 				"X", DoubleValue(x),
 				"Y", DoubleValue(y),
 				"Rho", PointerValue (rhos));
-		std::cout << "Group["<< g << "] starts ("<< x <<","<< y<<","<< z
-			<<") Pause "<< vpause <<"s, Speed "<< vspeed << "ms\n";
-		mobilityG.SetMobilityModel ("ns3::RandomWaypointMobilityModel",
-		                             "Pause", PointerValue (pause),
-		                             "Speed", PointerValue (speed),
-									 "PositionAllocator", PointerValue (positionAllocG[g]));
+		if (mobility == 0)
+		{
+			mobilityG.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+		}
+		else if (mobility == 1)
+		{
+			std::cout << "Group["<< g << "] starts ("<< x <<","<< y<<","<< z
+				<<") Pause "<< vpause <<"s, Speed "<< vspeed << "ms\n";
+			mobilityG.SetMobilityModel ("ns3::RandomWaypointMobilityModel",
+										 "Pause", PointerValue (pause),
+										 "Speed", PointerValue (speed),
+										 "PositionAllocator", PointerValue (positionAllocG[g]));
+		}
 		mobilityG.Install(groups[g]);
 	}
+
 	for(uint32_t i = 0; i < sizeClient; i++){
 		  Ptr<MobilityModel> mobility = clients.Get(i)->GetObject<MobilityModel> ();
 	      Vector apos = mobility->GetPosition ();
