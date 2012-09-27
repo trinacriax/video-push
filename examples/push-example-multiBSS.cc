@@ -1160,6 +1160,7 @@ int main(int argc, char **argv)
 		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/RxPimData",MakeCallback (&RxDataPim));
 		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/TxPimControl", MakeCallback (&TxControlPim));
 		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/RxPimControl", MakeCallback (&RxControlPim));
+		Config::Connect ("/NodeList/*/$ns3::pimdm::MulticastRoutingProtocol/TxRouteControl", MakeCallback (&TxRouteControl));
 		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/Drop", MakeCallback (&GenericPacketTrace));
 
 		Simulator::Schedule (Seconds(1), &ResetValues);
