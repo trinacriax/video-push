@@ -1102,7 +1102,7 @@ int main(int argc, char **argv)
 		video.SetAttribute ("Source", Ipv4AddressValue (multicastSource));
 		video.SetAttribute ("PacketSize", UintegerValue (packetsize));
 		video.SetAttribute ("PeerType", EnumValue (SOURCE));
-		video.SetAttribute ("Local", AddressValue (ipSource.GetAddress(s)));
+		video.SetAttribute ("Local", AddressValue (ipSource.GetAddress(0)));
 		video.SetAttribute ("PeerPolicy", EnumValue (PS_RANDOM));
 		video.SetAttribute ("ChunkPolicy", EnumValue (CS_NEW_CHUNK));
 
