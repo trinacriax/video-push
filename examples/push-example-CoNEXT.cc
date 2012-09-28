@@ -170,6 +170,7 @@ void
 VideoTrafficSent (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgVideo.size());
 	msgVideo[mc.id] += p->GetSize();
 	msgTxVideoT += p->GetSize();
 }
@@ -189,6 +190,7 @@ void
 TxDataPull (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxDataPull.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgTxDataPull[mc.id] += p->GetSize();
 	msgTxDataLP += p->GetSize();
@@ -210,6 +212,7 @@ void
 RxDataPull (std::string context, Ptr<const Packet> p, const Address & address)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgRxDataPull.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgRxDataPull[mc.id] += p->GetSize();
 	msgRxDataLP += p->GetSize();
@@ -231,6 +234,7 @@ void
 VideoControlSent (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxVideoControl.size());
 	msgTxVideoControl[mc.id] += (p->GetSize() + 20 + 8 );
 	msgTxControlT += (p->GetSize() + 20 + 8 );
 	msgControlP++;
@@ -252,6 +256,7 @@ TxControlPull (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxControlPull.size());
 	msgTxControlPull[mc.id] += (p->GetSize() + 20 + 8 );
 	msgTxControlL += (p->GetSize() + 20 + 8 );
 	msgTxControlLP++;
@@ -272,6 +277,7 @@ void
 RxControlPull (std::string context, Ptr<const Packet> p, const Address & address)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgRxControlPull.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgRxControlPull[mc.id] += (p->GetSize() + 20 + 8 );
 	msgRxControlL += (p->GetSize() + 20 + 8 );
@@ -293,6 +299,7 @@ void
 Neighbors (std::string context, const uint32_t n)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <neighbors.size());
 	neighbors[mc.id] = n;
 }
 
