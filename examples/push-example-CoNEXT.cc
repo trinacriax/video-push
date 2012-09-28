@@ -367,6 +367,10 @@ int main(int argc, char **argv)
 	bool pullactive = false;
 	// Unicast routing protocol to use
 	uint32_t routing = 0;
+	// mobility
+	uint32_t mobility = 0;
+	// scenario
+	uint32_t scenario = 0;
 	// reference loss
 	double log_r = 52.059796126;
 	// loss exponent
@@ -420,6 +424,8 @@ int main(int argc, char **argv)
 	cmd.AddValue ("xmax", "Grid X max", xmax);
 	cmd.AddValue ("ymax", "Grid Y max", ymax);
 	cmd.AddValue ("radius", "Radius range", radius);
+	cmd.AddValue ("mobility", "Mobility: 0)no, 1)client, 2) routers", mobility);
+	cmd.AddValue ("scenario", "Scenario: 0)chain, 1)grid", scenario);
 	cmd.AddValue ("routing", "Unicast Routing Protocol (1 - AODV)", routing);
 	cmd.AddValue ("stream", "Streaming ", stream);
 	cmd.AddValue ("packetsize", "Packet Size", packetsize);
@@ -522,6 +528,8 @@ int main(int argc, char **argv)
 			<< " --xmax=" << xmax
 			<< " --ymax=" << ymax
 			<< " --radius=" << radius
+			<< " --mobility="<<mobility
+			<< " --scenario="<<scenario
 			<< " --routing=" << routing
 			<< " --stream=" << stream
 			<< " --packetsize=" << packetsize
@@ -668,14 +676,14 @@ int main(int argc, char **argv)
 	rhos->SetAttribute ("Min", DoubleValue (1));
 	rhos->SetAttribute ("Max", DoubleValue (radius));
 
-	MobilityHelper mobility;
-	mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-	mobility.SetPositionAllocator("ns3::RandomDiscPositionAllocator",
+	MobilityHelper mobilityC;
+	mobilityC.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+	mobilityC.SetPositionAllocator("ns3::RandomDiscPositionAllocator",
 					"X",DoubleValue(0.0),
 					"Y",DoubleValue(0.0),
 					"Rho", PointerValue (rhos)
 					);
-	mobility.Install(clients);
+	mobilityC.Install(clients);
 
 	//Source streaming rate
 	Ipv4Address subnet ("10.255.255.255");
