@@ -397,7 +397,9 @@ int main(int argc, char **argv)
 	uint32_t flag = 0;
 
 	CommandLine cmd;
-	cmd.AddValue ("size", "Number of nodes.", size);
+	cmd.AddValue ("sizeSource", "Number of nodes.", sizeSource);
+	cmd.AddValue ("sizeRouter", "Number of nodes.", sizeRouter);
+	cmd.AddValue ("sizeClient", "Number of nodes.", sizeClient);
 	cmd.AddValue ("time", "Simulation time, s.", totalTime);
 	cmd.AddValue ("run", "Run Identifier", run);
 	cmd.AddValue ("seed", "Seed ", seed);
@@ -497,7 +499,9 @@ int main(int argc, char **argv)
 		std::cout << argv[c] << " ";
 	std::cout << "\n";
 
-	std::cout << " --size=" << size
+	std::cout << " --sizeSource=" << sizeSource
+			<< " --sizeRouter=" << sizeRouter
+			<< " --sizeClient=" << sizeClient
 			<< " --time=" << totalTime
 			<< " --run=" << run
 			<< " --seed=" << seed
@@ -545,15 +549,15 @@ int main(int argc, char **argv)
 	NodeContainer fake;
 	fake.Create(1);
 	NodeContainer source;
-	source.Create (1);
-	NodeContainer nodes;
-	nodes.Create(size);
+	source.Create (sizeSource);
+	NodeContainer clients;
+	clients.Create(sizeClient);
 	NodeContainer all;
 	all.Add (source);
-	all.Add (nodes);
+	all.Add (clients);
 
 
-	for (int k=0; k<size; k++)
+	for (int k=0; k<sizeSource+sizeRouter+sizeClient; k++)
 	{
 	    msgTxVideoControl.push_back(0);
 	    msgTxControlPull.push_back(0);
@@ -563,6 +567,8 @@ int main(int argc, char **argv)
 	    msgRxDataPull.push_back(0);
 	    neighbors.push_back(0);
 	}
+
+	NS_LOG_INFO ("Create WiFi channel");
 
 	WifiHelper wifi = WifiHelper::Default();
 
@@ -595,9 +601,9 @@ int main(int argc, char **argv)
 
 	NetDeviceContainer device;
 	device.Add (wifi.Install (wifiPhy, wifiMac, source));
-	device.Add (wifi.Install (wifiPhy, wifiMac, nodes));
+	device.Add (wifi.Install (wifiPhy, wifiMac, clients));
 
-    Ptr<ListPositionAllocator> positionAllocS = CreateObject<ListPositionAllocator> ();
+	Ptr<ListPositionAllocator> positionAllocS = CreateObject<ListPositionAllocator> ();
 	positionAllocS->Add(Vector(0.0, 0.0, 0.0));// Source
 	MobilityHelper mobilityS;
 	mobilityS.SetPositionAllocator(positionAllocS);
@@ -605,11 +611,8 @@ int main(int argc, char **argv)
 	mobilityS.Install(source);
 
 	Ptr<UniformRandomVariable> rhos = CreateObject<UniformRandomVariable> ();
-
 	rhos->SetAttribute ("Min", DoubleValue (1));
 	rhos->SetAttribute ("Max", DoubleValue (radius));
-//	std::stringstream rho;
-//	rho<<"ns3::UniformRandomVariable[Min=0|Max="<<radius<<"]";
 
 	MobilityHelper mobility;
 	mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -618,11 +621,11 @@ int main(int argc, char **argv)
 					"Y",DoubleValue(0.0),
 					"Rho", PointerValue (rhos)
 					);
-	mobility.Install(nodes);
+	mobility.Install(clients);
 
 	InternetStackHelper stack;
 	stack.Install(source);
-	stack.Install(nodes);
+	stack.Install(clients);
 	Ipv4AddressHelper address;
 	address.SetBase("10.0.0.0", "255.0.0.0");
 
@@ -692,7 +695,7 @@ int main(int argc, char **argv)
 		apps.Stop (Seconds (sourceStop));
 	}
 
-	for(uint32_t n = 0; n < nodes.GetN() ; n++){
+	for(uint32_t n = 0; n < clients.GetN() ; n++){
 		InetSocketAddress dstC = InetSocketAddress (subnet, PUSH_PORT);
 		Config::SetDefault ("ns3::UdpSocket::IpMulticastTtl", UintegerValue (1));
 		VideoHelper videoC = VideoHelper ("ns3::UdpSocketFactory", dstC);
@@ -704,7 +707,7 @@ int main(int argc, char **argv)
 		videoC.SetAttribute ("PeerPolicy", EnumValue (PS_SINR));
 		videoC.SetAttribute ("ChunkPolicy", EnumValue (CS_LEAST_MISSED));
 
-		ApplicationContainer appC = videoC.Install (nodes.Get(n));
+		ApplicationContainer appC = videoC.Install (clients.Get(n));
 		appC.Start (Seconds (clientStart));
 		appC.Stop (Seconds (clientStop));
 	}
