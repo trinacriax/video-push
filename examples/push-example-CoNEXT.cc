@@ -665,6 +665,7 @@ int main(int argc, char **argv)
 		}
 	}
 
+	NS_LOG_INFO ("Topology Source");
 	Ptr<ListPositionAllocator> positionAllocS = CreateObject<ListPositionAllocator> ();
 	positionAllocS->Add(Vector(0.0, 0.0, 0.0));// Source
 	MobilityHelper mobilityS;
