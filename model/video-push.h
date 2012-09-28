@@ -166,7 +166,7 @@ private:
 	void SendPull (uint32_t chunkid, const Ipv4Address target);
 	void SendHello ();
 //	void SendHelloUnicast (Ipv4Address &neighbor);
-	ChunkVideo* ForgeChunk ();
+	ChunkVideo ForgeChunk ();
 	uint32_t ChunkSelection (ChunkPolicy policy);
 	Neighbor PeerSelection (PeerPolicy policy);
 

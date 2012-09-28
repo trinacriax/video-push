@@ -211,6 +211,7 @@ void
 RxControlAodv (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgRxControlAodv.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgRxControlAodv [mc.id] += (p->GetSize() + 20 + 8 );
 	msgRxControlAodvT += (p->GetSize() + 20 + 8 );
@@ -232,6 +233,7 @@ void
 TxControlAodv (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxControlAodv.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgTxControlAodv [mc.id] += (p->GetSize() + 20 + 8 );
 	msgTxControlAodvT += (p->GetSize() + 20 + 8 );
@@ -253,6 +255,7 @@ void
 RxControlPim (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgRxControlPim.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgRxControlPim [mc.id] += (p->GetSize() + 20 + 8 );
 	msgRxControlPimT += (p->GetSize() + 20 + 8 );
@@ -275,6 +278,7 @@ TxControlPim (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxControlPim.size());
 	msgTxControlPim [mc.id] += (p->GetSize() + 20 + 8 );
 	msgTxControlPimT += (p->GetSize() + 20 + 8 );
 	msgTxControlPimP++;
@@ -295,6 +299,7 @@ void
 TxRouteControl (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxControlRoute.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgTxControlRoute [mc.id] += (p->GetSize() + 20 + 8 );
 	msgTxControlRouteT += (p->GetSize() + 20 + 8 );
@@ -317,6 +322,7 @@ void
 RxDataPim (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgRxDataPim.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgRxDataPim [mc.id] += (p->GetSize() + 20 + 8 );
 	msgRxDataPimT += (p->GetSize() + 20 + 8 );
@@ -338,6 +344,7 @@ void
 TxDataPim (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxDataPim.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgTxDataPim [mc.id] += (p->GetSize() + 20 + 8 );
 	msgTxDataPimT += (p->GetSize() + 20 + 8 );
@@ -359,6 +366,7 @@ void
 RxControlIgmp (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgRxControlIgmp.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgRxControlIgmp [mc.id] += (p->GetSize() + 20 + 8 );
 	msgRxControlIgmpT += (p->GetSize() + 20 + 8 );
@@ -380,6 +388,7 @@ void
 TxControlIgmp (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxControlIgmp.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgTxControlIgmp [mc.id] += (p->GetSize() + 20 + 8 );
 	msgTxControlIgmpT += (p->GetSize() + 20 + 8 );
@@ -401,6 +410,7 @@ void
 VideoTrafficSent (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgVideo.size());
 	msgVideo[mc.id] += p->GetSize();
 	msgTxVideoT += p->GetSize();
 }
@@ -420,6 +430,7 @@ void
 TxDataPull (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxDataPull.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgTxDataPull[mc.id] += p->GetSize();
 	msgTxDataLP += p->GetSize();
@@ -441,6 +452,7 @@ void
 RxDataPull (std::string context, Ptr<const Packet> p, const Address & address)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgRxDataPull.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgRxDataPull[mc.id] += p->GetSize();
 	msgRxDataLP += p->GetSize();
@@ -462,6 +474,7 @@ void
 VideoControlSent (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxVideoControl.size());
 	msgTxVideoControl[mc.id] += (p->GetSize() + 20 + 8 );
 	msgTxControlT += (p->GetSize() + 20 + 8 );
 	msgControlP++;
@@ -483,6 +496,7 @@ TxControlPull (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxControlPull.size());
 	msgTxControlPull[mc.id] += (p->GetSize() + 20 + 8 );
 	msgTxControlL += (p->GetSize() + 20 + 8 );
 	msgTxControlLP++;
@@ -503,6 +517,7 @@ void
 RxControlPull (std::string context, Ptr<const Packet> p, const Address & address)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <msgRxControlPull.size());
 	NS_LOG_INFO(mc.id<<" ID="<<p->GetUid());
 	msgRxControlPull[mc.id] += (p->GetSize() + 20 + 8 );
 	msgRxControlL += (p->GetSize() + 20 + 8 );
@@ -524,6 +539,7 @@ void
 Neighbors (std::string context, const uint32_t n)
 {
 	struct mycontext mc = GetContextInfo (context);
+	NS_ASSERT(mc.id >= 0 && mc.id <neighbors.size());
 	neighbors[mc.id] = n;
 }
 
@@ -811,7 +827,7 @@ int main(int argc, char **argv)
 	all.Add (clients);
 
 
-	for (int k=0; k<sizeClient; k++)
+	for (int k=0 ; k<sizeSource+sizeRouter+sizeClient; k++)
 	{
 	    msgTxVideoControl.push_back(0);
 	    msgTxControlPull.push_back(0);
@@ -821,7 +837,7 @@ int main(int argc, char **argv)
 	    msgRxDataPull.push_back(0);
 	    neighbors.push_back(0);
 	}
-	for (int k=0; k<sizeRouter; k++)
+	for (int k=0 ; k<sizeSource+sizeRouter+sizeClient; k++)
 	{
 	    msgTxControlAodv.push_back(0);
 	    msgRxControlAodv.push_back(0);
@@ -831,7 +847,7 @@ int main(int argc, char **argv)
 		msgRxDataPim.push_back(0);
 		msgTxControlRoute.push_back(0);
 	}
-	for (int k=0; k<sizeRouter+sizeClient; k++)
+	for (int k=0 ; k<sizeSource+sizeRouter+sizeClient; k++)
 	{
 		msgTxControlIgmp.push_back(0);
 		msgRxControlIgmp.push_back(0);

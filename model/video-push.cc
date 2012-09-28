@@ -1322,13 +1322,14 @@ VideoPushApplication::PeerSelection (PeerPolicy policy)
 	return m_neighbors.SelectNeighbor(policy);
 }
 
-ChunkVideo*
+ChunkVideo
 VideoPushApplication::ForgeChunk ()
 {
 	uint64_t tstamp = Simulator::Now().ToInteger(Time::US);
 	if (m_chunks.GetBufferSize() == 0 )
 		m_latestChunkID = 0;
-	return new ChunkVideo (++m_latestChunkID, tstamp, m_pktSize, 0);
+	ChunkVideo cv (++m_latestChunkID, tstamp, m_pktSize, 0);
+	return cv;
 }
 
 uint32_t
@@ -1338,15 +1339,15 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 	switch (policy){
 		case CS_NEW_CHUNK:
 		{
-			ChunkVideo *cv = ForgeChunk();
-			chunkid = cv->c_id;
+			ChunkVideo cv = ForgeChunk();
+			chunkid = cv.c_id;
 			SetPullWBase (chunkid<GetPullWindow()?1:chunkid-GetPullWindow());
-			if(!m_chunks.AddChunk(*cv, CHUNK_RECEIVED_PUSH))
+			if(!m_chunks.AddChunk(cv, CHUNK_RECEIVED_PUSH))
 			{
-				AddDuplicate(cv->c_id);
+				AddDuplicate(cv.c_id);
 				NS_ASSERT (true);
 			}
-			NS_ASSERT (m_duplicates.find(cv->c_id) == m_duplicates.end());
+			NS_ASSERT (m_duplicates.find(cv.c_id) == m_duplicates.end());
 			break;
 		}
 		case CS_LATEST_MISSED:
