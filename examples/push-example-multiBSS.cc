@@ -632,9 +632,9 @@ int main(int argc, char **argv)
 	// loss exponent
 	double log_n = 2.6;
 	// Tx power start
-	double TxStart = 18.0;
+	double TxStart = 20.0;
 	// Tx power end
-	double TxEnd = 18.0;
+	double TxEnd = 20.0;
 	// Tx power levels
 	uint32_t TxLevels = 1;
 	// Tx gain
