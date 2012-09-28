@@ -178,10 +178,10 @@ void StatisticVideo ()
 {
 	for (uint32_t i = 0; i < msgVideo.size(); i++)
 	{
-		std::cout << "VideoMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideo[i] << "\n";
+		std::cout << "VideoDataMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideo[i] << "\n";
 		msgVideo[i] = 0;
 	}
-	std::cout << "VideoMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoT<< "\n";
+	std::cout << "VideoDataMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoT<< "\n";
 	msgTxVideoT = 0;
 }
 
@@ -240,10 +240,10 @@ void StatisticControl ()
 {
 	for (uint32_t i = 0; i < msgTxVideoControl.size(); i++)
 	{
-		std::cout << "ControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoControl[i] << "\n";
+		std::cout << "VideoControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoControl[i] << "\n";
 		msgTxVideoControl[i] = 0;
 	}
-	std::cout << "ControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlT<< "\t" << msgControlP << "\n";
+	std::cout << "VideoControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlT<< "\t" << msgControlP << "\n";
 	msgTxControlT = msgControlP = 0;
 }
 
