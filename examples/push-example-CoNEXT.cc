@@ -53,8 +53,6 @@ NS_LOG_COMPONENT_DEFINE ("PushExample");
 
 /// Verbose
 uint32_t verbose = 0;
-uint32_t aodvControlSent = 0;
-uint32_t msgTxControlAodvP = 0;
 uint32_t arpSent = 0;
 uint32_t videoBroadcast = 0;
 
@@ -166,19 +164,6 @@ void StatisticArp()
 {
 	std::cout << "ArpMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<arpTx<<"\t"<< arpTxP<< "\n";
 	arpTx = arpTxP = 0;
-}
-
-void
-AodvTrafficSent (Ptr<const Packet> p)
-{
-	aodvControlSent += p->GetSize();
-	msgTxControlAodvP++;
-}
-
-void StatisticAodv ()
-{
-	std::cout << "AodvMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<aodvControlSent<<"\t"<< msgTxControlAodvP<< "\n";
-	aodvControlSent = msgTxControlAodvP= 0;
 }
 
 void
@@ -335,14 +320,17 @@ ResetValues ()
 	StatisticPhy ();
 	StatisticMac ();
 	StatisticArp ();
-	StatisticAodv ();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
 
 int main(int argc, char **argv)
 {
-	/// Number of nodes
-	uint32_t size = 5;
+	/// Number of source nodes
+	uint32_t sizeSource = 1;
+	/// Number of router nodes
+	uint32_t sizeRouter = 0;
+	/// Number of client nodes
+	uint32_t sizeClient = 5;
 	/// Simulation time in seconds
 	double totalTime = 160;
 	// Simulation run
@@ -773,7 +761,6 @@ int main(int argc, char **argv)
 //		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop",	MakeCallback (&GenericPacketTrace));
 		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/TxArp", MakeCallback (&GenericPacketTrace));
 
-		Config::ConnectWithoutContext ("/NodeList/*/$ns3::aodv::RoutingProtocol/ControlMessageTrafficSent", MakeCallback (&AodvTrafficSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxData", MakeCallback (&VideoTrafficSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxControl", MakeCallback (&VideoControlSent));
 		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxPull", MakeCallback (&TxControlPull));
