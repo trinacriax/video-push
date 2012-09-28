@@ -11,3 +11,5 @@ def build(bld):
     obj.source = 'push-example-CoNEXT.cc'
     obj = bld.create_ns3_program('push-example-multiBSS', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'applications', 'flow-monitor', 'pimdm', 'igmpx', 'visualizer'])
     obj.source = 'push-example-multiBSS.cc'
+    obj = bld.create_ns3_program('push-example-singleBSS', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'applications', 'flow-monitor', 'pimdm', 'igmpx'])
+    obj.source = 'push-example-singleBSS.cc'    
