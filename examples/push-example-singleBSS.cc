@@ -695,62 +695,79 @@ int main(int argc, char **argv)
 
 	NS_LOG_INFO ("Topology Clients");
 
-	// var
-	double ve = radius;
-	Ptr<ListPositionAllocator> positionAllocG[groupModel];
-	for (int g = 0; g < groupModel; g++){
-		positionAllocG[g] = CreateObject<ListPositionAllocator> ();
-		std::cout << "Group["<<g<<"] POI: ";
-		for (int k = 0; k < groupPoints; k++){
-			double x, y, z;
-			x = y = z = 0;
+	if (mobility == 0)
+	{
+		Ptr<UniformRandomVariable> rhos = CreateObject<UniformRandomVariable> ();
+		rhos->SetAttribute ("Min", DoubleValue (1));
+		rhos->SetAttribute ("Max", DoubleValue (radius));
+		MobilityHelper mobilityC;
+		mobilityC.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+		mobilityC.SetPositionAllocator("ns3::RandomDiscPositionAllocator",
+						"X",DoubleValue(0.0),
+						"Y",DoubleValue(0.0),
+						"Rho", PointerValue (rhos)
+						);
+		mobilityC.Install(clients);
+	}
+	else
+	{
+		// var
+		double ve = radius;
+		Ptr<ListPositionAllocator> positionAllocG[groupModel];
+		for (int g = 0; g < groupModel; g++){
+			positionAllocG[g] = CreateObject<ListPositionAllocator> ();
+			std::cout << "Group["<<g<<"] POI: ";
+			for (int k = 0; k < groupPoints; k++){
+				double x, y, z;
+				x = y = z = 0;
+				int d = UniformVariable().GetInteger(0,sizeSource-1) % sizeSource;
+				x = UniformVariable().GetValue((pos[d].x - ve), (pos[d].x + ve));
+				y = UniformVariable().GetValue((pos[d].y - ve), (pos[d].y + ve));
+				positionAllocG[g]->Add(Vector(x, y, z));
+				std::cout <<"("<<x<<","<<y<<","<<z<<") ";
+			}
+			std::cout <<"\n";
+		}
+
+		NodeContainer groups[groupModel];
+		for (uint32_t c = 0; c < clients.GetN(); c++) {
+			groups[c%groupModel].Add(clients.Get(c));
+		}
+
+		double vpause = 30, vspeed = 1.4;
+		Ptr<UniformRandomVariable> rhos = CreateObject<UniformRandomVariable> ();
+		rhos->SetAttribute ("Min", DoubleValue (1));
+		rhos->SetAttribute ("Max", DoubleValue (radius));
+		Ptr<ConstantRandomVariable> pause = CreateObject<ConstantRandomVariable> ();
+		pause->SetAttribute("Constant",DoubleValue(vpause));
+		Ptr<ConstantRandomVariable> speed = CreateObject<ConstantRandomVariable> ();
+		speed->SetAttribute("Constant",DoubleValue(vspeed));
+		for (int g = 0; g < groupModel ; g++) {
+			MobilityHelper mobilityG;
 			int d = UniformVariable().GetInteger(0,sizeSource-1) % sizeSource;
-			x = UniformVariable().GetValue((pos[d].x - ve), (pos[d].x + ve));
-			y = UniformVariable().GetValue((pos[d].y - ve), (pos[d].y + ve));
-			positionAllocG[g]->Add(Vector(x, y, z));
-			std::cout <<"("<<x<<","<<y<<","<<z<<") ";
+			double x, y, z;
+			x = pos[d].x;
+			y = pos[d].y;
+			z = 0;
+			mobilityG.SetPositionAllocator("ns3::RandomDiscPositionAllocator",
+					"X", DoubleValue(x),
+					"Y", DoubleValue(y),
+					"Rho", PointerValue (rhos));
+			if (mobility == 0)
+			{
+				mobilityG.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+			}
+			else if (mobility == 1)
+			{
+				std::cout << "Group["<< g << "] starts ("<< x <<","<< y<<","<< z
+					<<") Pause "<< vpause <<"s, Speed "<< vspeed << "ms\n";
+				mobilityG.SetMobilityModel ("ns3::RandomWaypointMobilityModel",
+											 "Pause", PointerValue (pause),
+											 "Speed", PointerValue (speed),
+											 "PositionAllocator", PointerValue (positionAllocG[g]));
+			}
+			mobilityG.Install(groups[g]);
 		}
-		std::cout <<"\n";
-	}
-
-	NodeContainer groups[groupModel];
-	for (uint32_t c = 0; c < clients.GetN(); c++) {
-		groups[c%groupModel].Add(clients.Get(c));
-	}
-
-	double vpause = 30, vspeed = 1.4;
-	Ptr<UniformRandomVariable> rhos = CreateObject<UniformRandomVariable> ();
-	rhos->SetAttribute ("Min", DoubleValue (1));
-	rhos->SetAttribute ("Max", DoubleValue (radius));
-	Ptr<ConstantRandomVariable> pause = CreateObject<ConstantRandomVariable> ();
-	pause->SetAttribute("Constant",DoubleValue(vpause));
-	Ptr<ConstantRandomVariable> speed = CreateObject<ConstantRandomVariable> ();
-	speed->SetAttribute("Constant",DoubleValue(vspeed));
-	for (int g = 0; g < groupModel ; g++) {
-		MobilityHelper mobilityG;
-		int d = UniformVariable().GetInteger(0,sizeSource-1) % sizeSource;
-		double x, y, z;
-		x = pos[d].x;
-		y = pos[d].y;
-		z = 0;
-		mobilityG.SetPositionAllocator("ns3::RandomDiscPositionAllocator",
-				"X", DoubleValue(x),
-				"Y", DoubleValue(y),
-				"Rho", PointerValue (rhos));
-		if (mobility == 0)
-		{
-			mobilityG.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-		}
-		else if (mobility == 1)
-		{
-			std::cout << "Group["<< g << "] starts ("<< x <<","<< y<<","<< z
-				<<") Pause "<< vpause <<"s, Speed "<< vspeed << "ms\n";
-			mobilityG.SetMobilityModel ("ns3::RandomWaypointMobilityModel",
-										 "Pause", PointerValue (pause),
-										 "Speed", PointerValue (speed),
-										 "PositionAllocator", PointerValue (positionAllocG[g]));
-		}
-		mobilityG.Install(groups[g]);
 	}
 
 	for(uint32_t i = 0; i < sizeClient; i++){
