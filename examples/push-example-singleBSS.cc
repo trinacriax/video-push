@@ -614,9 +614,9 @@ int main(int argc, char **argv)
 	NqosWifiMacHelper wifiMac = NqosWifiMacHelper::Default();
 	wifiMac.SetType("ns3::AdhocWifiMac");
 
-	NetDeviceContainer NetDev;
-	NetDev.Add(wifi.Install(wifiPhy, wifiMac, source));
-	NetDev.Add(wifi.Install(wifiPhy, wifiMac, clients));
+	NetDeviceContainer device;
+	device.Add (wifi.Install (wifiPhy, wifiMac, source));
+	device.Add (wifi.Install (wifiPhy, wifiMac, clients));
 
 	InternetStackHelper stack;
 	stack.Install(source);
@@ -625,7 +625,7 @@ int main(int argc, char **argv)
 	address.SetBase("10.0.0.0", "255.0.0.0");
 
 	Ipv4InterfaceContainer interfaces;
-	interfaces = address.Assign(NetDev);
+	interfaces = address.Assign(device);
 
 	NS_LOG_INFO ("Statically populate ARP cache!\n");
 	Ptr<ArpCache> arp;
