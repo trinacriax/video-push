@@ -434,10 +434,10 @@ int main(int argc, char **argv)
 	cmd.AddValue ("v", "Verbose", verbose);
 	cmd.AddValue ("ff", "flag", flag);
 	cmd.Parse(argc, argv);
+
 	if (pullactive)
 		NS_ASSERT (helloactive);
 
-//	pulltime = 0.004;//((packetsize*8.0)/(54*pow10(6)));
 	SeedManager::SetRun (run);
 	SeedManager::SetSeed (seed);
 	Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2100"));
@@ -621,43 +621,6 @@ int main(int argc, char **argv)
 	mobility.Install(nodes);
 
 	InternetStackHelper stack;
-//	MbnAodvHelper mbnaodv;
-	switch (routing)
-	{
-		case 1:
-		{
-			Config::SetDefault ("ns3::aodv::RoutingProtocol::Enable1Hop", BooleanValue (true));
-			AodvHelper aodv;
-			uint32_t aodvHello = 2, aodvHelloLoss = 2;
-//			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableHello", BooleanValue(false));
-//			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
-//			Config::SetDefault ("ns3::aodv::RoutingProtocol::RreqRetries", UintegerValue(2));
-//			Config::SetDefault ("ns3::aodv::RoutingProtocol::NodeTraversalTime", TimeValue (MicroSeconds(40)));
-//			Config::SetDefault ("ns3::aodv::RoutingProtocol::ActiveRouteTimeout", TimeValue (Seconds(aodvHello*(aodvHelloLoss+1))));
-//			Config::SetDefault ("ns3::aodv::RoutingProtocol::AllowedHelloLoss", UintegerValue (aodvHelloLoss));
-//			Config::SetDefault ("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(aodvHello)));
-			stack.SetRoutingHelper(aodv);
-			break;
-		}
-//		case 2:
-//		{
-////			Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableHello", BooleanValue(false));
-//			Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableBroadcast", BooleanValue(false));
-//			/// Short Timer
-//			uint32_t short_t = 2, long_t = 6, rule1 = 1, rule2 = 1;
-//			Config::SetDefault ("ns3::mbn::RoutingProtocol::HelloInterval", TimeValue(Seconds(short_t)));
-//			Config::SetDefault ("ns3::mbn::RoutingProtocol::ShortInterval", TimeValue(Seconds(short_t)));
-//			Config::SetDefault ("ns3::mbn::RoutingProtocol::LongInterval", TimeValue(Seconds(long_t)));
-//			Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule1", BooleanValue(rule1==1));
-//			Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule2", BooleanValue(rule2==1));
-//			Config::SetDefault ("ns3::mbn::RoutingProtocol::localWeightFunction", EnumValue(mbn::W_NODE_DEGREE));
-//			Config::SetDefault ("ns3::mbn::RoutingProtocol::AllowedHelloLoss", UintegerValue(1));
-//			stack.SetRoutingHelper(mbnaodv);
-//			break;
-//		}
-		default:
-			break;
-	}
 	stack.Install(source);
 	stack.Install(nodes);
 	Ipv4AddressHelper address;
@@ -666,7 +629,7 @@ int main(int argc, char **argv)
 	Ipv4InterfaceContainer interfaces;
 	interfaces = address.Assign(device);
 
-//	NS_LOG_INFO ("Statically populate ARP cache!\n");
+	NS_LOG_INFO ("Statically populate ARP cache!\n");
 	Ptr<ArpCache> arp;
 	for (uint32_t n = 0;  n < all.GetN() ; n++)
 	{
@@ -699,7 +662,7 @@ int main(int argc, char **argv)
 		}
 	}
 	for (uint32_t n = 0;  n < all.GetN() ; n++){
-		NS_LOG_INFO ("Populate node");
+		NS_LOG_INFO ("Populate node "<<all.Get(n)->GetId());
 		Ptr<Ipv4L3Protocol> ip = all.Get(n)->GetObject<Ipv4L3Protocol> ();
 		NS_ASSERT (ip !=0);
 		ObjectVectorValue interfaces;
@@ -712,7 +675,7 @@ int main(int argc, char **argv)
 	}
 	//Source streaming rate
 	Ipv4Address subnet ("10.255.255.255");
-	NS_LOG_INFO ("Create Source");
+	NS_LOG_INFO ("Application: create source");
 	for(uint32_t s = 0; s < source.GetN() ; s++){
 		InetSocketAddress dst = InetSocketAddress (subnet, PUSH_PORT);
 		Config::SetDefault ("ns3::UdpSocket::IpMulticastTtl", UintegerValue (1));
