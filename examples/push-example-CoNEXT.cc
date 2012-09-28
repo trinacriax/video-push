@@ -603,26 +603,6 @@ int main(int argc, char **argv)
 	device.Add (wifi.Install (wifiPhy, wifiMac, source));
 	device.Add (wifi.Install (wifiPhy, wifiMac, clients));
 
-	Ptr<ListPositionAllocator> positionAllocS = CreateObject<ListPositionAllocator> ();
-	positionAllocS->Add(Vector(0.0, 0.0, 0.0));// Source
-	MobilityHelper mobilityS;
-	mobilityS.SetPositionAllocator(positionAllocS);
-	mobilityS.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-	mobilityS.Install(source);
-
-	Ptr<UniformRandomVariable> rhos = CreateObject<UniformRandomVariable> ();
-	rhos->SetAttribute ("Min", DoubleValue (1));
-	rhos->SetAttribute ("Max", DoubleValue (radius));
-
-	MobilityHelper mobility;
-	mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-	mobility.SetPositionAllocator("ns3::RandomDiscPositionAllocator",
-					"X",DoubleValue(0.0),
-					"Y",DoubleValue(0.0),
-					"Rho", PointerValue (rhos)
-					);
-	mobility.Install(clients);
-
 	InternetStackHelper stack;
 	stack.Install(source);
 	stack.Install(clients);
@@ -676,6 +656,27 @@ int main(int argc, char **argv)
 			ipIface->SetAttribute ("ArpCache", PointerValue (arp));
 		}
 	}
+
+	Ptr<ListPositionAllocator> positionAllocS = CreateObject<ListPositionAllocator> ();
+	positionAllocS->Add(Vector(0.0, 0.0, 0.0));// Source
+	MobilityHelper mobilityS;
+	mobilityS.SetPositionAllocator(positionAllocS);
+	mobilityS.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+	mobilityS.Install(source);
+
+	Ptr<UniformRandomVariable> rhos = CreateObject<UniformRandomVariable> ();
+	rhos->SetAttribute ("Min", DoubleValue (1));
+	rhos->SetAttribute ("Max", DoubleValue (radius));
+
+	MobilityHelper mobility;
+	mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+	mobility.SetPositionAllocator("ns3::RandomDiscPositionAllocator",
+					"X",DoubleValue(0.0),
+					"Y",DoubleValue(0.0),
+					"Rho", PointerValue (rhos)
+					);
+	mobility.Install(clients);
+
 	//Source streaming rate
 	Ipv4Address subnet ("10.255.255.255");
 	NS_LOG_INFO ("Application: create source");
