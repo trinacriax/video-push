@@ -324,7 +324,7 @@ VideoPushApplication::StatisticChunk (void)
 		  }
 		  default:
 		  {
-			  NS_ASSERT (false);
+//			  NS_ASSERT (false); ///TODO possibly measure delayed chunks
 			  break;
 		  }
 	  }
