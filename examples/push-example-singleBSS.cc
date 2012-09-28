@@ -337,7 +337,7 @@ int main(int argc, char **argv)
 	/// Number of router nodes
 	uint32_t sizeRouter = 0;
 	/// Number of client nodes
-	uint32_t sizeClient = 4;
+	uint32_t sizeClient = 5;
 	/// Simulation time in seconds
 	double totalTime = 160;
 	// Simulation run
@@ -572,7 +572,7 @@ int main(int argc, char **argv)
 	all.Add (clients);
 
 
-	for (int k=0 ; k<sizeSource+sizeRouter+sizeClient; k++)
+	for (int k=0; k<sizeSource+sizeRouter+sizeClient; k++)
 	{
 	    msgTxVideoControl.push_back(0);
 	    msgTxControlPull.push_back(0);
@@ -582,7 +582,6 @@ int main(int argc, char **argv)
 	    msgRxDataPull.push_back(0);
 	    neighbors.push_back(0);
 	}
-
 
 	NS_LOG_INFO ("Create WiFi channel");
 
