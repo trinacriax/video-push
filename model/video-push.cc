@@ -769,6 +769,19 @@ VideoPushApplication::GetPullTimes (uint32_t chunkid)
 	return p;
 }
 
+Time
+VideoPushApplication::RemPullTimes (uint32_t chunkid)
+{
+	NS_LOG_INFO("REMLOADING "<<chunkid);
+	Time p = Seconds (0);
+	if (m_pullTimes.find(chunkid)!=m_pullTimes.end())
+	{
+		p = m_pullTimes.find(chunkid)->second;
+		m_pullTimes.erase(chunkid);
+	}
+	return p;
+}
+
 
 bool
 VideoPushApplication::Pulled (uint32_t chunkid)
