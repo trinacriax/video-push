@@ -396,6 +396,8 @@ int main(int argc, char **argv)
 	double EnergyDet= -95.0;
 	// CCA mode 1
 	double CCAMode1 = -62.0;
+	// Broadcast Rate
+	uint32_t broadrate = 18;
 
 	double nak_d1 = 80;
 	double nak_d2 = 200;
@@ -428,6 +430,7 @@ int main(int argc, char **argv)
 	cmd.AddValue ("RxGain", "Receiver power gain dBm.", RxGain);
 	cmd.AddValue ("EnergyDet", "Energy detection threshold dBm.", EnergyDet);
 	cmd.AddValue ("CCAMode1", "CCA mode 1 threshold dBm.", CCAMode1);
+	cmd.AddValue ("broadRate", "Broadcast Rate [6 9 12 18 24]mbps", broadrate);
 	cmd.AddValue ("xmax", "Grid X max", xmax);
 	cmd.AddValue ("ymax", "Grid Y max", ymax);
 	cmd.AddValue ("radius", "Radius range", radius);
@@ -489,7 +492,7 @@ int main(int argc, char **argv)
 	Config::SetDefault ("ns3::YansWifiPhy::CcaMode1Threshold",DoubleValue(CCAMode1));///17.3.10.5 CCA sensitivity
 
 	if(verbose==1){
-		LogComponentEnable("PushExample", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
+		LogComponentEnable("PushExampleSingleBSS", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 		LogComponentEnable("VideoPushApplication", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 //		LogComponentEnable("ChunkBuffer", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
 //		LogComponentEnable("AodvRoutingTable", LogLevel (LOG_LEVEL_ALL | LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_TIME | LOG_PREFIX_NODE| LOG_PREFIX_FUNC));
@@ -561,8 +564,8 @@ int main(int argc, char **argv)
 	/// Client stop
 	double clientStop = totalTime - 10;
 
-	NodeContainer fake;
-	fake.Create(1);
+//	NodeContainer fake;
+//	fake.Create(1);
 	NodeContainer source;
 	source.Create (sizeSource);
 	NodeContainer clients;
@@ -594,11 +597,15 @@ int main(int argc, char **argv)
 //			,"NonUnicastMode", StringValue ("DsssRate5_5Mbps")
 //			);
 
+	NS_ASSERT(broadrate==6||broadrate==9||broadrate==12||broadrate==18||broadrate==24);
+	std::stringstream sss;
+	sss<< "ErpOfdmRate" << broadrate << "Mbps";
+
 	wifi.SetStandard(WIFI_PHY_STANDARD_80211g);
 	wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager"
 			,"DataMode", StringValue("ErpOfdmRate54Mbps")
-			,"ControlMode", StringValue("ErpOfdmRate18Mbps")
-			,"NonUnicastMode", StringValue("ErpOfdmRate18Mbps")
+			,"ControlMode", StringValue(sss.str())
+			,"NonUnicastMode", StringValue(sss.str())
 			);
 
 //	wifi.SetRemoteStationManager ("ns3::AarfWifiManager"
