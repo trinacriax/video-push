@@ -188,6 +188,7 @@ private:
 	uint32_t GetPullMissed () const;
 
 	void SetPullTimes (uint32_t chunkid);
+	void SetPullTimes (uint32_t chunkid, Time time);
 	Time GetPullTimes (uint32_t chunkid);
 	bool Pulled (uint32_t chunkid);
 	// Event handlers

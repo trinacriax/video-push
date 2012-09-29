@@ -746,6 +746,17 @@ VideoPushApplication::SetPullTimes (uint32_t chunkid)
 	}
 }
 
+void
+VideoPushApplication::SetPullTimes (uint32_t chunkid, Time time)
+{
+	NS_LOG_INFO("LOADING "<<chunkid);
+	if (m_pullTimes.find(chunkid)==m_pullTimes.end())
+	{
+		std::pair<uint32_t,Time> pair (chunkid, Seconds (time));
+		m_pullTimes.insert(pair);
+	}
+}
+
 Time
 VideoPushApplication::GetPullTimes (uint32_t chunkid)
 {
