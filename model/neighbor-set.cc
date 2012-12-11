@@ -414,6 +414,12 @@ NeighborsSet::SelectNeighbor (PeerPolicy policy)
 }
 
 void
+NeighborsSet::Clear ()
+{
+	m_neighbor_set.clear();
+}
+
+void
 NeighborsSet::Purge ()
 {
 //	std::map<Neighbor, NeighborData> newset;

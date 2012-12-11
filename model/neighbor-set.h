@@ -107,6 +107,7 @@ public:
 	bool DelNeighbor (Neighbor neighbor);
 	bool IsNeighbor (const Neighbor neighbor);
 	size_t GetSize();
+	void Clear ();
 	void Purge ();
 	void SetExpire (Time time);
 	Time GetExpire () const;
