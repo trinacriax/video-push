@@ -286,6 +286,8 @@ private:
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxControlPullTrace;
 	TracedCallback<Ptr<const Packet> > m_txDataPullTrace;
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxDataPullTrace;
+	TracedCallback<double> m_pullStartTrace;
+	TracedCallback<double> m_pullStopTrace;
 	TracedCallback<uint32_t> m_neighborsTrace;
 };
 }

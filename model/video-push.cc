@@ -139,6 +139,10 @@ VideoPushApplication::GetTypeId (void)
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxDataPullTrace))
 	.AddTraceSource ("VideoNeighborTrace", "Neighbors",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_neighborsTrace))
+	.AddTraceSource ("VideoPullStart", "Pull start",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_pullStartTrace))
+	.AddTraceSource ("VideoPullStop", "Pull stop",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_pullStopTrace))
 	.AddAttribute ("PullTime", "Time between two consecutive pulls.",
 				   TimeValue (MilliSeconds (50)),
 				   MakeTimeAccessor (&VideoPushApplication::SetPullTime,
