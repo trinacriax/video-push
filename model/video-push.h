@@ -235,7 +235,6 @@ private:
 
 	/// STREAMING AND CHUNKS
 	uint32_t	 	m_pullMissed;		// missed chunk just pulled
-	uint32_t		m_pullCReply;
 	uint32_t		m_pullMReply;
 
 	Time 			m_helloNeighborsTime;
@@ -258,6 +257,7 @@ private:
 	bool			m_pullActive;			// Activate or not the pull mechanism
 	EventId         m_pullEvent;			// Eventid of pending "pull tx " event
 	Time			m_pullSlot;				// Pull slot duration for pull operations
+	uint32_t		m_pullReplyCurrent;		// Current number of pull replies in the current slot
 	Timer			m_pullReplyTimer;		// Timer to reset the pull replies for the next slot
 	Time 			m_pullTimeout;			// Pull timeout time
 	Timer 			m_pullTimer;			// Pull timer to pull chunks

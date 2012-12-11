@@ -629,19 +629,19 @@ VideoPushApplication::GetPullActive () const
 uint32_t
 VideoPushApplication::GetPullCReply () const
 {
-	return m_pullCReply;
+	return m_pullReplyCurrent;
 }
 
 void
 VideoPushApplication::SetPullCReply (uint32_t value)
 {
-	m_pullCReply = value;
+	m_pullReplyCurrent = value;
 }
 
 void
 VideoPushApplication::ResetPullCReply ()
 {
-	m_pullCReply = 0;
+	m_pullReplyCurrent = 0;
 	if(m_pullReplyTimer.IsRunning())
 		m_pullReplyTimer.Cancel();
 	m_pullReplyTimer.Schedule();
