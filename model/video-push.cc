@@ -220,7 +220,7 @@ VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
 		m_connected(false), m_ipv4(0), m_socket(0),
 		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY),
-		m_pullRequest (0), m_pullHit (0), m_pullReceived (0), m_pullReply (0), m_pullCTimer (Timer::CANCEL_ON_DESTROY)
+		m_statisticsPullRequest (0), m_statisticsPullHit (0), m_statisticsPullReceived (0), m_statisticsPullReply (0), m_pullCTimer (Timer::CANCEL_ON_DESTROY),
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
