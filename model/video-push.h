@@ -186,8 +186,8 @@ private:
 	Time GetSlotEnd () const;
 	double PullSlot ();
 
-	void SetPullMissed (uint32_t chunkid);
-	uint32_t GetPullMissed () const;
+	void SetChunkMissed (uint32_t chunkid);
+	uint32_t GetChunkMissed () const;
 
 	void SetPullTimes (uint32_t chunkid);
 	void SetPullTimes (uint32_t chunkid, Time time);
