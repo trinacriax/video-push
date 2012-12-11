@@ -650,13 +650,13 @@ VideoPushApplication::ResetPullCReply ()
 uint32_t
 VideoPushApplication::GetPullMReply () const
 {
-	return m_pullMReply;
+	return m_pullReplyMax;
 }
 
 void
 VideoPushApplication::SetPullMReply (uint32_t value)
 {
-	m_pullMReply = value;
+	m_pullReplyMax = value;
 }
 
 void
