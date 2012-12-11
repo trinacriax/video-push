@@ -734,25 +734,25 @@ VideoPushApplication::GetPullWBase ()
 void
 VideoPushApplication::SetPullRatioMin (double ratio)
 {
-	m_pullRatioMin = ratio;
+	m_chunkRatioMin = ratio;
 }
 
 double
 VideoPushApplication::GetPullRatioMin () const
 {
-	return m_pullRatioMin;
+	return m_chunkRatioMin;
 }
 
 void
 VideoPushApplication::SetPullRatioMax (double ratio)
 {
-	m_pullRatioMax = ratio;
+	m_chunkRatioMax = ratio;
 }
 
 double
 VideoPushApplication::GetPullRatioMax () const
 {
-	return m_pullRatioMax;
+	return m_chunkRatioMax;
 }
 
 bool
