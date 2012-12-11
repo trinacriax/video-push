@@ -238,7 +238,6 @@ private:
 
 	Time 			m_helloNeighborsTime;
 	Timer 			m_helloNeighborsTimer;
-	uint32_t 		m_flag;
 	Time			m_slotStart;
 	EventId 		m_slotEvent;
 	// support for neighbors
