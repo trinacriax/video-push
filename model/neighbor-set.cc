@@ -327,11 +327,6 @@ NeighborsSet::SelectPeer (PeerPolicy policy)
 		return nt;
 	}
 	NS_ASSERT (GetSize() > 0);
-//	uint32_t index = UniformVariable().GetInteger(0, GetSize()-1);
-//	std::map<Neighbor, NeighborData>::iterator iter = m_neighbor_set.begin();
-//	for (; iter != m_neighbor_set.end() && index>0; iter++, index--);
-//
-//	return iter->first;
 	size_t msize = m_neighbor_set.size();
 	if (m_neighborProbVector.empty() && m_neighborProbVector.size() != msize)
 	{
@@ -362,15 +357,9 @@ NeighborsSet::SelectPeer (PeerPolicy policy)
 		id++;
 	}
 	if (nt.GetAddress() == Ipv4Address() && id >= nsize) {
-	//           if (debug >= 10) {
-	//               System.out.println("Out of Candidate ID range: " + id + " -- " + candidate);
-	//           }
 	   id = 0;
 	   nt = m_neighborProbVector[id].first;
 	}
-	//       if (debug >= 10) {
-	//           System.out.println("Return Candidate ID " + id + " -- " + candidate);
-	//       }
 	return nt;
 }
 
@@ -427,7 +416,7 @@ NeighborsSet::Purge ()
 		iter != m_neighbor_set.end();)
 		{
 //			std::cout << "Node "<< iter->first.n_address << " Last "<< iter->second.GetLastContact() << "\n";
-			if (Simulator::Now() - iter->second.GetLastContact() > m_expire)
+			if (Simulator::Now() - iter->second.GetLastContact() > GetExpire())
 			{
 //				std::map<Neighbor, NeighborData>::iterator iter2 = iter;
 				m_neighbor_set.erase (iter++);
