@@ -275,6 +275,7 @@ private:
 	Time			m_slotStart;
 	EventId 		m_slotEvent;
 	// support for neighbors
+	std::map<uint32_t, uint32_t> m_pullRetriesCurrent;	// Count pull attempts to recover a chunk
 	std::map<uint32_t, uint32_t> m_pullPending;	// Collect pending pulls
 	/// STATISTICS ON PULL
 	uint32_t	 	m_statisticsPullRequest;	// statistics on pull request sent (SENDER)
@@ -287,7 +288,6 @@ private:
 	ChunkBuffer		m_chunks;			// current chunk buffer
 	std::map<uint32_t, uint32_t> m_duplicates; // count chunks duplicated
 	std::map<uint32_t, uint64_t> m_chunk_delay; // count chunk delay
-	std::map<uint32_t, uint32_t> m_pullRetries; // count chunks duplicated
 	std::map<uint32_t, Time> m_pullTimes; 		// trace pull time for chunks
 
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm

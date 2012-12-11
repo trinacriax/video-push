@@ -224,6 +224,8 @@ VideoPushApplication::VideoPushApplication ():
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
+  m_pullRetriesCurrent.clear();
+  m_pullPending.clear();
   m_duplicates.clear();
   m_helloEvent.Cancel();
   m_loopEvent.Cancel();
@@ -1328,18 +1330,18 @@ void
 VideoPushApplication::AddPullRetry (uint32_t chunkid)
 {
 	NS_ASSERT (chunkid>0);
-	if (m_pullRetries.find(chunkid) == m_pullRetries.end())
-		m_pullRetries.insert(std::pair<uint32_t, uint32_t>(chunkid,0));
-	m_pullRetries.find(chunkid)->second++;
+	if (m_pullRetriesCurrent.find(chunkid) == m_pullRetriesCurrent.end())
+		m_pullRetriesCurrent.insert(std::pair<uint32_t, uint32_t>(chunkid,0));
+	m_pullRetriesCurrent.find(chunkid)->second++;
 }
 
 uint32_t
 VideoPushApplication::GetPullRetry (uint32_t chunkid)
 {
 	NS_ASSERT (chunkid>0);
-	if (m_pullRetries.find(chunkid) == m_pullRetries.end())
+	if (m_pullRetriesCurrent.find(chunkid) == m_pullRetriesCurrent.end())
 			return 0;
-	return m_pullRetries.find(chunkid)->second;
+	return m_pullRetriesCurrent.find(chunkid)->second;
 }
 
 void
