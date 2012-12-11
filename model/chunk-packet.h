@@ -32,10 +32,10 @@
 #include "chunk-video.h"
 #include <iostream>
 
-#define CHUNK_HEADER_SIZE 4
-#define MSG_CHUNK_SIZE (4 + 8 + 2 + 2)
-#define MSG_PULL_SIZE 4
-#define MSG_HELLO_SIZE 4*3
+const uint32_t CHUNK_HEADER_SIZE = 4;
+const uint32_t MSG_CHUNK_SIZE = (4 + 8 + 2 + 2);
+const uint32_t MSG_PULL_SIZE = 4;
+const uint32_t MSG_HELLO_SIZE = 4*3;
 
 enum ChunkMessageType
 {

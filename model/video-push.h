@@ -25,7 +25,6 @@
 #ifndef __VIDEO_PUSH_H__
 #define __VIDEO_PUSH_H__
 
-#define PUSH_PORT 9999
 #include "chunk-video.h"
 #include "chunk-buffer.h"
 #include "chunk-packet.h"
@@ -65,6 +64,7 @@ enum ChunkPolicy {
 };
 
 static uint32_t	m_pullWBase;		// pull window
+const uint32_t PUSH_PORT = 9999;
 
 class VideoPushApplication : public Application
 {
