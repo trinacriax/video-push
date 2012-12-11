@@ -222,76 +222,81 @@ private:
 	static void SetPullWBase (uint32_t base);
 	static uint32_t GetPullWBase ();
 
-	Ptr<Socket>     m_socket;       // Associated socket
-	std::list<Ptr<Socket> > m_socketList; //the accepted sockets
-	Address     	m_localAddress;	// Local address to bind to
-	uint16_t 		m_localPort;	// Local port to bind to
+	Ptr<Socket>     m_socket;				// Associated socket
+	std::list<Ptr<Socket> > m_socketList;	// Accepted sockets
+	Address     	m_localAddress;			// Local address to bind to
+	uint16_t 		m_localPort;			// Local port to bind to
+	Address 		m_peer;         		// Peer address
+	PeerType		m_peerType;     		// Peer type
+	TypeId          m_tid;					// Application TID
+	Ptr<Ipv4> 		m_ipv4;					// IPv4 entity
+	Ipv4Address		m_source;				// Source address (only one)
+	Ipv4Address		m_gateway;				// Gateway address (if set)
 
-	uint32_t        m_totalRx;      // Total bytes received
-	Address 		m_peer;         // Peer address
-	bool            m_connected;    // True if connected
-	PeerType		m_peerType;     // Peer type
-	DataRate        m_cbrRate;      // Rate that data is generated
-	uint32_t        m_pktSize;      // Size of packets
-	uint32_t        m_residualBits; // Number of generated, but not sent, bits
-	Time            m_lastStartTime; // Time last packet sent
-	uint32_t        m_maxBytes;     // Limit total number of bytes sent
-	uint32_t        m_totBytes;     // Total bytes sent so far
-	EventId         m_helloEvent;    // Eventid of pending "hello packet" event
-	EventId         m_pullEvent;    // Eventid of pending "pull tx " event
-	EventId         m_chunkEvent;    // Eventid of pending "chunk tx" event
-	EventId         m_loopEvent;    // Eventid of pending "loop" event
-//	bool            m_sending;      // True if currently in sending state
-	TypeId          m_tid;
-	Ptr<Ipv4> 		m_ipv4;
-	Ipv4Address		m_gateway;
-	Ipv4Address		m_source;
-
+	/// STREAMING AND CHUNKS
 	Time 			m_pullTime;
-	Timer 			m_pullTimer;
-	bool			m_pullActive;
 	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
 	uint32_t 		m_pullWindow;		// pull window
 	double	 		m_pullRatioMin;		// pull ratio activation
 	double	 		m_pullRatioMax;		// target pull
-	double	 		m_pullHit;			// success pull
-	uint32_t	 	m_pullRequest;		// pull request
-	uint32_t	 	m_pullReceived;		// pull received
-	double		 	m_pullReply;		// pull reply
-	Time			m_pullSlot;			// slot duration for pull operations
 	uint32_t	 	m_pullMissed;		// missed chunk just pulled
 	uint32_t		m_pullCReply;
 	uint32_t		m_pullMReply;
 
-	NeighborsSet 	m_neighbors;		// collect neighbors
-	Time 			m_helloTime;
-	Timer 			m_helloTimer;
 	Time 			m_helloNeighborsTime;
 	Timer 			m_helloNeighborsTimer;
-	uint32_t		m_helloLoss;
-	uint32_t		m_helloActive;
 	uint32_t 		m_flag;
 	Time			m_slotStart;
 	EventId 		m_slotEvent;
 	// support for neighbors
+	uint32_t        m_totalRx;				// Total bytes received
+	bool            m_connected;   			// True if connected
+	DataRate        m_cbrRate;     			// Rate that data is generated
+	uint32_t        m_pktSize;     			// Size of packets
+	uint32_t        m_residualBits;			// Number of generated, but not sent, bits
+	Time            m_lastStartTime;		// Time last packet sent
+	uint32_t        m_maxBytes;    			// Limit total number of bytes sent
+	uint32_t        m_totBytes;    			// Total bytes sent so far
+	bool			m_pullActive;			// Activate or not the pull mechanism
+	EventId         m_pullEvent;			// Eventid of pending "pull tx " event
+	Time			m_pullSlot;				// Pull slot duration for pull operations
 	Timer			m_pullReplyTimer;		// Timer to reset the pull replies for the next slot
+	Timer 			m_pullTimer;			// Pull timer to pull chunks
 	std::map<uint32_t, uint32_t> m_pullRetriesCurrent;	// Count pull attempts to recover a chunk
+	std::map<uint32_t, Time> m_pullTimes; 	// Collect the time to recover each chunk
 	std::map<uint32_t, uint32_t> m_pullPending;	// Collect pending pulls
+
+
 	/// STATISTICS ON PULL
 	uint32_t	 	m_statisticsPullRequest;	// statistics on pull request sent (SENDER)
 	uint32_t	 	m_statisticsPullReceived;	// statistics on pull request received (RECEIVER)
 	uint32_t		m_statisticsPullReply;		// statistics on pull reply sent (RECEIVER)
 	uint32_t 		m_statisticsPullHit;		// statistics on pull reply received (i.e., success pull) (SENDER)
 
-	double			n_selectionWeight;
 
-	ChunkBuffer		m_chunks;			// current chunk buffer
-	std::map<uint32_t, uint32_t> m_duplicates; // count chunks duplicated
-	std::map<uint32_t, uint64_t> m_chunk_delay; // count chunk delay
-	std::map<uint32_t, Time> m_pullTimes; 		// trace pull time for chunks
+	/// HELLO CONTROL MESSAGES
+	uint32_t		m_helloActive;			// Activate or not the hello mechanism
+	EventId         m_helloEvent;			// Eventid of pending "hello packet" event
+	Time 			m_helloTime;			// Hello Time
+	Timer 			m_helloTimer;			// Timer to send hello messages
+	uint32_t		m_helloLoss;			// Max number of hello loss before removing a node as neighbor
 
+
+	/// CHUNK CONTROL MESSAGES
+	EventId         m_chunkEvent;			// Eventid of pending "chunk tx" event
+	EventId         m_loopEvent;			// Eventid of pending "loop" event
+	ChunkBuffer		m_chunks;				// Node's chun buffer
+	std::map<uint32_t, uint32_t> m_duplicates; 	// Collect the number of duplicated chunks
+	std::map<uint32_t, uint64_t> m_chunk_delay;	// Collect the chunks' delay
 	enum PeerPolicy m_peerSelection; // Peer selection algorithm
 	enum ChunkPolicy m_chunkSelection; // Chunk selection algorithm
+
+	/// NEIGHBORHOOD PART
+	NeighborsSet 	m_neighbors;			// Local neighborhood
+	double			n_selectionWeight;
+
+
+	/// TRACE CALLBACK
 	TracedCallback<Ptr<const Packet> > m_txDataTrace;
 	TracedCallback<Ptr<const Packet>, const Address &> m_rxDataTrace;
 	TracedCallback<Ptr<const Packet> > m_txControlTrace;
@@ -303,6 +308,8 @@ private:
 	TracedCallback<double> m_pullStartTrace;
 	TracedCallback<double> m_pullStopTrace;
 	TracedCallback<uint32_t> m_neighborsTrace;
+	//	uint32_t 		m_flag;					// TESTING PURPOSE
+
 	Ptr<TimeMinMaxAvgTotalCalculator> m_delay;
 };
 }
