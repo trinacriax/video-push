@@ -919,12 +919,12 @@ VideoPushApplication::PullSlot ()
 void
 VideoPushApplication::PeerLoop ()
 {
-	NS_LOG_FUNCTION_NOARGS ();
+	NS_LOG_FUNCTION (Simulator::Now());
 	switch (m_peerType)
 	{
 		case PEER:
 		{
-			NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLSTART");
+			NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLSTART");
 			NS_ASSERT (GetPullActive());
 			NS_ASSERT (GetHelloActive());
 			NS_ASSERT (!m_pullTimer.IsRunning());
@@ -1049,7 +1049,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
 		SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
 		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received too late missed chunk "<< chunk.c_id);
-		NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
+		NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
 	}
 	else if (duplicated) // Duplicated chunk
 	{
@@ -1063,7 +1063,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	  if (GetChunkMissed() && GetChunkMissed() == chunk.c_id)// && Pulled (chunk.c_id) )
 	  {
 		m_pullTimer.Cancel();
-		NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
+		NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
 		Time shift = (Simulator::Now()-GetPullTimes(chunk.c_id));
 		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< chunk.c_id<< " after "
 				<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
@@ -1135,7 +1135,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 //				AddPending(chunkid);
 			}
 		}
-		NS_LOG_INFO ("Node " << GetLocalAddress() << " Received pull for " <<  chunkid << (hasChunk?"(Y)":"(N)") <<" from " << sender << ", reply in "<<delay.GetSeconds());\
+		NS_LOG_INFO ("Node " << GetLocalAddress() << " Received pull for " <<  chunkid << (hasChunk?"(Y)":"(N)") <<" from " << sender << ", reply in "<<delay.GetSeconds());
 		break;
 	}
 	default:
