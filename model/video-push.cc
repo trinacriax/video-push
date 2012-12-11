@@ -908,13 +908,13 @@ VideoPushApplication::SetChunkMissed (uint32_t chunkid)
 	NS_ASSERT(!chunkid||!m_chunks.ChunkDelayed(chunkid));
 	NS_ASSERT(!chunkid||!m_chunks.ChunkSkipped(chunkid));
 	NS_ASSERT(!chunkid|| m_chunks.ChunkMissed(chunkid));
-	m_pullMissed = chunkid;
+	m_pullChunkMissed = chunkid;
 }
 
 uint32_t
 inline VideoPushApplication::GetChunkMissed () const
 {
-	return m_pullMissed;
+	return m_pullChunkMissed;
 }
 
 double

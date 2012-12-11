@@ -255,6 +255,7 @@ private:
 	bool			m_pullActive;			// Activate or not the pull mechanism
 	EventId         m_pullEvent;			// Eventid of pending "pull tx " event
 	Time			m_pullSlot;				// Pull slot duration for pull operations
+	uint32_t	 	m_pullChunkMissed;		// Chunk identifier of the current missed chunk
 	uint32_t		m_pullReplyMax;			// Max number of pull replies within a pull slot
 	uint32_t		m_pullReplyCurrent;		// Current number of pull replies in the current slot
 	Timer			m_pullReplyTimer;		// Timer to reset the pull replies for the next slot
