@@ -117,7 +117,14 @@ public:
 	double GetPullRatioMax () const;
 	bool InPullRange ();
 
+	/**
+	 * Activate or deactivate the pull mechanism.
+	 * */
 	void SetPullActive (bool pull);
+
+	/**
+	 * Get the state of the pull mechanism, whether is active or not.
+	 * */
 	bool GetPullActive () const;
 	uint32_t GetPullCReply () const;
 	void SetPullCReply (uint32_t value);
