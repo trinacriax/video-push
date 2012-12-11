@@ -38,6 +38,7 @@
 #include "ns3/packet.h"
 #include "ns3/uinteger.h"
 #include "ns3/double.h"
+#include "ns3/pointer.h"
 #include "ns3/enum.h"
 #include "ns3/boolean.h"
 #include "ns3/trace-source-accessor.h"
@@ -206,6 +207,10 @@ VideoPushApplication::GetTypeId (void)
 				   MakeUintegerAccessor (&VideoPushApplication::SetPullMReply,
 						   	   	   	   	 &VideoPushApplication::GetPullMReply),
 				   MakeUintegerChecker<uint32_t> (0))
+   .AddAttribute ("ChunkDelay", "Chunk Delay Trace",
+				   PointerValue (),
+				   MakePointerAccessor (&VideoPushApplication::m_delay),
+				   MakePointerChecker<TimeMinMaxAvgTotalCalculator>())
   ;
   return tid;
 }

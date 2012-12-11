@@ -145,6 +145,7 @@ public:
 	Ipv4Address GetSource () const;
 	Time TransmissionDelay (double l, double u, enum Time::Unit unit);
 
+	void SetDelayTracker (Ptr<TimeMinMaxAvgTotalCalculator> delay);
 protected:
 	virtual void DoDispose (void);
 private:
@@ -296,6 +297,7 @@ private:
 	TracedCallback<double> m_pullStartTrace;
 	TracedCallback<double> m_pullStopTrace;
 	TracedCallback<uint32_t> m_neighborsTrace;
+	Ptr<TimeMinMaxAvgTotalCalculator> m_delay;
 };
 }
 #endif /* VIDEO_PUSH_H_ */
