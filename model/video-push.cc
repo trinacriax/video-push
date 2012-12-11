@@ -45,7 +45,7 @@
 #include "ns3/address-utils.h"
 #include "ns3/inet-socket-address.h"
 #include "ns3/udp-socket.h"
-#include "ns3/info-x-tag.h"
+#include "ns3/snr-tag.h"
 #include <memory.h>
 #include <math.h>
 #include <stdio.h>
@@ -1142,7 +1142,7 @@ void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
           break;
         }
       ns3::pimdm::RelayTag relayTag;
-      InfoXTag ptag;
+      SnrTag ptag;
       bool rtag = packet->RemovePacketTag(relayTag);
       bool packetTag = packet->RemovePacketTag(ptag);
       InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
