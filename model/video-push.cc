@@ -1287,27 +1287,27 @@ void
 VideoPushApplication::AddPending (uint32_t chunkid)
 {
 	NS_ASSERT (chunkid >0);
-	if (m_pendingPull.find(chunkid) == m_pendingPull.end())
-		m_pendingPull.insert(std::pair<uint32_t,uint32_t>(chunkid,0));
-	m_pendingPull.find(chunkid)->second+=1;
+	if (m_pullPending.find(chunkid) == m_pullPending.end())
+		m_pullPending.insert(std::pair<uint32_t,uint32_t>(chunkid,0));
+	m_pullPending.find(chunkid)->second+=1;
 }
 
 bool
 VideoPushApplication::IsPending (uint32_t chunkid)
 {
 	NS_ASSERT (chunkid >0);
-	if (m_pendingPull.find(chunkid) == m_pendingPull.end())
+	if (m_pullPending.find(chunkid) == m_pullPending.end())
 		return false;
-	return (m_pendingPull.find(chunkid)->second > 0);
+	return (m_pullPending.find(chunkid)->second > 0);
 }
 
 bool
 VideoPushApplication::RemovePending (uint32_t chunkid)
 {
-	if (m_pendingPull.find(chunkid) == m_pendingPull.end())
+	if (m_pullPending.find(chunkid) == m_pullPending.end())
 		return false;
-	m_pendingPull.erase(chunkid);
-	NS_ASSERT (m_pendingPull.find(chunkid) == m_pendingPull.end());
+	m_pullPending.erase(chunkid);
+	NS_ASSERT (m_pullPending.find(chunkid) == m_pullPending.end());
 	return true;
 }
 
