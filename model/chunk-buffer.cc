@@ -173,6 +173,12 @@ namespace ns3{
 		return last;
 	}
 
+	uint32_t
+	ChunkBuffer::GetSize ()
+	{
+		return chunk_buffer.size();
+	}
+
 	void
 	ChunkBuffer::SetChunkState (uint32_t chunkid, ChunkState state)
 	{

@@ -56,6 +56,7 @@ public:
 	uint32_t GetLeastMissed (uint32_t base, uint32_t window);
 	uint32_t GetLatestMissed (uint32_t base, uint32_t window);
 	uint32_t GetLastChunk ();
+	uint32_t GetSize ();
 
 protected:
 	std::map<uint32_t, ChunkVideo> chunk_buffer;
