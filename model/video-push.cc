@@ -760,6 +760,10 @@ VideoPushApplication::InPullRange ()
 {
 	double ratio = GetReceived();
 	bool active = (ratio <= GetPullRatioMax() && ratio >= GetPullRatioMin());
+	if (active)
+		m_pullStartTrace (ratio);
+	else
+		m_pullStopTrace (ratio);
 	return  active;
 }
 
