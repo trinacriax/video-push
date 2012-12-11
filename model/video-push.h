@@ -234,7 +234,6 @@ private:
 	Ipv4Address		m_gateway;				// Gateway address (if set)
 
 	/// STREAMING AND CHUNKS
-	uint32_t 		m_pullWindow;		// pull window
 	double	 		m_pullRatioMin;		// pull ratio activation
 	double	 		m_pullRatioMax;		// target pull
 	uint32_t	 	m_pullMissed;		// missed chunk just pulled
@@ -255,6 +254,7 @@ private:
 	Time            m_lastStartTime;		// Time last packet sent
 	uint32_t        m_maxBytes;    			// Limit total number of bytes sent
 	uint32_t        m_totBytes;    			// Total bytes sent so far
+	uint32_t 		m_playoutWindow;		// Playout window size
 	bool			m_pullActive;			// Activate or not the pull mechanism
 	EventId         m_pullEvent;			// Eventid of pending "pull tx " event
 	Time			m_pullSlot;				// Pull slot duration for pull operations

@@ -710,13 +710,13 @@ VideoPushApplication::GetPullMax () const
 void
 VideoPushApplication::SetPullWindow (uint32_t window)
 {
-	m_pullWindow = window;
+	m_playoutWindow = window;
 }
 
 uint32_t
 VideoPushApplication::GetPullWindow () const
 {
-	return m_pullWindow;
+	return m_playoutWindow;
 }
 
 void
