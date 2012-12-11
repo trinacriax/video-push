@@ -1596,4 +1596,11 @@ void VideoPushApplication::SetGateway (const Ipv4Address &gateway)
 	m_gateway = gateway;
 }
 
+Time VideoPushApplication::TransmissionDelay (double l, double u, enum Time::Unit unit)
+{
+	double delay = UniformVariable().GetValue(l,u);
+	Time delayms = Time::FromDouble(delay, unit);
+//	NS_LOG_DEBUG("Time ("<<l<<","<<u<<") = "<<delayms.GetSeconds()<<"s "<< delay);
+	return delayms;
+}
 } // Namespace ns3

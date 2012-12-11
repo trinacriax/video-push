@@ -136,6 +136,7 @@ public:
 	uint32_t GetHelloLoss () const;
 	void SetSource (Ipv4Address source);
 	Ipv4Address GetSource () const;
+	Time TransmissionDelay (double l, double u, enum Time::Unit unit);
 
 protected:
 	virtual void DoDispose (void);
