@@ -234,13 +234,8 @@ private:
 	Ipv4Address		m_gateway;				// Gateway address (if set)
 
 	/// STREAMING AND CHUNKS
-	uint32_t	 	m_pullMissed;		// missed chunk just pulled
-
-	Time 			m_helloNeighborsTime;
-	Timer 			m_helloNeighborsTimer;
 	Time			m_slotStart;
 	EventId 		m_slotEvent;
-	// support for neighbors
 	uint32_t        m_totalRx;				// Total bytes received
 	bool            m_connected;   			// True if connected
 	DataRate        m_cbrRate;     			// Rate that data is generated
