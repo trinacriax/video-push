@@ -219,7 +219,7 @@ VideoPushApplication::GetTypeId (void)
 VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
 		m_connected(false), m_ipv4(0), m_socket(0),
-		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY),
+		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullRetriesMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY),
 		m_statisticsPullRequest (0), m_statisticsPullHit (0), m_statisticsPullReceived (0), m_statisticsPullReply (0), m_pullReplyTimer (Timer::CANCEL_ON_DESTROY),
 		m_delay(0),
 		m_gateway(Ipv4Address::GetAny()), m_pktSize (0)
@@ -698,13 +698,13 @@ VideoPushApplication::GetHelloTime () const
 void
 VideoPushApplication::SetPullMax (uint32_t max)
 {
-	m_pullMax = max;
+	m_pullRetriesMax = max;
 }
 
 uint32_t
 VideoPushApplication::GetPullMax () const
 {
-	return m_pullMax;
+	return m_pullRetriesMax;
 }
 
 void
