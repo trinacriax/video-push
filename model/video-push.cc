@@ -729,10 +729,11 @@ VideoPushApplication::GetPullRatioMax () const
 }
 
 bool
-VideoPushApplication::PullRange ()
+VideoPushApplication::InPullRange ()
 {
 	double ratio = GetReceived();
-	return (ratio <= GetPullRatioMax() && ratio >= GetPullRatioMin());
+	bool active = (ratio <= GetPullRatioMax() && ratio >= GetPullRatioMin());
+	return  active;
 }
 
 void
@@ -938,7 +939,7 @@ VideoPushApplication::PeerLoop ()
 					<< " Last=" << m_chunks.GetLastChunk() << " Missed=" << GetChunkMissed() << " ("<<(GetChunkMissed()?GetPullRetry(GetChunkMissed()):0)<<","<<GetPullMax()<<")"
 					<< " Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
 					<< " Timer="<<(m_pullTimer.IsRunning()?"Yes":"No"));
-			if (GetChunkMissed() && PullRange())/*check whether the node is within Pull-allowed range*/
+			if (GetChunkMissed() && InPullRange())/*check whether the node is within Pull-allowed range*/
 			{
 				Neighbor target = PeerSelection (m_peerSelection);
 				m_neighborsTrace (m_neighbors.GetSize());
@@ -963,7 +964,7 @@ VideoPushApplication::PeerLoop ()
 				}
 			}
 			else
-				NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
+				NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND "<< GetChunkMissed() << ", "<<InPullRange());
 			break;
 		}
 		case SOURCE:
@@ -1063,7 +1064,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		  <<" Missed="<<GetChunkMissed()
 		  <<" Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
 		  <<" Slot="<<GetPullSlotStart().GetSeconds());
-	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() /*&& !m_loopEvent.IsRunning() */&& PullRange())
+	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() /*&& !m_loopEvent.IsRunning() */&& InPullRange())
 	{
 		Time delay (0);
 		if (GetSlotStart() > Simulator::Now())

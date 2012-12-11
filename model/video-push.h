@@ -115,7 +115,7 @@ public:
 	double GetPullRatioMin () const;
 	void SetPullRatioMax (double ratio);
 	double GetPullRatioMax () const;
-	bool PullRange ();
+	bool InPullRange ();
 
 	void SetPullActive (bool pull);
 	bool GetPullActive () const;
