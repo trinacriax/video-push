@@ -674,13 +674,13 @@ VideoPushApplication::GetHelloActive () const
 void
 VideoPushApplication::SetPullTime (Time pullt)
 {
-	m_pullTime = pullt;
+	m_pullTimeout = pullt;
 }
 
 Time
 VideoPushApplication::GetPullTime () const
 {
-	return m_pullTime;
+	return m_pullTimeout;
 }
 
 void

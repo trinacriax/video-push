@@ -234,7 +234,6 @@ private:
 	Ipv4Address		m_gateway;				// Gateway address (if set)
 
 	/// STREAMING AND CHUNKS
-	Time 			m_pullTime;
 	uint32_t 		m_pullMax;			// max number of pull allowed per chunk
 	uint32_t 		m_pullWindow;		// pull window
 	double	 		m_pullRatioMin;		// pull ratio activation
@@ -261,6 +260,7 @@ private:
 	EventId         m_pullEvent;			// Eventid of pending "pull tx " event
 	Time			m_pullSlot;				// Pull slot duration for pull operations
 	Timer			m_pullReplyTimer;		// Timer to reset the pull replies for the next slot
+	Time 			m_pullTimeout;			// Pull timeout time
 	Timer 			m_pullTimer;			// Pull timer to pull chunks
 	std::map<uint32_t, uint32_t> m_pullRetriesCurrent;	// Count pull attempts to recover a chunk
 	std::map<uint32_t, Time> m_pullTimes; 	// Collect the time to recover each chunk
