@@ -275,6 +275,12 @@ private:
 	Time			m_slotStart;
 	EventId 		m_slotEvent;
 	// support for neighbors
+	/// STATISTICS ON PULL
+	uint32_t	 	m_statisticsPullRequest;	// statistics on pull request sent (SENDER)
+	uint32_t	 	m_statisticsPullReceived;	// statistics on pull request received (RECEIVER)
+	uint32_t		m_statisticsPullReply;		// statistics on pull reply sent (RECEIVER)
+	uint32_t 		m_statisticsPullHit;		// statistics on pull reply received (i.e., success pull) (SENDER)
+
 	double			n_selectionWeight;
 
 	ChunkBuffer		m_chunks;			// current chunk buffer
