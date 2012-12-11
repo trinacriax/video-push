@@ -261,7 +261,6 @@ private:
 	Time			m_pullSlot;			// slot duration for pull operations
 	uint32_t	 	m_pullMissed;		// missed chunk just pulled
 	uint32_t		m_pullCReply;
-	Timer			m_pullCTimer;
 	uint32_t		m_pullMReply;
 
 	NeighborsSet 	m_neighbors;		// collect neighbors
@@ -275,6 +274,7 @@ private:
 	Time			m_slotStart;
 	EventId 		m_slotEvent;
 	// support for neighbors
+	Timer			m_pullReplyTimer;		// Timer to reset the pull replies for the next slot
 	std::map<uint32_t, uint32_t> m_pullRetriesCurrent;	// Count pull attempts to recover a chunk
 	std::map<uint32_t, uint32_t> m_pullPending;	// Collect pending pulls
 	/// STATISTICS ON PULL

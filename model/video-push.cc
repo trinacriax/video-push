@@ -220,8 +220,8 @@ VideoPushApplication::VideoPushApplication ():
 		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
 		m_connected(false), m_ipv4(0), m_socket(0),
 		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY),
-		m_statisticsPullRequest (0), m_statisticsPullHit (0), m_statisticsPullReceived (0), m_statisticsPullReply (0), m_pullCTimer (Timer::CANCEL_ON_DESTROY),
-		m_delay(0),
+		m_statisticsPullRequest (0), m_statisticsPullHit (0), m_statisticsPullReceived (0), m_statisticsPullReply (0), m_pullReplyTimer (Timer::CANCEL_ON_DESTROY),
+		m_delay(0)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
@@ -504,8 +504,8 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_pullSlot = Time::FromDouble(inter_time,Time::S);
 //      double v = ceil(m_pullSlot.ToDouble(Time::US)/m_pullTime.ToDouble(Time::US));
 //      SetPullMReply((uint32_t) v);
-      m_pullCTimer.SetDelay (m_pullSlot);
-      m_pullCTimer.SetFunction (&VideoPushApplication::ResetPullCReply, this);
+      m_pullReplyTimer.SetDelay (m_pullSlot);
+      m_pullReplyTimer.SetFunction (&VideoPushApplication::ResetPullCReply, this);
     }
   // Insure no pending event
   StartSending ();
@@ -637,7 +637,9 @@ void
 VideoPushApplication::ResetPullCReply ()
 {
 	m_pullCReply = 0;
-	m_pullCTimer.Schedule();
+	if(m_pullReplyTimer.IsRunning())
+		m_pullReplyTimer.Cancel();
+	m_pullReplyTimer.Schedule();
 }
 
 uint32_t
@@ -1040,9 +1042,9 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	if (sender == GetSource())//&& m_chunks.GetBufferSize() == 1 && !duplicated)
 	{
 		SetSlotStart (Simulator::Now());
-		if(m_pullCTimer.IsRunning())
-			m_pullCTimer.Cancel();
-		m_pullCTimer.Schedule();
+		if(m_pullReplyTimer.IsRunning())
+			m_pullReplyTimer.Cancel();
+		m_pullReplyTimer.Schedule();
 	}
 	if (toolate) // Chunk was pulled and received to late
 	{
