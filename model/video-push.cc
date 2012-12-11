@@ -121,39 +121,39 @@ VideoPushApplication::GetTypeId (void)
 				   	   	   	   	   	CS_LEAST_MISSED, "Least missed",
 				   	   	   	   	   	CS_LATEST_MISSED, "Latest missed",
 				   	   	   	   	   	CS_NEW_CHUNK, "New chunks"))
-    .AddTraceSource ("TxData", "A new packet is created and is sent",
+    .AddTraceSource ("VideoTxData", "A data packet has been sent in push",
                    MakeTraceSourceAccessor (&VideoPushApplication::m_txDataTrace))
-	.AddTraceSource ("RxData", "A packet has been received",
+	.AddTraceSource ("VideoRxData", "A packet has been received in push",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxDataTrace))
-	.AddTraceSource ("TxControl", "A new packet is created and is sent",
+	.AddTraceSource ("VideoTxControl", "A new packet is created and is sent",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_txControlTrace))
-	.AddTraceSource ("RxControl", "A packet has been received",
+	.AddTraceSource ("VideoRxControl", "A packet has been received",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxControlTrace))
-	.AddTraceSource ("TxPull", "A new pull has been sent",
+	.AddTraceSource ("VideoTxPull", "A new pull has been sent",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_txControlPullTrace))
-    .AddTraceSource ("RxPull", "A new pull has been received",
+	.AddTraceSource ("VideoRxPull", "A new pull has been received",
     			   MakeTraceSourceAccessor (&VideoPushApplication::m_rxControlPullTrace))
-	.AddTraceSource ("TxDataPull", "A data packet has been sent in reply to a pull request",
+	.AddTraceSource ("VideoTxDataPull", "A data packet has been sent in reply to a pull request",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_txDataPullTrace))
-	.AddTraceSource ("RxDataPull", "A data packet has been received after a pull request",
+	.AddTraceSource ("VideoRxDataPull", "A data packet has been received after a pull request",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxDataPullTrace))
-	.AddTraceSource ("NeighborTrace", "Neighbors",
+	.AddTraceSource ("VideoNeighborTrace", "Neighbors",
 				   MakeTraceSourceAccessor (&VideoPushApplication::m_neighborsTrace))
 	.AddAttribute ("PullTime", "Time between two consecutive pulls.",
-				 TimeValue (MilliSeconds (50)),
-				 MakeTimeAccessor (&VideoPushApplication::SetPullTime,
+				   TimeValue (MilliSeconds (50)),
+				   MakeTimeAccessor (&VideoPushApplication::SetPullTime,
 								   &VideoPushApplication::GetPullTime),
-				 MakeTimeChecker ())
+				   MakeTimeChecker ())
 	.AddAttribute ("HelloTime", "Hello Time.",
-				 TimeValue (Seconds (10)),
-				 MakeTimeAccessor (&VideoPushApplication::SetHelloTime,
+				   TimeValue (Seconds (10)),
+				   MakeTimeAccessor (&VideoPushApplication::SetHelloTime,
 								   &VideoPushApplication::GetHelloTime),
-				 MakeTimeChecker ())
+				   MakeTimeChecker ())
 	.AddAttribute ("PullMax", "Max number of pull.",
 				   UintegerValue (1),
 				   MakeUintegerAccessor (&VideoPushApplication::SetPullMax,
 						   	   	   	   	 &VideoPushApplication::GetPullMax),
-				   MakeUintegerChecker<uint32_t> (1))
+				   MakeUintegerChecker<uint32_t> (0))
 	.AddAttribute ("PullActive", "Pull activation.",
 				   BooleanValue (true),
 				   MakeBooleanAccessor (&VideoPushApplication::SetPullActive,
@@ -189,10 +189,10 @@ VideoPushApplication::GetTypeId (void)
 				   MakeUintegerAccessor (&VideoPushApplication::SetHelloActive,
 										&VideoPushApplication::GetHelloActive),
 				   MakeUintegerChecker<uint32_t> (0))
-	.AddAttribute ("Flag", "Flag.",
-				   UintegerValue (0),
-				   MakeUintegerAccessor (&VideoPushApplication::m_flag),
-				   MakeUintegerChecker<uint32_t> (0))
+//	.AddAttribute ("Flag", "Flag.",
+//				   UintegerValue (0),
+//				   MakeUintegerAccessor (&VideoPushApplication::m_flag),
+//				   MakeUintegerChecker<uint32_t> (0))
 	.AddAttribute ("SelectionWeight", "Neighbor selection weight (p * W) + (1-p) * (%ChunkReceived).",
 				   DoubleValue (0),
 				   MakeDoubleAccessor (&VideoPushApplication::n_selectionWeight),
