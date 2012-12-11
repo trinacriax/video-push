@@ -221,13 +221,18 @@ VideoPushApplication::VideoPushApplication ():
 		m_connected(false), m_ipv4(0), m_socket(0),
 		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY),
 		m_statisticsPullRequest (0), m_statisticsPullHit (0), m_statisticsPullReceived (0), m_statisticsPullReply (0), m_pullReplyTimer (Timer::CANCEL_ON_DESTROY),
-		m_delay(0)
+		m_delay(0),
+		m_gateway(Ipv4Address::GetAny()), m_pktSize (0)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
   m_pullRetriesCurrent.clear();
+  m_pullTimes.clear();
   m_pullPending.clear();
   m_duplicates.clear();
+  m_chunk_delay.clear();
+  m_neighbors.Clear();
+
   m_helloEvent.Cancel();
   m_loopEvent.Cancel();
   m_pullEvent.Cancel();
