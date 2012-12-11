@@ -40,6 +40,7 @@
 #include "ns3/traced-callback.h"
 #include "ns3/ipv4.h"
 #include "ns3/timer.h"
+#include "ns3/stats-module.h"
 
 namespace ns3{
 
