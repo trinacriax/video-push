@@ -886,20 +886,20 @@ Time
 VideoPushApplication::GetPullSlotEnd() const
 {
 //	return GetPullSlotStart() + Time::FromDouble((m_pullSlot.GetSeconds()*.90),Time::S);
-	return GetPullSlotStart() + GetPullSlot();
+	return GetPullSlotStart() + GetPullSlot ();
 }
 
 double
 VideoPushApplication::PullSlot ()
 {
 	NS_LOG_INFO ("Node=" <<m_node->GetId()<< " NextSlot="<<GetPullSlotEnd().GetSeconds());
-	NS_ASSERT (Simulator::Now() >= GetPullSlotStart() && Simulator::Now() < GetPullSlotStart()+m_pullSlot);
+	NS_ASSERT (Simulator::Now() >= GetPullSlotStart() && Simulator::Now() < GetPullSlotStart()+GetPullSlot ());
 	double n = (Simulator::Now() - GetPullSlotStart()).ToDouble(Time::US);
-	double m = (m_pullSlot - MilliSeconds(2)).ToDouble(Time::US);
+	double m = (GetPullSlot () - MilliSeconds(2)).ToDouble(Time::US);
 	double r = n/m;
 	return r;
 //	Time now = Simulator::Now();
-//	if ( now < GetPullSlotStart() || now > GetPullSlotEnd())
+//	if ( now < GetPullSlotStart()-MilliSeconds(2) || now > GetPullSlotEnd())
 //		return 0;
 //	return 1;
 }
@@ -967,7 +967,7 @@ VideoPushApplication::PeerLoop ()
 				NS_LOG_INFO ("Node " <<m_node->GetId()<< " is marking chunk "<< lastmissed
 						<<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<"/"<<GetPullMax()<<") New missed="<<GetChunkMissed ());
 			}
-//			if (!PullSlot())/*Check whether the node is within a pull slot or not*/
+//			if (!PullSlot ())/*Check whether the node is within a pull slot or not*/
 //			{
 //				NS_ASSERT(GetSlotStart() < Simulator::Now());
 //				NS_ASSERT(GetSlotStart() + m_pullSlot > Simulator::Now());
@@ -1527,7 +1527,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 {
 	NS_LOG_FUNCTION (this<<chunkid);
 	NS_ASSERT (chunkid>0);
-	if (PullSlot() < .80)/*Check whether the node is within a pull slot or not*/
+	if (PullSlot () < .80)/*Check whether the node is within a pull slot or not*/
 //	if (PullSlot () == 1)/*Check whether the node is within a pull slot or not*/
 	{
 		ChunkHeader pull (MSG_PULL);
