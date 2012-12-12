@@ -1053,7 +1053,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	// INDUCING MISSING CHUNKS END.
 	toolate = m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED;
 	duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
-	if (sender == GetSource())//&& m_chunks.GetBufferSize() == 1 && !duplicated)
+	if (sender == GetSource() && !duplicated)//&& m_chunks.GetBufferSize() == 1 && !duplicated)
 	{
 		SetPullSlotStart (Simulator::Now());
 		ResetPullCReply ();
