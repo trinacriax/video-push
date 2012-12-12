@@ -883,10 +883,14 @@ VideoPushApplication::PullSlot ()
 {
 	NS_LOG_INFO ("Node=" <<m_node->GetId()<< " NextSlot="<<GetPullSlotEnd().GetSeconds());
 	Time now = Simulator::Now();
-	NS_ASSERT (now >= GetPullSlotStart() && now < GetPullSlotStart()+GetPullSlot ());
-	double n = (now - GetPullSlotStart()).ToDouble(Time::US);
-	double m = (GetPullSlot () - MilliSeconds(2)).ToDouble(Time::US);
-	double r = n/m;
+	double r = 1.0;
+	if (now >= GetPullSlotStart() && now <= GetPullSlotEnd())
+	{
+		NS_ASSERT (GetPullSlot () > RPULLGUARD + LPULLGUARD);
+		double n = (now - GetPullSlotStart()).ToDouble(Time::US);
+		double m = (GetPullSlot ()).ToDouble(Time::US) - RPULLGUARD - LPULLGUARD;
+		r = n/m;
+	}
 	return r;
 }
 
