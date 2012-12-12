@@ -1160,7 +1160,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		AddPullReceived ();
 		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply())
 		{
-			AddPending (chunkid);
+//			AddPending (chunkid);
 //		  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
 //		  double delayv = rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.40));
 //		  NS_ASSERT_MSG (delayv > 1, "HandlePull: pulltime is 0");
@@ -1168,16 +1168,16 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 			if (PullSlot () < .90)
 //			if (PullSlot () == 1) //Even the receiver is in its pull slot
 			{
-//				NS_LOG_INFO(GetPullSlotStart().GetMicroSeconds()<<" < " << Simulator::Now().GetMicroSeconds() << " < " << GetPullSlotEnd().GetMicroSeconds() << " : "<< (GetPullSlotEnd()-Simulator::Now()).GetMicroSeconds());
-//				NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
-//				NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
+				NS_LOG_INFO(GetPullSlotStart().GetMicroSeconds()<<" < " << Simulator::Now().GetMicroSeconds() << " < " << GetPullSlotEnd().GetMicroSeconds() << " : "<< (GetPullSlotEnd()-Simulator::Now()).GetMicroSeconds());
+				NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
+				NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
 				m_chunkEvent = Simulator::ScheduleNow (&VideoPushApplication::SendChunk, this, chunkid, sender);
 				AddPending(chunkid);
 				AddPullReply ();
 			}
 			else
 			{
-				SetPullCReply(0);
+//				SetPullCReply(0);
 //				NS_LOG_INFO(GetPullSlotStart().GetSeconds()<<" < " << Simulator::Now() << " < " << GetPullSlotEnd().GetSeconds());
 //				if (GetPullSlotStart() > Simulator::Now())
 //					delay = GetPullSlotStart() - Simulator::Now();
