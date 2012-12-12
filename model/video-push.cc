@@ -910,7 +910,7 @@ VideoPushApplication::GetReceived ()
 	double ratio = 0.0;
 	for (int32_t i = base ; i < (base + window); i++)
 	{
-		ratio += (m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PUSH || m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PULL ? 1.0 : 0.0);
+		ratio += (m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PUSH /* || m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PULL */? 1.0 : 0.0);
 	}
 	ratio = (ratio / window);
 	return  ratio;
