@@ -289,7 +289,7 @@ VideoPushApplication::StatisticChunk (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
   std::map<uint32_t, ChunkVideo> current_buffer = m_chunks.GetChunkBuffer();
-  uint32_t received = 1, receivedpull = 0, receivedpush = 0, delayed = 0, missed = 0, duplicates = 0, chunkID = 0, current = 1, late = 0, split = 0, splitP = 0, splitL = 0;
+  uint32_t received = 1, receivedpull = 0, receivedpush = 0, delayed = 0, missed = 0, duplicates = 0, chunkID = 0, current = 1, split = 0, splitP = 0, splitL = 0;
   uint64_t delay = 0, delaylate = 0, delayavg = 0, delayavgpush = 0, delayavgpull = 0;
   uint64_t delaymax = (current_buffer.empty() ? 0: GetChunkDelay(current_buffer.begin()->first).GetMicroSeconds()), delaymin = (current_buffer.empty()?0:GetChunkDelay(current_buffer.begin()->first).GetMicroSeconds());
   uint32_t missing[] = {0,0,0,0,0,0}, hole = 0; // hole size = 1 2 3 4 5 >5
@@ -301,11 +301,6 @@ VideoPushApplication::StatisticChunk (void)
 	  while (current < chunkID){
 //		NS_LOG_DEBUG ("Missed chunk "<< received << "-"<<m_chunks.GetChunk(received));
 		NS_ASSERT (!m_chunks.HasChunk(current));
-		if (m_chunks.GetChunkState(current) == CHUNK_DELAYED)
-		{
-			delaylate += GetChunkDelay(current).GetMicroSeconds();
-			late++;
-		}
 		missed++;
 		hole++;
 		current = received + missed;
@@ -339,6 +334,7 @@ VideoPushApplication::StatisticChunk (void)
 		  default:
 		  {
 			  delayed++;
+			  delaylate += GetChunkDelay(current).GetMicroSeconds();
 //			  NS_ASSERT (false); ///TODO possibly measure delayed chunks
 			  break;
 		  }
@@ -416,7 +412,7 @@ VideoPushApplication::StatisticChunk (void)
 	  miss = (missed/(1.0*m_latestChunkID));
 	  rec = (received/(1.0*m_latestChunkID));
 	  dups = (duplicates==0?0:(1.0*duplicates)/received);
-	  dlate = (late==0?0: delaylate/(1.0*late));
+	  dlate = (delayed==0?0: delaylate/(1.0*delayed));
   }
   NS_ASSERT (m_latestChunkID==received+missed);
   double tstudent = 1.96; // alpha = 0.025, degree of freedom = infinite
