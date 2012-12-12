@@ -237,6 +237,7 @@ VideoPushApplication::VideoPushApplication ():
   m_loopEvent.Cancel();
   m_pullEvent.Cancel();
   m_chunkEvent.Cancel();
+  m_pullSlotEvent.Cancel();
 }
 
 VideoPushApplication::~VideoPushApplication()
@@ -858,24 +859,53 @@ VideoPushApplication::GetHelloLoss () const
 }
 
 Time
-VideoPushApplication::GetSlotStart () const
+VideoPushApplication::GetPullSlot () const
 {
-	return m_slotStart;
-}
-
-void
-VideoPushApplication::SetSlotStart (Time start)
-{
-	m_slotStart = start;
-	if (m_slotEvent.IsRunning())
-		m_slotEvent.Cancel();
-	m_slotEvent = Simulator::Schedule (m_pullSlot, &VideoPushApplication::SetSlotStart, this, (m_slotStart + m_pullSlot));
+	return m_pullSlot;
 }
 
 Time
-VideoPushApplication::GetSlotEnd() const
+VideoPushApplication::GetPullSlotStart () const
 {
-	return GetSlotStart() + Time::FromDouble((m_pullSlot.GetSeconds()*.90),Time::S);
+	return m_pullSlotStart;
+}
+
+void
+VideoPushApplication::SetPullSlotStart (Time start)
+{
+	m_pullSlotStart = start;
+	if (m_pullSlotEvent.IsRunning())
+		m_pullSlotEvent.Cancel();
+	m_pullSlotEvent = Simulator::Schedule (m_pullSlot, &VideoPushApplication::SetPullSlotStart, this, (m_pullSlotStart + m_pullSlot));
+//	m_pullSlotStart = start + MicroSeconds(LPULLGUARD);
+//	SetPullCReply(0);
+//	if (m_pullSlotEvent.IsRunning())
+//		m_pullSlotEvent.Cancel();
+//	/// Schedule the next pull start
+//	Time nextStart = m_pullSlotStart + (m_pullSlot + MicroSeconds(LPULLGUARD+RPULLGUARD));
+//	m_pullSlotEvent = Simulator::Schedule (GetPullSlotEnd()-Simulator::Now(), &VideoPushApplication::SetPullSlotStart, this, nextStart);
+}
+
+Time
+VideoPushApplication::GetPullSlotEnd() const
+{
+//	return GetPullSlotStart() + Time::FromDouble((m_pullSlot.GetSeconds()*.90),Time::S);
+	return GetPullSlotStart() + GetPullSlot();
+}
+
+double
+VideoPushApplication::PullSlot ()
+{
+	NS_LOG_INFO ("Node=" <<m_node->GetId()<< " NextSlot="<<GetPullSlotEnd().GetSeconds());
+	NS_ASSERT (Simulator::Now() >= GetPullSlotStart() && Simulator::Now() < GetPullSlotStart()+m_pullSlot);
+	double n = (Simulator::Now() - GetPullSlotStart()).ToDouble(Time::US);
+	double m = (m_pullSlot - MilliSeconds(2)).ToDouble(Time::US);
+	double r = n/m;
+	return r;
+//	Time now = Simulator::Now();
+//	if ( now < GetPullSlotStart() || now > GetPullSlotEnd())
+//		return 0;
+//	return 1;
 }
 
 Ipv4Address
@@ -917,17 +947,6 @@ inline VideoPushApplication::GetChunkMissed () const
 	return m_pullChunkMissed;
 }
 
-double
-VideoPushApplication::PullSlot ()
-{
-	NS_LOG_INFO ("Node=" <<m_node->GetId()<< " NextSlot="<<GetSlotEnd().GetSeconds());
-	NS_ASSERT (Simulator::Now() >= GetSlotStart() && Simulator::Now() < GetSlotStart()+m_pullSlot);
-	double n = (Simulator::Now() - GetSlotStart()).ToDouble(Time::US);
-	double m = (m_pullSlot - MilliSeconds(2)).ToDouble(Time::US);
-	double r = n/m;
-	return r;
-}
-
 void
 VideoPushApplication::PeerLoop ()
 {
@@ -961,6 +980,22 @@ VideoPushApplication::PeerLoop ()
 //				NS_LOG_INFO ("Node=" <<m_node->GetId()<< " No time to pull: "<<GetSlotStart().GetSeconds()
 //						<< " < "<<Simulator::Now().GetSeconds() << " < "<<GetSlotEnd().GetSeconds() << " move for "<<delay.GetSeconds());
 //				NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
+//				break;
+//			}
+//			if (!PullSlot ())/*Check whether the node is within a pull slot or not*/
+//			{
+//				Time delay (0);
+//				if (GetPullSlotStart() > Simulator::Now())
+//				delay = GetPullSlotStart() - Simulator::Now();
+//				else if (Simulator::Now() > GetPullSlotEnd())
+//				delay = GetPullSlotEnd() + MicroSeconds(LPULLGUARD+RPULLGUARD);
+//				else
+//				delay = Seconds(0);
+//				NS_ASSERT(delay.GetMicroSeconds() >= 0);
+//				m_pullTimer.Schedule(delay);
+//				NS_LOG_INFO ("Node " <<m_node->GetId()<< " No time to pull: ("<<GetPullSlotStart().GetSeconds()
+//				<< " < "<<Simulator::Now().GetSeconds() << " < "<<GetPullSlotEnd().GetSeconds() << ") reschedule in "<<delay.GetSeconds()<< "sec");
+//				NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
 //				break;
 //			}
 			double ratio = GetReceived ();
@@ -1050,10 +1085,12 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
 	if (sender == GetSource())//&& m_chunks.GetBufferSize() == 1 && !duplicated)
 	{
-		SetSlotStart (Simulator::Now());
+		SetPullSlotStart (Simulator::Now());
 		if(m_pullReplyTimer.IsRunning())
 			m_pullReplyTimer.Cancel();
 		m_pullReplyTimer.Schedule();
+//		SetPullSlotStart (Simulator::Now()); //Re-align the pull slot start
+//		ResetPullCReply();
 	}
 	if (toolate) // Chunk was pulled and received to late
 	{
@@ -1098,9 +1135,9 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() /*&& !m_loopEvent.IsRunning() */&& InPullRange())
 	{
 		Time delay (0);
-		if (GetSlotStart() > Simulator::Now())
-			delay = GetSlotStart() - Simulator::Now();
-		NS_ASSERT(GetSlotEnd() > Simulator::Now());
+		if (GetPullSlotStart() > Simulator::Now())
+			delay = GetPullSlotStart() - Simulator::Now();
+		NS_ASSERT(GetPullSlotEnd() > Simulator::Now());
 		m_pullTimer.Schedule(delay);
 //		m_loopEvent = Simulator::Schedule (delay, &VideoPushApplication::PeerLoop, this);
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " will pull "<<GetChunkMissed()<< " @ "<<delay.GetSeconds());
@@ -1127,12 +1164,17 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		AddPullReceived ();
 		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply())
 		{
+			AddPending (chunkid);
 //		  double delayv = rint(UniformVariable().GetValue (m_pullTime.GetMicroSeconds()*.01, m_pullTime.GetMicroSeconds()*.20));
 //		  double delayv = rint(UniformVariable().GetValue (m_pullSlot.GetMicroSeconds()*.01, m_pullSlot.GetMicroSeconds()*.40));
 //		  NS_ASSERT_MSG (delayv > 1, "HandlePull: pulltime is 0");
 //		  delay = Time::FromDouble (delayv, Time::US);
 			if (PullSlot () < .90)
+//			if (PullSlot () == 1) //Even the receiver is in its pull slot
 			{
+//				NS_LOG_INFO(GetPullSlotStart().GetMicroSeconds()<<" < " << Simulator::Now().GetMicroSeconds() << " < " << GetPullSlotEnd().GetMicroSeconds() << " : "<< (GetPullSlotEnd()-Simulator::Now()).GetMicroSeconds());
+//				NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
+//				NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
 				m_chunkEvent = Simulator::ScheduleNow (&VideoPushApplication::SendChunk, this, chunkid, sender);
 				AddPending(chunkid);
 				AddPullReply ();
@@ -1140,6 +1182,10 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 			else
 			{
 				SetPullCReply(0);
+//				NS_LOG_INFO(GetPullSlotStart().GetSeconds()<<" < " << Simulator::Now() << " < " << GetPullSlotEnd().GetSeconds());
+//				if (GetPullSlotStart() > Simulator::Now())
+//					delay = GetPullSlotStart() - Simulator::Now();
+//				m_chunkEvent = Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
 //				NS_ASSERT(GetSlotStart() < Simulator::Now());
 //				NS_ASSERT(GetSlotStart() + m_pullSlot > Simulator::Now());
 //				delay = GetSlotStart() + m_pullSlot - Simulator::Now();
@@ -1486,18 +1532,25 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 	NS_LOG_FUNCTION (this<<chunkid);
 	NS_ASSERT (chunkid>0);
 	if (PullSlot() < .80)/*Check whether the node is within a pull slot or not*/
+//	if (PullSlot () == 1)/*Check whether the node is within a pull slot or not*/
 	{
 		ChunkHeader pull (MSG_PULL);
 		pull.GetPullMessage ().SetChunk (chunkid);
 		Ptr<Packet> packet = Create<Packet> ();
 		packet->AddHeader(pull);
-		NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid << m_pullEvent.IsRunning());
-		NS_ASSERT( GetSlotStart() <= Simulator::Now() && (GetSlotStart() + m_pullSlot) > Simulator::Now());
+//		NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid << m_pullEvent.IsRunning());
+//		NS_ASSERT( GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
+//		NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
+//		NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
 		if (chunkid <GetPullWBase()) //the chunk window has just shifted
 		{
 			m_pullTimer.Cancel();
+//			m_pullTimer.Schedule();
 			Simulator::ScheduleNow (&VideoPushApplication::PeerLoop, this);
 		}
+//		NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target
+//				<< " for chunk "<< chunkid << " timeout "<<  (Simulator::Now()+m_pullTimer.GetDelayLeft()).GetSeconds()
+//				<< " PullActive "<< m_pullEvent.IsRunning() << " UID "<< packet->GetUid());
 		NS_ASSERT (chunkid <= (GetPullWBase()+GetPullWindow()));
 		m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
 		m_txControlPullTrace (packet);

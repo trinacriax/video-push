@@ -189,9 +189,10 @@ private:
 	void AddPullReceived ();
 	void AddPullReply ();
 
-	void SetSlotStart (Time start);
-	Time GetSlotStart () const;
-	Time GetSlotEnd () const;
+	void SetPullSlotStart (Time start);
+	Time GetPullSlotStart () const;
+	Time GetPullSlotEnd () const;
+	Time GetPullSlot () const;
 	double PullSlot ();
 
 	void SetChunkMissed (uint32_t chunkid);
@@ -234,8 +235,6 @@ private:
 	Ipv4Address		m_gateway;				// Gateway address (if set)
 
 	/// STREAMING AND CHUNKS
-	Time			m_slotStart;
-	EventId 		m_slotEvent;
 	uint32_t        m_totalRx;				// Total bytes received
 	bool            m_connected;   			// True if connected
 	DataRate        m_cbrRate;     			// Rate that data is generated
@@ -247,9 +246,14 @@ private:
 	uint32_t 		m_playoutWindow;		// Playout window size
 	double	 		m_chunkRatioMin;		// Chunks' ratio within the playout window - MIN
 	double	 		m_chunkRatioMax;		// Chunks' ratio within the playout window - MAX
+
+
+	/// PULL CONTROL MESSAGES
 	bool			m_pullActive;			// Activate or not the pull mechanism
 	EventId         m_pullEvent;			// Eventid of pending "pull tx " event
 	Time			m_pullSlot;				// Pull slot duration for pull operations
+	Time			m_pullSlotStart;		// Current pull slot start
+	EventId 		m_pullSlotEvent;		// Event ID to update the next pull slot start
 	uint32_t	 	m_pullChunkMissed;		// Chunk identifier of the current missed chunk
 	uint32_t		m_pullReplyMax;			// Max number of pull replies within a pull slot
 	uint32_t		m_pullReplyCurrent;		// Current number of pull replies in the current slot
