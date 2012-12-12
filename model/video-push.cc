@@ -1198,84 +1198,101 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 
 void VideoPushApplication::HandleReceive (Ptr<Socket> socket)
 {
-  NS_LOG_FUNCTION (this << socket);
-  Ptr<Packet> packet;
+switch (m_peerType)
+{
+	case SOURCE:
+	{
+		break;
+	}
+	case PEER:
+	{
+	  NS_LOG_FUNCTION (this << socket);
+	  Ptr<Packet> packet;
 
-  Address from;
-  while ((packet = socket->RecvFrom (from)))
-    {
-      if (packet->GetSize () == 0)
-        { //EOF
-          break;
-        }
-      ns3::pimdm::RelayTag relayTag;
-      SnrTag ptag;
-      bool rtag = packet->RemovePacketTag(relayTag);
-      bool packetTag = packet->RemovePacketTag(ptag);
-      InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
-      Ipv4Address sourceAddr = address.GetIpv4 ();
-      uint32_t port = address.GetPort();
-//      Ipv4Address gateway = GetNextHop(sourceAddr);
-      Ipv4Mask mask ("255.0.0.0");
-	  Neighbor nt (sourceAddr, port);
-      Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(mask);
-      NS_LOG_DEBUG("Node " << GetLocalAddress() <<  " receives packet from "<< sourceAddr
-    		  << /*" gw " << gateway<< */" Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast()
-    		  << " SINR "<< ptag.GetSinr());
-      if(rtag && subnet != relayTag.m_receiver)
-      {
-//    	  // NS_LOG_DEBUG("Discarded: not for clients "<<relayTag.m_receiver);
-    	  break;
-      }
-//      if(gateway!=relayTag.m_sender)
-//      {
-//    	  NS_LOG_DEBUG("Duplicated packet Gateway "<<gateway<< " Sender " << relayTag.m_sender);
-//		  break;
-//      }
-      NS_ASSERT (sourceAddr != GetLocalAddress());
-      if (InetSocketAddress::IsMatchingType (from))
-        {
-          ChunkHeader chunkH (MSG_CHUNK);
-          packet->RemoveHeader(chunkH);
-          switch (chunkH.GetType())
-          {
-          	  case MSG_CHUNK:
+	  Address from;
+	  while ((packet = socket->RecvFrom (from)))
+		{
+		  if (packet->GetSize () == 0)
+			{ //EOF
+			  break;
+			}
+		  ns3::pimdm::RelayTag relayTag;
+		  SnrTag ptag;
+		  bool rtag = packet->RemovePacketTag(relayTag);
+		  bool packetTag = packet->RemovePacketTag(ptag);
+		  InetSocketAddress address = InetSocketAddress::ConvertFrom (from);
+		  Ipv4Address sourceAddr = address.GetIpv4 ();
+		  uint32_t port = address.GetPort();
+//	      Ipv4Address gateway = GetNextHop(sourceAddr);
+		  Ipv4Mask mask ("255.0.0.0");
+		  Neighbor nt (sourceAddr, port);
+		  Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(mask);
+		  NS_LOG_DEBUG("Node " << GetLocalAddress() <<  " receives packet from "<< sourceAddr
+				  << /*" gw " << gateway<< */" Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast()
+				  << " SINR "<< ptag.GetSinr());
+		  if(rtag && subnet != relayTag.m_receiver)
+		  {
+//	    	  NS_LOG_DEBUG("Discarded: not for clients "<<relayTag.m_receiver);
+			  break;
+		  }
+//	      if(gateway!=relayTag.m_sender)
+//	      {
+//	    	  NS_LOG_DEBUG("Duplicated packet Gateway "<<gateway<< " Sender " << relayTag.m_sender);
+//			  break;
+//	      }
+		  NS_ASSERT (sourceAddr != GetLocalAddress());
+		  if (InetSocketAddress::IsMatchingType (from))
+			{
+			  ChunkHeader chunkH (MSG_CHUNK);
+			  packet->RemoveHeader(chunkH);
+			  switch (chunkH.GetType())
 			  {
-				  if (sourceAddr == GetSource())
+				  case MSG_CHUNK:
 				  {
-					  m_rxDataTrace (packet, address);
+					  if (sourceAddr == GetSource())
+					  {
+						  m_rxDataTrace (packet, address);
+					  }
+					  else
+					  {
+						  m_rxDataPullTrace (packet, address);
+					  }
+					  HandleChunk(chunkH.GetChunkMessage(), sourceAddr);
+					  break;
 				  }
-				  else
+				  case MSG_PULL:
 				  {
-					  m_rxDataPullTrace (packet, address);
+					  NS_ASSERT (GetPullActive());
+					  m_rxControlPullTrace (packet, address);
+					  HandlePull(chunkH.GetPullMessage(), sourceAddr);
+					  break;
 				  }
-				  HandleChunk(chunkH.GetChunkMessage(), sourceAddr);
-				  break;
-			  }
-			  case MSG_PULL:
-			  {
-				  NS_ASSERT (GetPullActive());
-				  m_rxControlPullTrace (packet, address);
-				  HandlePull(chunkH.GetPullMessage(), sourceAddr);
-				  break;
-			  }
-			  case MSG_HELLO:
-			  {
-				  NS_ASSERT (GetHelloActive());
-				  if (packetTag)
+				  case MSG_HELLO:
 				  {
-					  double sinr = ptag.GetSinr();
-					  m_neighbors.AddNeighbor(nt);
-					  m_neighbors.GetNeighbor (nt)->SetSINR(sinr);
+					  NS_ASSERT (GetHelloActive());
+					  if (packetTag)
+					  {
+						  double sinr = ptag.GetSinr();
+						  m_neighbors.AddNeighbor(nt);
+						  m_neighbors.GetNeighbor (nt)->SetSINR(sinr);
+					  }
+					  m_rxControlTrace (packet, address);
+					  HandleHello(chunkH.GetHelloMessage(), sourceAddr);
+					  break;
 				  }
-				  m_rxControlTrace (packet, address);
-				  HandleHello(chunkH.GetHelloMessage(), sourceAddr);
-				  break;
 			  }
-          }
-        }
-    }
+			}
+		}
+	break;
+	}
+	default:
+	{
+	  NS_ASSERT_MSG(false, "Invalid peer type: "<<m_peerType);
+	  break;
+	}
+	}
 }
+
 
 void
 VideoPushApplication::AddPullRequest ()
