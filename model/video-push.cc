@@ -627,7 +627,7 @@ VideoPushApplication::SetPullCReply (uint32_t value)
 void
 VideoPushApplication::ResetPullCReply ()
 {
-	m_pullReplyCurrent = 0;
+	SetPullCReply(0);
 	if(m_pullReplyTimer.IsRunning())
 		m_pullReplyTimer.Cancel();
 	m_pullReplyTimer.Schedule();
@@ -859,7 +859,7 @@ void
 VideoPushApplication::SetPullSlotStart (Time start)
 {
 	m_pullSlotStart = start + MicroSeconds(LPULLGUARD);
-	SetPullCReply(0);
+	ResetPullCReply ();
 	if (m_pullSlotEvent.IsRunning())
 		m_pullSlotEvent.Cancel();
 	/// Schedule the next pull start
@@ -1051,9 +1051,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	if (sender == GetSource())//&& m_chunks.GetBufferSize() == 1 && !duplicated)
 	{
 		SetPullSlotStart (Simulator::Now());
-		if(m_pullReplyTimer.IsRunning())
-			m_pullReplyTimer.Cancel();
-		m_pullReplyTimer.Schedule();
+		ResetPullCReply ();
 	}
 	if (toolate) // Chunk was pulled and received to late
 	{
