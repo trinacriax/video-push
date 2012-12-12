@@ -1134,7 +1134,6 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply())
 		{
 			if (PullSlot () < PullRepThr)
-//			if (PullSlot () == 1) //Even the receiver is in its pull slot
 			{
 				NS_LOG_INFO(GetPullSlotStart().GetMicroSeconds()<<" < " << now.GetMicroSeconds() << " < " << GetPullSlotEnd().GetMicroSeconds() << " : "<< (GetPullSlotEnd()-Simulator::Now()).GetMicroSeconds());
 				NS_ASSERT (now >= GetPullSlotStart());
@@ -1493,7 +1492,6 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 	NS_LOG_FUNCTION (this<<chunkid);
 	NS_ASSERT (chunkid>0);
 	if (PullSlot () < PullReqThr)/*Check whether the node is within a pull slot or not*/
-//	if (PullSlot () == 1)/*Check whether the node is within a pull slot or not*/
 	{
 		ChunkHeader pull (MSG_PULL);
 		pull.GetPullMessage ().SetChunk (chunkid);
