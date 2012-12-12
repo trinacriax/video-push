@@ -492,6 +492,7 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_neighbors.SetSelectionWeight (n_selectionWeight);
       double inter_time = 1 / (m_cbrRate.GetBitRate()/(8.0*m_pktSize));
       m_pullSlot = Time::FromDouble(inter_time,Time::S);
+//    m_pullSlot -= MicroSeconds(LPULLGUARD+RPULLGUARD);
 //      double v = ceil(m_pullSlot.ToDouble(Time::US)/m_pullTime.ToDouble(Time::US));
 //      SetPullMReply((uint32_t) v);
       m_pullReplyTimer.SetDelay (m_pullSlot);
