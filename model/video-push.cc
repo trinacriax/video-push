@@ -1035,15 +1035,12 @@ VideoPushApplication::PeerLoop ()
 void
 VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const Ipv4Address &sender)
 {
-	if (m_peerType == SOURCE)
-	  return;
+	NS_ASSERT (m_peerType == PEER);
 	ChunkVideo chunk = chunkheader.GetChunk();
 	m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
 	// Update Chunk Buffer START
 	uint32_t last = m_chunks.GetLastChunk();
 	double ratio = 0.0;
-	bool duplicated = false;
-	bool toolate = false;
 //#define MISS // INDUCING MISSING CHUNKS START
 #ifdef MISS
 	bool missed_chunk = UniformVariable().GetValue() < 0.05;
@@ -1056,8 +1053,8 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	}
 #endif
 	// INDUCING MISSING CHUNKS END.
-	toolate = m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED;
-	duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
+	bool toolate = (m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED);
+	bool duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
 	if (sender == GetSource() && !duplicated)//&& m_chunks.GetBufferSize() == 1 && !duplicated)
 	{
 		SetPullSlotStart (Simulator::Now());
