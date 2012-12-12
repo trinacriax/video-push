@@ -1499,7 +1499,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 		NS_ASSERT( GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
 		NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
 		NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
-		//TODO Create too late chunks
+		//TODO CHECK Create too late chunks
 //		if (chunkid <GetPullWBase()) //the chunk window has just shifted
 //		{
 //			m_pullTimer.Cancel();
