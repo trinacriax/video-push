@@ -435,14 +435,6 @@ VideoPushApplication::StatisticChunk (void)
 	confidenceL = 0.0;
 	delay_avg_pull = MicroSeconds (0);
   }
-//  char buffer [1024];
-//  sprintf(buffer, "Chunks Node %d Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f RecP %d AvgP %ld us sigmaP %.5f confP %.5f RecL %d AvgL %ld us sigmaL %.5f confL %.5f PRec %d PRep %.4f PReq %d PHit %.4f H1 %d H2 %d H3 %d H4 %d H5 %d H6 %d",
-//		  	  	    m_node->GetId(), rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence, dlate,
-//		  receivedpush, delay_avg_push.ToInteger(Time::US), sigmaP, confidenceP,
-//		  receivedpull, delay_avg_pull.ToInteger(Time::US), sigmaL, confidenceL,
-//		  m_statisticsPullReceived, (m_statisticsPullReceived == 0 ? 0 : m_statisticsPullReply/(1.0*m_statisticsPullReceived)), m_statisticsPullRequest, (m_statisticsPullRequest == 0 ? 0 : m_statisticsPullHit/(1.0*m_statisticsPullRequest)),
-//		  missing[0], missing[1], missing[2], missing[3], missing[4], missing[5]);
-//  std::cout << buffer << std::endl<< std::endl;
     printf("Chunks Node %d Rec %.5f Miss %.5f Dup %.5f K %d Max %ld us Min %ld us Avg %ld us sigma %.5f conf %.5f late %.5f RecP %d AvgP %ld us sigmaP %.5f confP %.5f RecL %d AvgL %ld us sigmaL %.5f confL %.5f PRec %d PRep %.4f PReq %d PHit %.4f H1 %d H2 %d H3 %d H4 %d H5 %d H6 %d\n",
           m_node->GetId(), rec, miss, dups, received, delay_max.ToInteger(Time::US), delay_min.ToInteger(Time::US), delay_avg.ToInteger(Time::US), sigma, confidence, dlate,
           receivedpush, delay_avg_push.ToInteger(Time::US), sigmaP, confidenceP,
