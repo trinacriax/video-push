@@ -875,7 +875,7 @@ VideoPushApplication::SetPullSlotStart (Time start)
 Time
 VideoPushApplication::GetPullSlotEnd() const
 {
-	return GetPullSlotStart() + GetPullSlot ();
+	return GetPullSlotStart() + GetPullSlot () - MicroSeconds(LPULLGUARD + RPULLGUARD);
 }
 
 double
