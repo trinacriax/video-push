@@ -861,10 +861,6 @@ VideoPushApplication::GetPullSlotStart () const
 void
 VideoPushApplication::SetPullSlotStart (Time start)
 {
-//	m_pullSlotStart = start;
-//	if (m_pullSlotEvent.IsRunning())
-//		m_pullSlotEvent.Cancel();
-//	m_pullSlotEvent = Simulator::Schedule (m_pullSlot, &VideoPushApplication::SetPullSlotStart, this, (m_pullSlotStart + m_pullSlot));
 	m_pullSlotStart = start + MicroSeconds(LPULLGUARD);
 	SetPullCReply(0);
 	if (m_pullSlotEvent.IsRunning())
@@ -877,7 +873,6 @@ VideoPushApplication::SetPullSlotStart (Time start)
 Time
 VideoPushApplication::GetPullSlotEnd() const
 {
-//	return GetPullSlotStart() + Time::FromDouble((m_pullSlot.GetSeconds()*.90),Time::S);
 	return GetPullSlotStart() + GetPullSlot ();
 }
 
@@ -885,15 +880,12 @@ double
 VideoPushApplication::PullSlot ()
 {
 	NS_LOG_INFO ("Node=" <<m_node->GetId()<< " NextSlot="<<GetPullSlotEnd().GetSeconds());
-	NS_ASSERT (Simulator::Now() >= GetPullSlotStart() && Simulator::Now() < GetPullSlotStart()+GetPullSlot ());
-	double n = (Simulator::Now() - GetPullSlotStart()).ToDouble(Time::US);
+	Time now = Simulator::Now();
+	NS_ASSERT (now >= GetPullSlotStart() && now < GetPullSlotStart()+GetPullSlot ());
+	double n = (now - GetPullSlotStart()).ToDouble(Time::US);
 	double m = (GetPullSlot () - MilliSeconds(2)).ToDouble(Time::US);
 	double r = n/m;
 	return r;
-//	Time now = Simulator::Now();
-//	if ( now < GetPullSlotStart()-MilliSeconds(2) || now > GetPullSlotEnd())
-//		return 0;
-//	return 1;
 }
 
 Ipv4Address
