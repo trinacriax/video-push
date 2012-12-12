@@ -941,7 +941,6 @@ VideoPushApplication::PeerLoop ()
 			NS_ASSERT (!m_pullTimer.IsRunning());
 			/* There is a missed chunk*/
 			while (GetChunkMissed() && GetPullRetry(GetChunkMissed()) >= GetPullMax())/* Mark chunks as skipped*/
-//			std::cout << "C1 = " << m_loopEvent.PeekEventImpl()->IsCancelled()<< " "<<m_loopEvent.IsExpired()<< " " << m_loopEvent.IsRunning()<<"\n";
 			{
 				m_chunks.SetChunkState(GetChunkMissed(), CHUNK_SKIPPED); // Mark as skipped
 				RemPullTimes(GetChunkMissed()); // Remove the chunk form PullTimes
@@ -951,17 +950,6 @@ VideoPushApplication::PeerLoop ()
 				NS_LOG_INFO ("Node " <<m_node->GetId()<< " is marking chunk "<< lastmissed
 						<<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<"/"<<GetPullMax()<<") New missed="<<GetChunkMissed ());
 			}
-//			if (!PullSlot ())/*Check whether the node is within a pull slot or not*/
-//			{
-//				NS_ASSERT(GetSlotStart() < Simulator::Now());
-//				NS_ASSERT(GetSlotStart() + m_pullSlot > Simulator::Now());
-//				Time delay = GetSlotStart() + m_pullSlot - Simulator::Now();
-//				m_pullTimer.Schedule(delay);
-//				NS_LOG_INFO ("Node=" <<m_node->GetId()<< " No time to pull: "<<GetSlotStart().GetSeconds()
-//						<< " < "<<Simulator::Now().GetSeconds() << " < "<<GetSlotEnd().GetSeconds() << " move for "<<delay.GetSeconds());
-//				NS_LOG_INFO ("Node=" <<m_node->GetId()<<" PULLEND");
-//				break;
-//			}
 //			if (!PullSlot ())/*Check whether the node is within a pull slot or not*/
 //			{
 //				Time delay (0);
