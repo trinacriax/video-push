@@ -218,7 +218,11 @@ VideoPushApplication::VideoPushApplication ():
 		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullRetriesMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY),
 		m_statisticsPullRequest (0), m_statisticsPullHit (0), m_statisticsPullReceived (0), m_statisticsPullReply (0), m_pullReplyTimer (Timer::CANCEL_ON_DESTROY),
 		m_delay(0),
-		m_gateway(Ipv4Address::GetAny()), m_pktSize (0)
+		m_gateway(Ipv4Address::GetAny()), m_pktSize (0),
+		m_playoutWindow (0),  m_chunkRatioMin (0), m_chunkRatioMax (0),
+		m_pullActive (false), m_pullSlot (0), m_pullSlotStart (0),
+		m_pullReplyMax (0), m_pullReplyCurrent (0),
+		m_pullChunkMissed (0), m_helloActive (0), m_helloTime (0), n_selectionWeight (0)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
