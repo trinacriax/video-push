@@ -194,10 +194,6 @@ VideoPushApplication::GetTypeId (void)
 				   MakeUintegerAccessor (&VideoPushApplication::SetHelloActive,
 										&VideoPushApplication::GetHelloActive),
 				   MakeUintegerChecker<uint32_t> (0))
-//	.AddAttribute ("Flag", "Flag.",
-//				   UintegerValue (0),
-//				   MakeUintegerAccessor (&VideoPushApplication::m_flag),
-//				   MakeUintegerChecker<uint32_t> (0))
 	.AddAttribute ("SelectionWeight", "Neighbor selection weight (p * W) + (1-p) * (%ChunkReceived).",
 				   DoubleValue (0),
 				   MakeDoubleAccessor (&VideoPushApplication::n_selectionWeight),
