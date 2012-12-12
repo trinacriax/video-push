@@ -863,7 +863,7 @@ VideoPushApplication::GetPullSlotStart () const
 void
 VideoPushApplication::SetPullSlotStart (Time start)
 {
-	m_pullSlotStart = start + MicroSeconds(LPULLGUARD);
+	m_pullSlotStart = start + LPULLGUARD;
 	ResetPullCReply ();
 	if (m_pullSlotEvent.IsRunning())
 		m_pullSlotEvent.Cancel();
@@ -875,7 +875,7 @@ VideoPushApplication::SetPullSlotStart (Time start)
 Time
 VideoPushApplication::GetPullSlotEnd() const
 {
-	return GetPullSlotStart() + GetPullSlot () - MicroSeconds(LPULLGUARD + RPULLGUARD);
+	return GetPullSlotStart() + GetPullSlot () - LPULLGUARD - RPULLGUARD;
 }
 
 double
@@ -888,7 +888,7 @@ VideoPushApplication::PullSlot ()
 	{
 		NS_ASSERT (GetPullSlot () > RPULLGUARD + LPULLGUARD);
 		double n = (now - GetPullSlotStart()).ToDouble(Time::US);
-		double m = (GetPullSlot ()).ToDouble(Time::US) - RPULLGUARD - LPULLGUARD;
+		double m = (GetPullSlot () - RPULLGUARD - LPULLGUARD).ToDouble(Time::US);
 		r = n/m;
 	}
 	return r;

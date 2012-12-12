@@ -66,8 +66,8 @@ enum ChunkPolicy {
 
 static uint32_t	m_pullWBase;		// pull window
 const uint32_t PUSH_PORT = 9999;
-const uint32_t LPULLGUARD = 0;
-const uint32_t RPULLGUARD = 0;
+const Time LPULLGUARD = MicroSeconds(1000);
+const Time RPULLGUARD = MicroSeconds(500);
 const double PullReqThr = 0.80;
 const double PullRepThr = 0.90;
 
