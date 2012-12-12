@@ -838,6 +838,7 @@ VideoPushApplication::GetChunkDelay (uint32_t chunkid)
 void
 VideoPushApplication::SetHelloLoss (uint32_t loss)
 {
+	NS_ASSERT(loss>0);
 	m_helloLoss = loss;
 }
 
