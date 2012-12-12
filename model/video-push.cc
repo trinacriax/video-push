@@ -1501,17 +1501,17 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 		NS_ASSERT( GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
 		NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
 		NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
-		if (chunkid <GetPullWBase()) //the chunk window has just shifted
-		{
-			m_pullTimer.Cancel();
+		//TODO Create too late chunks
+//		if (chunkid <GetPullWBase()) //the chunk window has just shifted
+//		{
+//			m_pullTimer.Cancel();
 //			m_pullTimer.Schedule();
-			Simulator::ScheduleNow (&VideoPushApplication::PeerLoop, this);
-		}
+//		}
 		NS_ASSERT (chunkid <= (GetPullWBase()+GetPullWindow()));
 		m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
 		m_txControlPullTrace (packet);
 	}
-	else
+	else // out of threshold, cancel the PeerLoop
 	{
 		m_pullTimer.Cancel();
 	}
