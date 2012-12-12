@@ -1057,8 +1057,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		if(m_pullReplyTimer.IsRunning())
 			m_pullReplyTimer.Cancel();
 		m_pullReplyTimer.Schedule();
-//		SetPullSlotStart (Simulator::Now()); //Re-align the pull slot start
-//		ResetPullCReply();
 	}
 	if (toolate) // Chunk was pulled and received to late
 	{
