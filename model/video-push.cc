@@ -1404,11 +1404,8 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 			ChunkVideo cv = ForgeChunk();
 			chunkid = cv.c_id;
 			SetPullWBase (chunkid<GetPullWindow()?1:chunkid-GetPullWindow());
-			if(!m_chunks.AddChunk(cv, CHUNK_RECEIVED_PUSH))
-			{
-				AddDuplicate(cv.c_id);
-				NS_ASSERT (true);
-			}
+			bool addChunk = m_chunks.AddChunk(cv, CHUNK_RECEIVED_PUSH);
+			NS_ASSERT (addChunk);
 			NS_ASSERT (m_duplicates.find(cv.c_id) == m_duplicates.end());
 			break;
 		}
