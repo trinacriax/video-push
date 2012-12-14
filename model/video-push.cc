@@ -640,7 +640,7 @@ VideoPushApplication::ResetPullCReply ()
 	SetPullCReply(0);
 	if(m_pullReplyTimer.IsRunning())
 		m_pullReplyTimer.Cancel();
-	m_pullReplyTimer.Schedule();
+	m_pullReplyTimer.Schedule ();
 }
 
 uint32_t
@@ -971,7 +971,7 @@ VideoPushApplication::PeerLoop ()
 //				else
 //				delay = Seconds(0);
 //				NS_ASSERT(delay.GetMicroSeconds() >= 0);
-//				m_pullTimer.Schedule(delay);
+//				m_pullTimer.Schedule (delay);
 //				NS_LOG_INFO ("Node " <<m_node->GetId()<< " No time to pull: ("<<GetPullSlotStart().GetSeconds()
 //				<< " < "<<Simulator::Now().GetSeconds() << " < "<<GetPullSlotEnd().GetSeconds() << ") reschedule in "<<delay.GetSeconds()<< "sec");
 //				NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
@@ -991,10 +991,9 @@ VideoPushApplication::PeerLoop ()
 				if (target.GetAddress() != Ipv4Address::GetAny())
 				{
 					NS_ASSERT (m_neighbors.IsNeighbor(target));
-//					Time delay = Time::FromDouble (UniformVariable().GetValue (0, 1000), Time::US); //[0-1000]us random
-					Time delay = TransmissionDelay(0, 1000, Time::US); //[0-1000]us random
+					Time delay = TransmissionDelay(0, 2000, Time::US); //[0-1000]us random
 					SetPullTimes (GetChunkMissed());
-					m_pullTimer.Schedule();
+					m_pullTimer.Schedule ();
 					m_pullEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, GetChunkMissed(), target.GetAddress());
 					NS_LOG_INFO ("Node " <<m_node->GetId()<< " schedule pull to "<< target.GetAddress()
 							<< " for chunk " << GetChunkMissed() <<" ("<< GetPullRetry(GetChunkMissed())<<") at "
@@ -1097,11 +1096,11 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		  <<" Slot="<<GetPullSlotStart().GetSeconds());
 	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() && InPullRange() && PullSlot() < PullReqThr)
 	{
-		Time delay = TransmissionDelay(0, 0, Time::US);
+		Time delay = TransmissionDelay(0, 2000, Time::US);
 		if (GetPullSlotStart() > Simulator::Now())
 			delay = GetPullSlotStart() - Simulator::Now();
 		NS_ASSERT(GetPullSlotEnd() > Simulator::Now());
-		m_pullTimer.Schedule(delay);
+		m_pullTimer.Schedule (delay);
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " will pull "<<GetChunkMissed()<< " @ "<<delay.GetSeconds());
 	}
 }
@@ -1123,7 +1122,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		NS_ASSERT (m_statisticsPullReceived>=m_statisticsPullReply);
 		Time now = Simulator::Now();
 		bool hasChunk = m_chunks.HasChunk (chunkid);
-		Time delay = TransmissionDelay(0, 0, Time::US);
+		Time delay = TransmissionDelay(0, 2000, Time::US);
 		StatisticAddPullReceived ();
 		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply() && PullSlot () < PullRepThr)
 		{
@@ -1505,7 +1504,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 //		if (chunkid <GetPullWBase()) //the chunk window has just shifted
 //		{
 //			m_pullTimer.Cancel();
-//			m_pullTimer.Schedule();
+//			m_pullTimer.Schedule ();
 //		}
 		NS_ASSERT (chunkid <= (GetPullWBase()+GetPullWindow()));
 		m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
