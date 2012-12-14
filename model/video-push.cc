@@ -873,7 +873,7 @@ VideoPushApplication::SetPullSlotStart (Time start)
 		m_pullSlotEvent.Cancel();
 	/// Schedule the next pull start
 	Time nextStart = start + GetPullSlot() + LPULLGUARD;
-	Time delay = GetPullSlotEnd()-Simulator::Now();
+	Time delay = GetPullSlotEnd()-Simulator::Now()+RPULLGUARD;
 	m_pullSlotEvent = Simulator::Schedule (delay, &VideoPushApplication::SetPullSlotStart, this, nextStart);
 }
 
