@@ -1079,7 +1079,8 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 				<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
 	  }
 	}
-	SetChunkMissed(!GetChunkMissed() || GetChunkMissed() < GetPullWBase() || GetChunkMissed() == chunk.c_id? ChunkSelection(m_chunkSelection) : GetChunkMissed());
+//	SetChunkMissed(!GetChunkMissed() || GetChunkMissed() < GetPullWBase() || GetChunkMissed() == chunk.c_id? ChunkSelection(m_chunkSelection) : GetChunkMissed());
+	SetChunkMissed(ChunkSelection(m_chunkSelection));
 	ratio = GetReceived();
 	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate ":" Received "))
 		  << chunk.c_id //<< "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"
@@ -1090,14 +1091,13 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		  <<" Missed="<<GetChunkMissed()
 		  <<" Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
 		  <<" Slot="<<GetPullSlotStart().GetSeconds());
-	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() /*&& !m_loopEvent.IsRunning() */&& InPullRange())
+	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() && InPullRange())
 	{
 		Time delay (0);
 		if (GetPullSlotStart() > Simulator::Now())
 			delay = GetPullSlotStart() - Simulator::Now();
 		NS_ASSERT(GetPullSlotEnd() > Simulator::Now());
 		m_pullTimer.Schedule(delay);
-//		m_loopEvent = Simulator::Schedule (delay, &VideoPushApplication::PeerLoop, this);
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " will pull "<<GetChunkMissed()<< " @ "<<delay.GetSeconds());
 	}
 }
