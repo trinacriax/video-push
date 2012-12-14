@@ -1040,9 +1040,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	NS_ASSERT (m_peerType == PEER);
 	ChunkVideo chunk = chunkheader.GetChunk();
 	m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
-	// Update Chunk Buffer START
-	uint32_t last = m_chunks.GetLastChunk();
-	double ratio = 0.0;
 	bool toolate = (m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED || chunk.c_id < GetPullWBase()); // chunk has been expired
 	bool duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
 	if (sender == GetSource() && !duplicated)
@@ -1052,10 +1049,10 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	}
 	if (toolate)// Chunk has been expired
 	{
-		if (GetPullRetry(chunk.c_id))
-			m_pullTimer.Cancel();
-		m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
-		SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
+//		if (GetPullRetry(chunk.c_id))
+//			m_pullTimer.Cancel();
+//		m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
+//		SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
 		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received too late missed chunk "<< chunk.c_id);
 		NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
 	}
@@ -1071,19 +1068,26 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	  if (GetPullRetry(chunk.c_id))// has been pulled
 	  {
 		m_pullTimer.Cancel();
-		m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
-		StatisticAddPullHit();
+		if (toolate)
+		{
+			m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
+			NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received too late missed chunk "<< chunk.c_id);
+		}
+		else
+		{
+			m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
+			StatisticAddPullHit();
+			Time shift = (Simulator::Now()-GetPullTimes(chunk.c_id));
+			NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< chunk.c_id<< " after "
+					<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
+		}
 		NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
-		Time shift = (Simulator::Now()-GetPullTimes(chunk.c_id));
-		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< chunk.c_id<< " after "
-				<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
 	  }
 	}
 	SetChunkMissed(ChunkSelection(m_chunkSelection));
-	ratio = GetReceived();
 	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate ":" Received "))
-		  << chunk.c_id //<< "("<< GetChunkDelay(chunk.c_id).GetMicroSeconds()<< ")"
-		  <<" from " << sender //<< " totalRx="<<m_totalRx
+		  << chunk.c_id
+		  <<" from " << sender
 		  <<" Ratio="<<GetReceived()
 		  <<" Pull "<< m_pullTimer.IsRunning() << "(D="<<m_pullTimer.GetDelay()<<"/N=" << m_pullTimer.GetDelayLeft()<<")"
 		  <<" #Neighbors "<< m_neighbors.GetSize()
