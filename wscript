@@ -1,7 +1,7 @@
 ## -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 def build(bld):
-    module = bld.create_ns3_module('video-push', ['internet', 'network', 'config-store', 'tools', 'pimdm', 'wifi', 'applications', 'csma', 'stats'])
+    module = bld.create_ns3_module('video-push', ['internet', 'network', 'config-store', 'tools', 'pimdm', 'wifi', 'applications', 'csma', 'stats', 'igmpx'])
     module.includes = '.'
     module.source = [
         'model/chunk-buffer.cc',		
