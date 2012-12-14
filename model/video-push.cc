@@ -1047,16 +1047,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		SetPullSlotStart (Simulator::Now());
 		ResetPullCReply ();
 	}
-	if (toolate)// Chunk has been expired
-	{
-//		if (GetPullRetry(chunk.c_id))
-//			m_pullTimer.Cancel();
-//		m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
-//		SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
-		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received too late missed chunk "<< chunk.c_id);
-		NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
-	}
-	else if (duplicated) // Duplicated chunk
+	if (duplicated) // Duplicated chunk
 	{
 	  StatisticAddDuplicateChunk (chunk.c_id);
 //	  if(IsPending(chunk.c_id))
