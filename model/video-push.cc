@@ -629,6 +629,12 @@ VideoPushApplication::SetPullCReply (uint32_t value)
 }
 
 void
+VideoPushApplication::AddPullCReply ()
+{
+	m_pullReplyCurrent++;
+}
+
+void
 VideoPushApplication::ResetPullCReply ()
 {
 	SetPullCReply(0);

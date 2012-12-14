@@ -132,6 +132,7 @@ public:
 	bool GetPullActive () const;
 	uint32_t GetPullCReply () const;
 	void SetPullCReply (uint32_t value);
+	void AddPullCReply ();
 	void ResetPullCReply ();
 	uint32_t GetPullMReply () const;
 	void SetPullMReply (uint32_t value);
