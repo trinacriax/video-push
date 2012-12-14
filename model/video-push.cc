@@ -993,10 +993,8 @@ VideoPushApplication::PeerLoop ()
 //					Time delay = Time::FromDouble (UniformVariable().GetValue (0, 1000), Time::US); //[0-1000]us random
 					Time delay = TransmissionDelay(0, 1000, Time::US); //[0-1000]us random
 					SetPullTimes (GetChunkMissed());
-					StatisticAddPullRequest();
 					m_pullTimer.Schedule();
 					m_pullEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, GetChunkMissed(), target.GetAddress());
-					AddPullRetry(GetChunkMissed());
 					NS_LOG_INFO ("Node " <<m_node->GetId()<< " schedule pull to "<< target.GetAddress()
 							<< " for chunk " << GetChunkMissed() <<" ("<< GetPullRetry(GetChunkMissed())<<") at "
 							<<  Simulator::Now()+delay  << " timeout "<< m_pullTimer.GetDelay());
@@ -1496,6 +1494,8 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 		NS_ASSERT( GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
 		NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
 		NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
+		AddPullRetry(GetChunkMissed());
+		StatisticAddPullRequest();
 		//TODO CHECK Create too late chunks
 //		if (chunkid <GetPullWBase()) //the chunk window has just shifted
 //		{
