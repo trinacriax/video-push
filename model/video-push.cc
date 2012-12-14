@@ -1097,7 +1097,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		  <<" Slot="<<GetPullSlotStart().GetSeconds());
 	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() && InPullRange() && PullSlot() < PullReqThr)
 	{
-		Time delay (0);
+		Time delay = TransmissionDelay(0, 0, Time::US);
 		if (GetPullSlotStart() > Simulator::Now())
 			delay = GetPullSlotStart() - Simulator::Now();
 		NS_ASSERT(GetPullSlotEnd() > Simulator::Now());
@@ -1123,7 +1123,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		NS_ASSERT (m_statisticsPullReceived>=m_statisticsPullReply);
 		Time now = Simulator::Now();
 		bool hasChunk = m_chunks.HasChunk (chunkid);
-		Time delay (0);
+		Time delay = TransmissionDelay(0, 0, Time::US);
 		StatisticAddPullReceived ();
 		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply() && PullSlot () < PullRepThr)
 		{
