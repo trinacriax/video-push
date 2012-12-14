@@ -868,7 +868,7 @@ VideoPushApplication::SetPullSlotStart (Time start)
 	if (m_pullSlotEvent.IsRunning())
 		m_pullSlotEvent.Cancel();
 	/// Schedule the next pull start
-	Time nextStart = start + GetPullSlot() + MicroSeconds(LPULLGUARD);
+	Time nextStart = start + GetPullSlot() + LPULLGUARD;
 	m_pullSlotEvent = Simulator::Schedule (GetPullSlotEnd()-Simulator::Now(), &VideoPushApplication::SetPullSlotStart, this, nextStart);
 }
 
