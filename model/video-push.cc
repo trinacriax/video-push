@@ -1052,7 +1052,8 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	}
 	if (toolate)// Chunk has been expired
 	{
-		m_pullTimer.Cancel();
+		if (GetPullRetry(chunk.c_id))
+			m_pullTimer.Cancel();
 		m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
 		SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
 		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received too late missed chunk "<< chunk.c_id);
@@ -1071,7 +1072,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	  {
 		m_pullTimer.Cancel();
 		m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
-		SetChunkMissed(ChunkSelection(m_chunkSelection));
 		StatisticAddPullHit();
 		NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
 		Time shift = (Simulator::Now()-GetPullTimes(chunk.c_id));
@@ -1079,7 +1079,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 				<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
 	  }
 	}
-//	SetChunkMissed(!GetChunkMissed() || GetChunkMissed() < GetPullWBase() || GetChunkMissed() == chunk.c_id? ChunkSelection(m_chunkSelection) : GetChunkMissed());
 	SetChunkMissed(ChunkSelection(m_chunkSelection));
 	ratio = GetReceived();
 	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate ":" Received "))
@@ -1091,7 +1090,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		  <<" Missed="<<GetChunkMissed()
 		  <<" Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
 		  <<" Slot="<<GetPullSlotStart().GetSeconds());
-	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() && InPullRange())
+	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() && InPullRange() && PullSlot() < PullReqThr)
 	{
 		Time delay (0);
 		if (GetPullSlotStart() > Simulator::Now())
