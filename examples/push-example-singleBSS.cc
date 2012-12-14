@@ -45,7 +45,6 @@
 #include "ns3/wifi-module.h"
 #include "ns3/aodv-helper.h"
 #include "ns3/string.h"
-#include "ns3/flow-monitor-module.h"
 
 using namespace ns3;
 
@@ -56,7 +55,26 @@ uint32_t verbose = 0;
 uint32_t arpSent = 0;
 uint32_t videoBroadcast = 0;
 
-std::vector<uint32_t> msgVideo;
+std::vector<Time> channelStateStartTx;
+std::vector<Time> channelStateStartRx;
+std::vector<Time> channelState;
+uint32_t channelStateTx = 0;
+uint32_t channelStateRx = 0;
+double channelStateBusy = 0.0;
+
+std::vector<Time> channelBusyStartTx;
+std::vector<Time> channelBusyStartRx;
+std::vector<Time> channelBusy;
+uint32_t channelTx = 0;
+uint32_t channelTxS = 0;
+uint32_t channelRx = 0;
+uint32_t channelRxS = 0;
+double channelOccupancy = 0.0;
+
+std::vector<Time> pullStart;
+std::vector<Time> pullActive;
+double pullActivation = 0;
+std::vector<uint32_t> msgTxVideo;
 uint32_t msgTxVideoT = 0;
 uint32_t msgTxVideoP = 0;
 
@@ -86,8 +104,14 @@ uint32_t phyTxBegin = 0;
 uint32_t phyTxBeginP = 0;
 uint32_t phyTxEnd = 0;
 uint32_t phyTxDrop = 0;
+uint32_t phyRxBegin = 0;
+uint32_t phyRxBeginP = 0;
+uint32_t phyRxEnd = 0;
+uint32_t phyRxDrop = 0;
 uint32_t macTx = 0;
 uint32_t macTxP = 0;
+uint32_t macRx = 0;
+uint32_t macRxP = 0;
 uint32_t arpTx = 0;
 uint32_t arpTxP = 0;
 
@@ -110,45 +134,243 @@ struct mycontext GetContextInfo (std::string context){
 	return mcontext;
 }
 
+void PullState (std::string context, const uint32_t chunkr)
+{
+	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.callback<<" CR "<<chunkr<< " Time "<<Simulator::Now().GetNanoSeconds());
+	if ( mc.callback.compare("PullStart")==0 )
+	{
+		if(pullStart[mc.id] > Seconds(0))
+		{
+			NS_LOG_INFO(mc.callback<<" from Time "<<pullActive[mc.id] << " ADD " << (Simulator::Now() - pullStart[mc.id]));
+			pullActive[mc.id] += (Simulator::Now() - pullStart[mc.id]);
+		}
+		pullStart[mc.id] = Simulator::Now();
+	}
+	else if ( mc.callback.compare("PullStop")==0 )
+	{
+		if(pullStart[mc.id] > Seconds(0))
+		{
+			NS_LOG_INFO(mc.callback<<" from Time "<<pullActive[mc.id] << " ADD " << (Simulator::Now() - pullStart[mc.id]));
+			pullActive[mc.id] += (Simulator::Now() - pullStart[mc.id]);
+		}
+		pullStart[mc.id] = Simulator::Now();
+	}
+}
+
+void StatisticPullActive ()
+{
+	uint32_t nodesrange = 0;
+	for (uint32_t i = 0; i < pullStart.size(); i++)
+	{
+		if (pullStart[i].ToDouble(Time::NS)!=0)
+		{
+			pullActive[i] += (Simulator::Now() - pullStart[i]);
+			pullStart[i] = Simulator::Now();
+		}
+		std::cout << "PullActive Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << pullActive[i] << "\n";
+		if (pullActive[i] > Seconds(0))
+			nodesrange++;
+		pullActivation += (pullActive[i].ToDouble(Time::NS)/pow10(9));
+		pullActive[i] = Seconds(0);
+	}
+	std::cout << "PullActives \t" << Simulator::Now().GetSeconds()<< "\t" << pullActivation/(1.0*pullStart.size())<< "\t" << nodesrange << "\t"<<pullActivation/(nodesrange==0?1.0:nodesrange)<<"\n";
+	pullActivation = 0.0;
+}
+
+void
+WiFiState (std::string context, Time start, Time duration, enum WifiPhy::State state)
+{
+	struct mycontext mc = GetContextInfo (context);
+	NS_LOG_INFO(mc.callback<<" S "<< start << " T "<<duration << " State "<< state);
+	uint64_t now = Simulator::Now().ToInteger(Time::S);
+	now++;
+	Time slot = Seconds (now);
+	switch (state)
+	{
+		case WifiPhy::IDLE:
+		{	// Last idle time, time in idle state
+			if (channelStateStartTx[mc.id] != Seconds(0))
+			{
+				Time tmp = Simulator::Now() - channelStateStartTx[mc.id];
+				channelState[mc.id] += tmp;
+				channelStateStartTx [mc.id] = Seconds (0);
+			}
+			else if (channelStateStartRx[mc.id] != Seconds(0) )
+			{
+				Time tmp = Simulator::Now() - channelStateStartRx[mc.id];
+				channelState[mc.id] += tmp;
+				channelStateStartRx [mc.id] = Seconds (0);
+			}
+			break;
+		}
+		case WifiPhy::TX:
+		{	//Current time, Tx duration
+			if (start + duration < slot)
+				channelState[mc.id] += duration;
+			else
+				channelStateStartTx[mc.id] = Simulator::Now();
+			channelStateTx++;
+			break;
+		}
+		case WifiPhy::RX:
+		{	//Current time, Rx duration
+			if (start + duration < slot)
+				channelState[mc.id] += duration;
+			else
+				channelStateStartRx[mc.id] = Simulator::Now();
+			channelStateRx++;
+			break;
+		}
+		case WifiPhy::CCA_BUSY:
+		{
+			if (start + duration < slot)
+				channelState[mc.id] += duration;
+			else
+				channelStateStartRx[mc.id] = Simulator::Now();
+			channelStateRx++;
+			break;
+		}
+	}
+}
+
+void StatisticWiFiState ()
+{
+	for (uint32_t i = 0; i < channelState.size(); i++)
+	{
+		if (channelStateStartTx[i] != Seconds(0))
+		{
+			std::cout << "Now "<< Simulator::Now() << " tx " << channelStateStartTx[i];
+			channelState[i] += (Simulator::Now() - channelStateStartTx[i]);
+			channelStateStartTx[i] = Simulator::Now() ;
+			std::cout << " busy "<< channelState[i]  << " txn " << channelStateStartTx[i] << "\n";
+		}
+		else if (channelStateStartRx[i] != Seconds(0))
+		{
+			std::cout << "Now "<< Simulator::Now() << " rx " << channelStateStartRx[i];
+			channelState[i] += (Simulator::Now() - channelStateStartRx[i]);
+			channelStateStartRx[i] = Simulator::Now();
+			std::cout << " busy "<< channelState[i]  << " rxn " << channelStateStartRx[i] << "\n";
+		}
+		std::cout << "ChannelBusy Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << channelState[i] << "\n";
+		channelStateBusy += (channelState[i].ToDouble(Time::NS)/pow10(9));
+		channelState[i] = Seconds(0);
+	}
+	std::cout << "ChannelBusys \t" << Simulator::Now().GetSeconds()<< "\t" << channelStateBusy/(1.0*channelState.size())<< "\t"
+			<< channelStateTx << "\t" << channelStateRx << "\n";
+	channelStateBusy = 0.0;
+	channelStateTx = channelStateRx = 0;
+}
+
 void
 GenericPacketTrace (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
-//	controls
-//	std::cout << Simulator::Now().GetSeconds() << " "<< mc.id << " <<Trace="<< mc.callback << ">> " << p->GetSize() << " Pid="<< p->GetUid() << " Psize="<<p->GetSize()<< std::endl;
+	NS_LOG_INFO(mc.callback<<" ID "<<p->GetUid()<< " Size "<< p->GetSize() << " Time "<<Simulator::Now().GetNanoSeconds());
 	if ( mc.callback.compare("PhyTxBegin")==0 )
 	{
-		NS_LOG_INFO(mc.callback<<" ID="<<p->GetUid());
 		phyTxBegin += p->GetSize();
 		phyTxBeginP++;
+		if (channelBusyStartTx[mc.id]==Seconds(0))
+		{
+			NS_ASSERT(channelBusyStartTx[mc.id]==Seconds(0));
+			channelBusyStartTx[mc.id]=Simulator::Now();
+			channelTx++;
+			channelTxS+=p->GetSize();
+		}
 	}
 	else if ( mc.callback.compare("PhyTxEnd")==0 )
 	{
-		NS_LOG_INFO(mc.callback<<" ID="<<p->GetUid());
 		phyTxEnd += p->GetSize();
+		if (channelBusyStartTx[mc.id]!=Seconds(0))
+		{
+			NS_ASSERT(channelBusyStartTx[mc.id]!=Seconds(0));
+			channelBusy[mc.id]+= (Simulator::Now()-channelBusyStartTx[mc.id]);
+			channelBusyStartTx[mc.id]=Seconds(0);
+		}
 	}
 	else if ( mc.callback.compare("PhyTxDrop")==0)
 	{
-		NS_LOG_INFO(mc.callback<<" ID="<<p->GetUid());
 		phyTxDrop += p->GetSize();
+		NS_ASSERT(channelBusyStartTx[mc.id]!=Seconds(0));
+		channelBusy[mc.id]+=(Simulator::Now()-channelBusyStartTx[mc.id]);
+		channelBusyStartTx[mc.id]=Seconds(0);
+	}
+	else if ( mc.callback.compare("PhyRxBegin")==0 )
+	{
+		phyRxBegin += p->GetSize();
+		phyRxBeginP++;
+		if (channelBusyStartRx[mc.id]==Seconds(0))
+		{
+			NS_ASSERT(channelBusyStartRx[mc.id]==Seconds(0));
+			channelBusyStartRx[mc.id]=Simulator::Now();
+			channelRx++;
+			channelRxS+=p->GetSize();
+		}
+	}
+	else if ( mc.callback.compare("PhyRxEnd")==0 )
+	{
+		phyRxEnd += p->GetSize();
+		if (channelBusyStartRx[mc.id]!=Seconds(0))
+		{
+			NS_ASSERT(channelBusyStartRx[mc.id]!=Seconds(0));
+			channelBusy[mc.id]+=(Simulator::Now()-channelBusyStartRx[mc.id]);
+			channelBusyStartRx[mc.id]=Seconds(0);
+		}
+	}
+	else if ( mc.callback.compare("PhyRxDrop")==0)
+	{
+		phyRxDrop += p->GetSize();
+		if (channelBusyStartRx[mc.id]!=Seconds(0))
+		{
+			channelBusy[mc.id]+=(Simulator::Now()-channelBusyStartRx[mc.id]);
+			channelBusyStartRx[mc.id]=Seconds(0);
+		}
 	}
 	else if ( mc.callback.compare("MacTx")==0)
 	{
-		NS_LOG_INFO(mc.callback<<" ID="<<p->GetUid());
 		macTx += p->GetSize();
 		macTxP++;
 	}
+	else if ( mc.callback.compare("MacRx")==0)
+	{
+		macRx += p->GetSize();
+		macRxP++;
+	}
 	else if ( mc.callback.compare("TxArp")==0)
 	{
-		NS_LOG_INFO(mc.callback<<" ID="<<p->GetUid());
 		arpTx += p->GetSize();
 		arpTxP++;
 	}
 }
 
+void StatisticChannel ()
+{
+	for (uint32_t i = 0; i < channelBusy.size(); i++)
+	{
+		if (channelBusyStartTx[i].ToDouble(Time::NS)!=0)
+		{
+			channelBusy[i] += (Simulator::Now() - channelBusyStartTx[i]);
+			channelBusyStartTx[i] = Simulator::Now();
+		}
+		if (channelBusyStartRx[i].ToDouble(Time::NS)!=0)
+		{
+			channelBusy[i] += (Simulator::Now() - channelBusyStartRx[i]);
+			channelBusyStartRx[i] = Simulator::Now();
+		}
+		std::cout << "ChannelBuzy Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << channelBusy[i] << "\n";
+		channelOccupancy += (channelBusy[i].ToDouble(Time::NS)/pow10(9));
+		channelBusy[i] = Seconds(0);
+	}
+	std::cout << "ChannelBuzys \t" << Simulator::Now().GetSeconds()<< "\t" << channelOccupancy/(1.0*channelBusy.size())<< "\t"
+			<< channelTx <<"\t" << channelTxS << "\t" << channelRx << "\t" << channelRxS << "\n";
+	channelOccupancy = 0.0;
+	channelTx = channelRx = channelTxS = channelRxS = 0;
+}
+
 void StatisticPhy ()
 {
-	std::cout << "PhyMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<phyTxBegin<<"\t"<< phyTxBeginP<< "\n";
+	std::cout << "PhyTxBegin\t" << Simulator::Now().GetSeconds()<< "\t" <<phyTxBegin<<"\t"<< phyTxBeginP<< "\n";
 	phyTxBegin = phyTxBeginP = 0;
 	phyTxEnd = 0;
 	phyTxDrop = 0;
@@ -156,13 +378,13 @@ void StatisticPhy ()
 
 void StatisticMac ()
 {
-	std::cout << "MacMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<macTx<<"\t"<< macTxP<< "\n";
+	std::cout << "MacTx\t" << Simulator::Now().GetSeconds()<< "\t" <<macTx<<"\t"<< macTxP<< "\n";
 	macTx = macTxP = 0;
 }
 
 void StatisticArp()
 {
-	std::cout << "ArpMessages\t" << Simulator::Now().GetSeconds()<< "\t" <<arpTx<<"\t"<< arpTxP<< "\n";
+	std::cout << "TxArp\t" << Simulator::Now().GetSeconds()<< "\t" <<arpTx<<"\t"<< arpTxP<< "\n";
 	arpTx = arpTxP = 0;
 }
 
@@ -170,20 +392,21 @@ void
 VideoTrafficSent (std::string context, Ptr<const Packet> p)
 {
 	struct mycontext mc = GetContextInfo (context);
-	NS_ASSERT(mc.id >= 0 && mc.id <msgVideo.size());
-	msgVideo[mc.id] += p->GetSize();
+	NS_ASSERT(mc.id >= 0 && mc.id <msgTxVideo.size());
+	msgTxVideo[mc.id] += p->GetSize();
 	msgTxVideoT += p->GetSize();
+	msgTxVideoP++;
 }
 
-void StatisticVideo ()
+void StatisticVideoTrafficSent ()
 {
-	for (uint32_t i = 0; i < msgVideo.size(); i++)
+	for (uint32_t i = 0; i < msgTxVideo.size(); i++)
 	{
-		std::cout << "VideoDataMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgVideo[i] << "\n";
-		msgVideo[i] = 0;
+		std::cout << "VideoDataMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideo[i] << "\n";
+		msgTxVideo[i] = 0;
 	}
-	std::cout << "VideoDataMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoT<< "\n";
-	msgTxVideoT = 0;
+	std::cout << "VideoTxData\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoT<< "\t"<<msgTxVideoP<< "\n";
+	msgTxVideoT = msgTxVideoP = 0;
 }
 
 void
@@ -204,7 +427,7 @@ void StatisticTxDataPull ()
 		std::cout << "TxDataPull Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxDataPull[i] << "\n";
 		msgTxDataPull[i] = 0;
 	}
-	std::cout << "TxDataPulls\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxDataLP<< "\t"<< msgTxDataL <<  "\n";
+	std::cout << "VideoTxPull\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxDataLP<< "\t"<< msgTxDataL <<  "\n";
 	msgTxDataLP = msgTxDataL = 0;
 }
 
@@ -226,7 +449,7 @@ void StatisticRxDataPull ()
 		std::cout << "RxDataPull Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxDataPull[i] << "\n";
 		msgRxDataPull[i] = 0;
 	}
-	std::cout << "RxDataPulls\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxDataLP << "\t"<< msgRxDataL<< "\n";
+	std::cout << "VideoRxPull\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxDataLP << "\t"<< msgRxDataL<< "\n";
 	msgRxDataLP = msgRxDataL = 0;
 }
 
@@ -247,7 +470,7 @@ void StatisticControl ()
 		std::cout << "VideoControlMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxVideoControl[i] << "\n";
 		msgTxVideoControl[i] = 0;
 	}
-	std::cout << "VideoControlMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlT<< "\t" << msgControlP << "\n";
+	std::cout << "VideoTxControl\t" << Simulator::Now().GetSeconds()<< "\t" << msgTxControlT<< "\t" << msgControlP << "\n";
 	msgTxControlT = msgControlP = 0;
 }
 
@@ -291,7 +514,7 @@ void StatisticRxControlPull ()
 		std::cout << "RxPullMessage Node\t" << i << "\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxControlPull[i] << "\n";
 		msgRxControlPull[i] = 0;
 	}
-	std::cout << "RxPullMessages\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxControlL<< "\t" << msgRxControlLP << "\n";
+	std::cout << "VideoRxPull\t" << Simulator::Now().GetSeconds()<< "\t" << msgRxControlL<< "\t" << msgRxControlLP << "\n";
 	msgRxControlL = msgRxControlLP = 0;
 }
 
@@ -320,13 +543,16 @@ ResetValues ()
 	StatisticControl ();
 	StatisticTxControlPull ();
 	StatisticRxControlPull ();
-	StatisticVideo ();
+	StatisticVideoTrafficSent ();
 	StatisticTxDataPull ();
 	StatisticRxDataPull ();
 	StatisticNeighbors ();
 	StatisticPhy ();
 	StatisticMac ();
 	StatisticArp ();
+	StatisticChannel();
+	StatisticWiFiState ();
+	StatisticPullActive();
 	Simulator::Schedule (Seconds(1), &ResetValues);
 }
 
@@ -353,7 +579,7 @@ int main(int argc, char **argv)
 	// Streaming rate
 	uint64_t stream = 1000000;
 	// Packet Size
-	uint64_t packetsize = 1500;
+	uint64_t packetsize = 1400;
 	// Period between pull
 	double pulltime = 12;//in ms
 	// max number of pull to retrieve a chunk
@@ -407,7 +633,7 @@ int main(int argc, char **argv)
 
 	double selectionWeight = 0.0;
 
-	uint32_t flag = 0;
+	std::string filename("/dev/stdout");
 
 	CommandLine cmd;
 	cmd.AddValue ("sizeSource", "Number of nodes.", sizeSource);
@@ -421,8 +647,8 @@ int main(int argc, char **argv)
 	cmd.AddValue ("nakm0", "Nakagami exponent 0", nak_m0);
 	cmd.AddValue ("nakm1", "Nakagami exponent 1", nak_m1);
 	cmd.AddValue ("nakm2", "Nakagami exponent 2", nak_m2);
-	cmd.AddValue ("logn", "Reference path loss dB.", log_r);
-	cmd.AddValue ("logr", "Path loss exponent.", log_n);
+	cmd.AddValue ("logn", "Reference path loss dB.", log_n);
+	cmd.AddValue ("logr", "Path loss exponent.", log_r);
 	cmd.AddValue ("TxStart", "Transmission power start dBm.", TxStart);
 	cmd.AddValue ("TxEnd", "Transmission power end dBm.", TxEnd);
 	cmd.AddValue ("TxLevels", "Transmission power levels.", TxLevels);
@@ -450,7 +676,7 @@ int main(int argc, char **argv)
 	cmd.AddValue ("pullmreply", "Max pull replies", pullmreply);
 	cmd.AddValue ("selectionw", "Selection Weight [0-1]", selectionWeight);
 	cmd.AddValue ("v", "Verbose", verbose);
-	cmd.AddValue ("ff", "flag", flag);
+	cmd.AddValue ("f", "File out", filename);
 	cmd.Parse(argc, argv);
 
 	if (pullactive)
@@ -478,7 +704,6 @@ int main(int argc, char **argv)
 	Config::SetDefault ("ns3::VideoPushApplication::HelloTime", TimeValue(Time::FromDouble(hellotime,Time::S)));
 	Config::SetDefault ("ns3::VideoPushApplication::HelloLoss", UintegerValue(helloloss));
 	Config::SetDefault ("ns3::VideoPushApplication::Source", Ipv4AddressValue(Ipv4Address("10.0.0.1")));
-	Config::SetDefault ("ns3::VideoPushApplication::Flag", UintegerValue(flag));
 	Config::SetDefault ("ns3::VideoPushApplication::SelectionWeight", DoubleValue(selectionWeight));
 	Config::SetDefault ("ns3::VideoPushApplication::MaxPullReply", UintegerValue(pullmreply));
 	Config::SetDefault ("ns3::Ipv4L3Protocol::DefaultTtl", UintegerValue (1)); //avoid to forward broadcast packets
@@ -535,6 +760,7 @@ int main(int argc, char **argv)
 			<< " --RxGain=" << RxGain
 			<< " --EnergyDet=" << EnergyDet
 			<< " --CCAMode1=" << CCAMode1
+			<< " --broadRate="<<broadrate
 			<< " --xmax=" << xmax
 			<< " --ymax=" << ymax
 			<< " --radius=" << radius
@@ -580,10 +806,18 @@ int main(int argc, char **argv)
 	    msgTxVideoControl.push_back(0);
 	    msgTxControlPull.push_back(0);
 	    msgRxControlPull.push_back(0);
-	    msgVideo.push_back(0);
+	    msgTxVideo.push_back(0);
 	    msgTxDataPull.push_back(0);
 	    msgRxDataPull.push_back(0);
 	    neighbors.push_back(0);
+	    channelStateStartTx.push_back(Seconds(0));
+	    channelStateStartRx.push_back(Seconds(0));
+	    channelState.push_back(Seconds(0));
+	    channelBusyStartTx.push_back(Seconds(0));
+	    channelBusyStartRx.push_back(Seconds(0));
+	    channelBusy.push_back(Seconds(0));
+	    pullStart.push_back(Seconds(0));
+	    pullActive.push_back(Seconds(0));
 	}
 
 	NS_LOG_INFO ("Create WiFi channel");
@@ -809,6 +1043,7 @@ int main(int argc, char **argv)
 		videoC.SetAttribute ("DataRate", DataRateValue (DataRate (stream)));
 		videoC.SetAttribute ("PacketSize", UintegerValue (packetsize));
 		videoC.SetAttribute ("PeerType", EnumValue (PEER));
+		videoC.SetAttribute ("Source", Ipv4AddressValue(interfaces.GetAddress(0)));
 		videoC.SetAttribute ("LocalPort", UintegerValue (PUSH_PORT));
 		videoC.SetAttribute ("Local", AddressValue(interfaces.GetAddress(source.GetN()+n)));
 		videoC.SetAttribute ("PeerPolicy", EnumValue (PS_SINR));
@@ -826,21 +1061,24 @@ int main(int argc, char **argv)
 		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRx", MakeCallback (&GenericPacketTrace));
 //		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRxDrop", MakeCallback (&GenericPacketTrace));
 //
-//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiPhy/PhyTxBegin",	MakeCallback (&GenericPacketTrace));
-//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiPhy/PhyTxEnd",	MakeCallback (&GenericPacketTrace));
-//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiPhy/PhyTxDrop",	MakeCallback (&GenericPacketTrace));
 		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxBegin",	MakeCallback (&GenericPacketTrace));
-//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxEnd",	MakeCallback (&GenericPacketTrace));
-//		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxEnd",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxDrop",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxBegin",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxEnd",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop",	MakeCallback (&GenericPacketTrace));
+		Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/$ns3::YansWifiPhy/State/State", MakeCallback (&WiFiState));
 		Config::Connect ("/NodeList/*/$ns3::ArpL3Protocol/TxArp", MakeCallback (&GenericPacketTrace));
 
-		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxData", MakeCallback (&VideoTrafficSent));
-		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxControl", MakeCallback (&VideoControlSent));
-		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxPull", MakeCallback (&TxControlPull));
-		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/RxPull", MakeCallback (&RxControlPull));
-		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/TxDataPull", MakeCallback (&TxDataPull));
-		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/RxDataPull", MakeCallback (&RxDataPull));
-		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/NeighborTrace", MakeCallback (&Neighbors));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/VideoTxData", MakeCallback (&VideoTrafficSent));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/VideoTxControl", MakeCallback (&VideoControlSent));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/VideoTxPull", MakeCallback (&TxControlPull));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/VideoRxPull", MakeCallback (&RxControlPull));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/VideoTxDataPull", MakeCallback (&TxDataPull));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/VideoRxDataPull", MakeCallback (&RxDataPull));
+//		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/VideoPullStart", MakeCallback (&PullState));
+//		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/VideoPullStop", MakeCallback (&PullState));
+		Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::VideoPushApplication/VideoNeighborTrace", MakeCallback (&Neighbors));
 		Simulator::Schedule (Seconds(1), &ResetValues);
 	}
 
