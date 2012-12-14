@@ -989,7 +989,7 @@ VideoPushApplication::PeerLoop ()
 //					Time delay = Time::FromDouble (UniformVariable().GetValue (0, 1000), Time::US); //[0-1000]us random
 					Time delay = TransmissionDelay(0, 1000, Time::US); //[0-1000]us random
 					SetPullTimes (GetChunkMissed());
-					AddPullRequest();
+					StatisticAddPullRequest();
 					m_pullTimer.Schedule();
 					m_pullEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, GetChunkMissed(), target.GetAddress());
 					AddPullRetry(GetChunkMissed());
@@ -1086,7 +1086,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 				<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
 		m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
 		SetChunkMissed(ChunkSelection(m_chunkSelection));
-		AddPullHit();
+		StatisticAddPullHit();
 	  }
 	}
 	SetChunkMissed(!GetChunkMissed() || GetChunkMissed() < GetPullWBase() || GetChunkMissed() == chunk.c_id? ChunkSelection(m_chunkSelection) : GetChunkMissed());
@@ -1130,7 +1130,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		bool hasChunk = m_chunks.HasChunk (chunkid);
 		Time delay (0);
 		SetPullCReply(GetPullCReply()+1);
-		AddPullReceived ();
+		StatisticAddPullReceived ();
 		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply())
 		{
 			if (PullSlot () < PullRepThr)
@@ -1140,7 +1140,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 				NS_ASSERT (now <= GetPullSlotEnd());
 				m_chunkEvent = Simulator::ScheduleNow (&VideoPushApplication::SendChunk, this, chunkid, sender);
 				AddPending(chunkid);
-				AddPullReply ();
+				StatisticAddPullReply ();
 			}
 			else
 			{
@@ -1297,25 +1297,25 @@ switch (m_peerType)
 
 
 void
-VideoPushApplication::AddPullRequest ()
+VideoPushApplication::StatisticAddPullRequest ()
 {
 	m_statisticsPullRequest++;
 }
 
 void
-VideoPushApplication::AddPullHit ()
+VideoPushApplication::StatisticAddPullHit ()
 {
 	m_statisticsPullHit++;
 }
 
 void
-VideoPushApplication::AddPullReceived ()
+VideoPushApplication::StatisticAddPullReceived ()
 {
 	m_statisticsPullReceived++;
 }
 
 void
-VideoPushApplication::AddPullReply ()
+VideoPushApplication::StatisticAddPullReply ()
 {
 	m_statisticsPullReply++;
 }
@@ -1594,7 +1594,7 @@ VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
 			chunk.GetChunkMessage().SetChunk(*copy);
 			packet->AddHeader(chunk);
 			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies pull to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
-			AddPullReply ();
+			StatisticAddPullReply ();
 			m_txDataPullTrace (packet);
 			m_socket->SendTo (packet, 0, InetSocketAddress(target, PUSH_PORT));
 			break;

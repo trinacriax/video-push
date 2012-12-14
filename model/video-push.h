@@ -188,10 +188,10 @@ private:
 	bool IsPending (uint32_t chunkid);
 	bool RemovePending (uint32_t chunkid);
 	double GetReceived ();
-	void AddPullRequest ();
-	void AddPullHit ();
-	void AddPullReceived ();
-	void AddPullReply ();
+	void StatisticAddPullRequest ();
+	void StatisticAddPullHit ();
+	void StatisticAddPullReceived ();
+	void StatisticAddPullReply ();
 
 	void SetPullSlotStart (Time start);
 	Time GetPullSlotStart () const;
