@@ -222,7 +222,8 @@ VideoPushApplication::VideoPushApplication ():
 		m_playoutWindow (0),  m_chunkRatioMin (0), m_chunkRatioMax (0),
 		m_pullActive (false), m_pullSlot (0), m_pullSlotStart (0),
 		m_pullReplyMax (0), m_pullReplyCurrent (0),
-		m_pullChunkMissed (0), m_helloActive (0), m_helloTime (0), n_selectionWeight (0)
+		m_pullChunkMissed (0), m_helloActive (0), m_helloTime (0), n_selectionWeight (0),
+		m_pullWBase (0), m_playout (Timer::CANCEL_ON_DESTROY)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
@@ -496,6 +497,8 @@ void VideoPushApplication::StartApplication () // Called at time specified by St
       m_neighbors.SetSelectionWeight (n_selectionWeight);
       double inter_time = 1 / (m_cbrRate.GetBitRate()/(8.0*m_pktSize));
       m_pullSlot = Time::FromDouble(inter_time,Time::S);
+      m_playout.SetDelay(Time::FromDouble(inter_time,Time::S));
+      m_playout.SetFunction (&VideoPushApplication::UpdatePullWBase, this);
 //    m_pullSlot -= MicroSeconds(LPULLGUARD+RPULLGUARD);
 //      double v = ceil(m_pullSlot.ToDouble(Time::US)/m_pullTime.ToDouble(Time::US));
 //      SetPullMReply((uint32_t) v);
@@ -713,6 +716,13 @@ uint32_t
 VideoPushApplication::GetPullWindow () const
 {
 	return m_playoutWindow;
+}
+
+void
+VideoPushApplication::UpdatePullWBase ()
+{
+	m_pullWBase++;
+	m_playout.Schedule();
 }
 
 void
@@ -1046,6 +1056,12 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	{
 		SetPullSlotStart (Simulator::Now());
 		ResetPullCReply ();
+		if (m_chunks.GetSize() == 1) // this is the first chunk
+		{
+			NS_ASSERT (!m_playout.IsRunning());
+			double playtime = GetPullSlot().ToDouble(Time::US)*GetPullWindow();
+			m_playout.Schedule(MicroSeconds(playtime));
+		}
 	}
 	if (duplicated) // Duplicated chunk
 	{
@@ -1401,7 +1417,6 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		{
 			ChunkVideo cv = ForgeChunk();
 			chunkid = cv.c_id;
-			SetPullWBase (chunkid<GetPullWindow()?1:chunkid-GetPullWindow());
 			bool addChunk = m_chunks.AddChunk(cv, CHUNK_RECEIVED_PUSH);
 			NS_ASSERT (addChunk);
 			NS_ASSERT (m_duplicates.find(cv.c_id) == m_duplicates.end());

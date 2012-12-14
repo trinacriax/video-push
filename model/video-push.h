@@ -64,7 +64,6 @@ enum ChunkPolicy {
 
 };
 
-static uint32_t	m_pullWBase;		// pull window
 const uint32_t PUSH_PORT = 9999;
 const Time LPULLGUARD = MicroSeconds(0);
 const Time RPULLGUARD = MicroSeconds(0);
@@ -225,8 +224,9 @@ private:
 	Ipv4Address GetLocalAddress ();
 	void StatisticChunk (void);
 
-	static void SetPullWBase (uint32_t base);
-	static uint32_t GetPullWBase ();
+	uint32_t GetPullWBase ();
+	void SetPullWBase (uint32_t base);
+	void UpdatePullWBase ();
 
 	Ptr<Socket>     m_socket;				// Associated socket
 	std::list<Ptr<Socket> > m_socketList;	// Accepted sockets
@@ -266,6 +266,8 @@ private:
 	Time 			m_pullTimeout;			// Pull timeout time
 	Timer 			m_pullTimer;			// Pull timer to pull chunks
 	uint32_t 		m_pullRetriesMax;		// Max number of pull attempts allowed per chunk
+	uint32_t		m_pullWBase;			// Pull window base chunk
+	Timer 			m_playout;				// Playout Timer
 	std::map<uint32_t, uint32_t> m_pullRetriesCurrent;	// Count pull attempts to recover a chunk
 	std::map<uint32_t, Time> m_pullTimes; 	// Collect the time to recover each chunk
 	std::map<uint32_t, uint32_t> m_pullPending;	// Collect pending pulls
