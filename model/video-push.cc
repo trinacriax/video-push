@@ -1060,7 +1060,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	}
 	else if (duplicated) // Duplicated chunk
 	{
-	  AddDuplicate (chunk.c_id);
+	  StatisticAddDuplicateChunk (chunk.c_id);
 //	  if(IsPending(chunk.c_id))
 //		  RemovePending(chunk.c_id);
 	}
@@ -1356,7 +1356,7 @@ VideoPushApplication::GetPullRetry (uint32_t chunkid)
 }
 
 void
-VideoPushApplication::AddDuplicate (uint32_t chunkid)
+VideoPushApplication::StatisticAddDuplicateChunk (uint32_t chunkid)
 {
 	NS_ASSERT (chunkid>0);
 	if(m_duplicates.find(chunkid) == m_duplicates.end())
