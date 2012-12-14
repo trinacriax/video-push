@@ -826,10 +826,8 @@ VideoPushApplication::SetChunkDelay (uint32_t chunkid, Time delay)
 	NS_ASSERT (chunkid>0);
 	NS_ASSERT (m_chunks.HasChunk(chunkid)||m_chunks.GetChunkState(chunkid) == CHUNK_DELAYED);
 	uint64_t udelay = delay.GetMicroSeconds();
-	if (m_chunk_delay.find(chunkid) == m_chunk_delay.end())
-		m_chunk_delay.insert(std::pair<uint32_t, uint64_t>(chunkid,udelay));
-	else
-		m_chunk_delay.find(chunkid)->second = udelay;
+	NS_ASSERT(m_chunk_delay.find(chunkid) == m_chunk_delay.end());
+	m_chunk_delay.insert(std::pair<uint32_t, uint64_t>(chunkid,udelay));
 }
 
 Time
