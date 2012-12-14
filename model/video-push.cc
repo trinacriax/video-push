@@ -1137,26 +1137,13 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		bool hasChunk = m_chunks.HasChunk (chunkid);
 		Time delay (0);
 		StatisticAddPullReceived ();
-		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply())
+		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply() && PullSlot () < PullRepThr)
 		{
-			if (PullSlot () < PullRepThr)
-			{
-				NS_LOG_INFO(GetPullSlotStart().GetMicroSeconds()<<" < " << now.GetMicroSeconds() << " < " << GetPullSlotEnd().GetMicroSeconds() << " : "<< (GetPullSlotEnd()-Simulator::Now()).GetMicroSeconds());
-				NS_ASSERT (now >= GetPullSlotStart());
-				NS_ASSERT (now <= GetPullSlotEnd());
-				m_chunkEvent = Simulator::ScheduleNow (&VideoPushApplication::SendChunk, this, chunkid, sender);
-				AddPending(chunkid);
-			}
-			else
-			{
-//				if (GetPullSlotStart() > now)
-//					delay = GetPullSlotStart() - now;
-//				else if (now < GetPullSlotEnd())
-//					delay = GetPullSlotEnd() - now + MicroSeconds(RPULLGUARD);
-//				else
-//					NS_ASSERT(false);
-//				m_chunkEvent = Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
-			}
+			NS_LOG_INFO(GetPullSlotStart().GetMicroSeconds()<<" < " << now.GetMicroSeconds() << " < " << GetPullSlotEnd().GetMicroSeconds() << " : "<< (GetPullSlotEnd()-Simulator::Now()).GetMicroSeconds());
+			NS_ASSERT (now >= GetPullSlotStart());
+			NS_ASSERT (now <= GetPullSlotEnd());
+			m_chunkEvent = Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
+			AddPending(chunkid);
 		}
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " Received pull for " <<  chunkid << (hasChunk?"(Y)":"(N)") <<" from " << sender << ", reply in "<<delay.GetSeconds());
 		break;
