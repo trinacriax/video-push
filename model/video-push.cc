@@ -1045,26 +1045,14 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	// Update Chunk Buffer START
 	uint32_t last = m_chunks.GetLastChunk();
 	double ratio = 0.0;
-//#define MISS // INDUCING MISSING CHUNKS START
-#ifdef MISS
-	bool missed_chunk = UniformVariable().GetValue() < 0.05;
-//	uint32_t chunktomiss = 10;//Only node 2 misses chunk #1
-//	missed_chunk = (chunk.c_id>last && chunk.c_id%chunktomiss == 0);
-	if(missed_chunk)
-	{
-	  NS_LOG_INFO ("Node " << GetLocalAddress() << " missed chunk " <<  chunk.c_id);
-	  return;
-	}
-#endif
-	// INDUCING MISSING CHUNKS END.
-	bool toolate = (m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED);
+	bool toolate = (m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED || chunk.c_id < GetPullWBase()); // chunk has been expired
 	bool duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
-	if (sender == GetSource() && !duplicated)//&& m_chunks.GetBufferSize() == 1 && !duplicated)
+	if (sender == GetSource() && !duplicated)
 	{
 		SetPullSlotStart (Simulator::Now());
 		ResetPullCReply ();
 	}
-	if (toolate) // Chunk was pulled and received to late
+	if (toolate)// Chunk has been expired
 	{
 		m_pullTimer.Cancel();
 		m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
@@ -1075,8 +1063,8 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	else if (duplicated) // Duplicated chunk
 	{
 	  AddDuplicate (chunk.c_id);
-	  if(IsPending(chunk.c_id))
-		  RemovePending(chunk.c_id);
+//	  if(IsPending(chunk.c_id))
+//		  RemovePending(chunk.c_id);
 	}
 	else //chunk received correctly
 	{
