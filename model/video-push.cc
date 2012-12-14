@@ -1156,9 +1156,7 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 		{
 			uint32_t n_last = helloheader.GetLastChunk();
 			uint32_t n_chunks = helloheader.GetChunksReceived();
-//			uint32_t n_neighborhood = helloheader.GetNeighborhoodSize();
 			double n_ratio = (helloheader.GetChunksRatio()/1000.0);
-//			Ipv4Address destination = helloheader.GetDestination();
 			Ipv4Mask mask ("255.0.0.0");
 			NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast hello from " << sender << " #Chunks="<< n_chunks << " Ratio="<< n_ratio);
 			Neighbor nt (sender, PUSH_PORT);
@@ -1253,9 +1251,15 @@ switch (m_peerType)
 					  NS_ASSERT (GetHelloActive());
 					  if (packetTag)
 					  {
-						  double sinr = ptag.GetSinr();
+ 						  double sinr = ptag.GetSinr();
+						  double alpha = 1.0;//more weight to latest sample
+// 						  if(chunkH.GetHelloMessage().GetChunksRatio() >= GetPullRatioMin())//Wrong, need hellos more frequent!
 						  m_neighbors.AddNeighbor(nt);
-						  m_neighbors.GetNeighbor (nt)->SetSINR(sinr);
+						  if (m_neighbors.IsNeighbor(nt))
+						  {
+							  sinr = alpha * sinr + (1-alpha)*m_neighbors.GetNeighbor (nt)->GetSINR();
+							  m_neighbors.GetNeighbor (nt)->SetSINR(sinr);
+						  }
 					  }
 					  m_rxControlTrace (packet, address);
 					  HandleHello(chunkH.GetHelloMessage(), sourceAddr);
