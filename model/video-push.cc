@@ -1067,16 +1067,16 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	else //chunk received correctly
 	{
 	  SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
-	  if (GetChunkMissed() && GetChunkMissed() == chunk.c_id)// && Pulled (chunk.c_id) )
+	  if (GetPullRetry(chunk.c_id))// has been pulled
 	  {
 		m_pullTimer.Cancel();
+		m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
+		SetChunkMissed(ChunkSelection(m_chunkSelection));
+		StatisticAddPullHit();
 		NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
 		Time shift = (Simulator::Now()-GetPullTimes(chunk.c_id));
 		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< chunk.c_id<< " after "
 				<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
-		m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
-		SetChunkMissed(ChunkSelection(m_chunkSelection));
-		StatisticAddPullHit();
 	  }
 	}
 	SetChunkMissed(!GetChunkMissed() || GetChunkMissed() < GetPullWBase() || GetChunkMissed() == chunk.c_id? ChunkSelection(m_chunkSelection) : GetChunkMissed());
