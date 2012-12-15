@@ -1123,13 +1123,13 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 	case PEER:
 	{
 		NS_ASSERT (GetPullActive());
-		uint32_t chunkid = pullheader.GetChunk();
 		NS_ASSERT (m_statisticsPullReceived>=m_statisticsPullReply);
+		uint32_t chunkid = pullheader.GetChunk();
 		Time now = Simulator::Now();
 		bool hasChunk = m_chunks.HasChunk (chunkid);
-		Time delay = TransmissionDelay(0, 3000, Time::US);
+		Time delay = TransmissionDelay(0, 1500, Time::US);
 		StatisticAddPullReceived ();
-		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply() && PullSlot () < PullRepThr)
+		if (hasChunk && !m_chunkEvent.IsRunning() && /*chunkid >= GetPullWBase() &&*/ GetPullCReply() <= GetPullMReply() && PullSlot () < PullRepThr)
 		{
 			NS_LOG_DEBUG(GetPullSlotStart().GetMicroSeconds()<<" < " << now.GetMicroSeconds() << " < " << GetPullSlotEnd().GetMicroSeconds() << " : "<< (GetPullSlotEnd()-Simulator::Now()).GetMicroSeconds());
 			NS_ASSERT (now >= GetPullSlotStart());
