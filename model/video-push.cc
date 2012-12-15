@@ -1050,7 +1050,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		if (m_chunks.GetSize() == 1) // this is the first chunk
 		{
 			NS_ASSERT (!m_playout.IsRunning());
-			double playtime = GetPullSlot().ToDouble(Time::US)*GetPullWindow();
+			double playtime = ceil (GetPullSlot().ToDouble(Time::US)*(GetPullWindow()-1));
 			m_playout.Schedule(MicroSeconds(playtime));
 		}
 	}
