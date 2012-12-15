@@ -965,7 +965,7 @@ VideoPushApplication::PeerLoop ()
 			NS_ASSERT (GetHelloActive());
 			NS_ASSERT (!m_pullTimer.IsRunning());
 			/* There is a missed chunk*/
-			while (GetChunkMissed() && GetPullRetry(GetChunkMissed()) >= GetPullMax())/* Mark chunks as skipped*/
+			while (GetChunkMissed() && (GetPullRetry(GetChunkMissed()) >= GetPullMax()||GetChunkMissed()<GetPullWBase()))/* Mark chunks as skipped*/
 			{
 				m_chunks.SetChunkState(GetChunkMissed(), CHUNK_SKIPPED); // Mark as skipped
 				RemPullTimes(GetChunkMissed()); // Remove the chunk form PullTimes
@@ -975,22 +975,6 @@ VideoPushApplication::PeerLoop ()
 				NS_LOG_INFO ("Node " <<m_node->GetId()<< " is marking chunk "<< lastmissed
 						<<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<"/"<<GetPullMax()<<") New missed="<<GetChunkMissed ());
 			}
-//			if (!PullSlot ())/*Check whether the node is within a pull slot or not*/
-//			{
-//				Time delay (0);
-//				if (GetPullSlotStart() > Simulator::Now())
-//				delay = GetPullSlotStart() - Simulator::Now();
-//				else if (Simulator::Now() > GetPullSlotEnd())
-//				delay = GetPullSlotEnd() + MicroSeconds(LPULLGUARD+RPULLGUARD);
-//				else
-//				delay = Seconds(0);
-//				NS_ASSERT(delay.GetMicroSeconds() >= 0);
-//				m_pullTimer.Schedule (delay);
-//				NS_LOG_INFO ("Node " <<m_node->GetId()<< " No time to pull: ("<<GetPullSlotStart().GetSeconds()
-//				<< " < "<<Simulator::Now().GetSeconds() << " < "<<GetPullSlotEnd().GetSeconds() << ") reschedule in "<<delay.GetSeconds()<< "sec");
-//				NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
-//				break;
-//			}
 			double ratio = GetReceived ();
 			SetChunkMissed((!GetChunkMissed() || GetChunkMissed() < GetPullWBase()) ? ChunkSelection(m_chunkSelection) : GetChunkMissed());
 			NS_LOG_INFO ("Node " << m_node->GetId() << " IP=" << GetLocalAddress()
@@ -1007,11 +991,14 @@ VideoPushApplication::PeerLoop ()
 					NS_ASSERT (m_neighbors.IsNeighbor(target));
 					Time delay = TransmissionDelay(0, 2000, Time::US); //[0-1000]us random
 					SetPullTimes (GetChunkMissed());
+					NS_ASSERT (!m_pullTimer.IsRunning());
+					NS_ASSERT (!m_pullEvent.IsRunning());
 					m_pullTimer.Schedule ();
 					m_pullEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, GetChunkMissed(), target.GetAddress());
 					NS_LOG_INFO ("Node " <<m_node->GetId()<< " schedule pull to "<< target.GetAddress()
 							<< " for chunk " << GetChunkMissed() <<" ("<< GetPullRetry(GetChunkMissed())<<") at "
-							<<  Simulator::Now()+delay  << " timeout "<< m_pullTimer.GetDelay());
+							<<  Simulator::Now()+delay  << " timeout "<< (Simulator::Now()+m_pullTimer.GetDelay())
+							<< " PullTimer "<< m_pullTimer.IsRunning());
 				}
 				else
 				{
