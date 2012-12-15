@@ -1188,6 +1188,7 @@ VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
 	{
 		case PEER:
 		{
+			NS_ASSERT (!m_chunkEvent.IsRunning());
 			ChunkHeader chunk (MSG_CHUNK);
 			ChunkVideo *copy = m_chunks.GetChunk(chunkid);
 			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
