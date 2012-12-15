@@ -154,6 +154,7 @@ namespace ns3{
 	uint32_t
 	ChunkBuffer::GetLeastMissed (uint32_t base, uint32_t window)
 	{
+		NS_ASSERT (base >=0 && window > 0);
 		uint32_t missed = 1;
 		int32_t low = base;
 		missed = low < 1 ? 1 : low;
@@ -162,7 +163,7 @@ namespace ns3{
 		{
 			missed++;
 		}
-		missed = (missed<=last?missed:0);
+		missed = (missed<=upper?missed:0);
 		missed = (missed>=low?missed:0);
 		return missed;
 	}
