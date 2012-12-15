@@ -1046,11 +1046,10 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	NS_ASSERT (chunk);
 	m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
 	bool toolate = (m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED || chunk.c_id < GetPullWBase()); // chunk has been expired
-	bool duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
+	bool duplicated = m_chunks.HasChunk(chunk.c_id);
 	if (sender == GetSource() && !duplicated)
 	{
 		SetPullSlotStart (Simulator::Now());
-		ResetPullCReply ();
 		if (m_chunks.GetSize() == 1) // this is the first chunk
 		{
 			NS_ASSERT (!m_playout.IsRunning());
@@ -1064,29 +1063,33 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 //	  if(IsPending(chunk.c_id))
 //		  RemovePending(chunk.c_id);
 	}
-	else //chunk received correctly
+	else if (GetPullRetry(chunk.c_id) && toolate)// has been pulled and received too late
 	{
-	  if (GetPullRetry(chunk.c_id))// has been pulled
-	  {
-		if (toolate)
+		m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
+		NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received too late missed chunk "<< chunk.c_id);
+		NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND");
+	}
+	else
+	{
+		Time delay = Simulator::Now() - MicroSeconds(chunk.c_tstamp);
+		SetChunkDelay(chunk.c_id, delay);
+		if (GetPullRetry(chunk.c_id)) // has been pulled and received in time
 		{
-			m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
-			NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received too late missed chunk "<< chunk.c_id);
-		}
-		else
-		{
-			m_chunks.SetChunkState(chunk.c_id, CHUNK_RECEIVED_PULL);
-			StatisticAddPullHit();
-			m_pullTimer.Cancel();
+			m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PULL);
+			NS_ASSERT (sender != GetSource());
+			NS_ASSERT (m_pullTimer.IsRunning());
 			NS_ASSERT (!m_pullEvent.IsRunning());
+			m_pullTimer.Cancel();
+			StatisticAddPullHit();
 			Time shift = (Simulator::Now()-GetPullTimes(chunk.c_id));
 			NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< chunk.c_id<< " after "
 					<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
+			NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND");
 		}
-		NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND");
-	  }
-	  Time delay = Simulator::Now() - MicroSeconds(chunk.c_tstamp);
-	  SetChunkDelay(chunk.c_id, delay);
+		else{
+			NS_ASSERT (sender == GetSource());
+			m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
+		}
 	}
 	SetChunkMissed(ChunkSelection(m_chunkSelection));
 	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate ":" Received ")) << chunk.c_id
@@ -1095,13 +1098,13 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		  <<" #Neighbors "<< m_neighbors.GetSize()
 		  <<" Missed="<<GetChunkMissed()<< " Chunks="<<m_chunks.GetBufferSize()
 		  <<" Slot="<<GetPullSlotStart().GetSeconds());
-//	NS_LOG_INFO (m_chunks.PrintBuffer());
-	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() && InPullRange())
+	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() && !m_pullEvent.IsRunning() && InPullRange())
 	{
-		Time delay = TransmissionDelay(0, 2000, Time::US);
-		Time lag = GetPullSlotStart() - Simulator::Now();
+		NS_ASSERT (!m_pullTimer.IsRunning());
+		NS_ASSERT (!m_pullEvent.IsRunning());
+		Time delay (0);
 		if (GetPullSlotStart() > Simulator::Now())
-			delay = delay>lag?delay:lag;
+			delay = GetPullSlotStart() - Simulator::Now();
 		NS_ASSERT(GetPullSlotEnd() > Simulator::Now());
 		m_pullTimer.Schedule (delay);
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " will pull "<<GetChunkMissed()<< " at "<<(Simulator::Now()+delay));
