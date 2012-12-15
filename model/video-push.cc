@@ -776,7 +776,7 @@ VideoPushApplication::InPullRange ()
 void
 VideoPushApplication::SetPullTimes (uint32_t chunkid)
 {
-	NS_LOG_INFO("LOADING "<<chunkid);
+	NS_LOG_DEBUG("LOADING "<<chunkid);
 	if (m_pullTimes.find(chunkid)==m_pullTimes.end())
 	{
 		std::pair<uint32_t,Time> pair (chunkid, Simulator::Now());
@@ -787,7 +787,7 @@ VideoPushApplication::SetPullTimes (uint32_t chunkid)
 void
 VideoPushApplication::SetPullTimes (uint32_t chunkid, Time time)
 {
-	NS_LOG_INFO("LOADING "<<chunkid);
+	NS_LOG_DEBUG("LOADING "<<chunkid);
 	if (m_pullTimes.find(chunkid)==m_pullTimes.end())
 	{
 		std::pair<uint32_t,Time> pair (chunkid, Seconds (time));
@@ -798,7 +798,7 @@ VideoPushApplication::SetPullTimes (uint32_t chunkid, Time time)
 Time
 VideoPushApplication::GetPullTimes (uint32_t chunkid)
 {
-	NS_LOG_INFO("REMLOADING "<<chunkid);
+	NS_LOG_DEBUG("REMLOADING "<<chunkid);
 	Time p = Seconds (0);
 	if (m_pullTimes.find(chunkid)!=m_pullTimes.end())
 	{
@@ -810,7 +810,7 @@ VideoPushApplication::GetPullTimes (uint32_t chunkid)
 Time
 VideoPushApplication::RemPullTimes (uint32_t chunkid)
 {
-	NS_LOG_INFO("REMLOADING "<<chunkid);
+	NS_LOG_DEBUG("REMLOADING "<<chunkid);
 	Time p = Seconds (0);
 	if (m_pullTimes.find(chunkid)!=m_pullTimes.end())
 	{
@@ -824,7 +824,7 @@ VideoPushApplication::RemPullTimes (uint32_t chunkid)
 bool
 VideoPushApplication::Pulled (uint32_t chunkid)
 {
-	NS_LOG_INFO("Pulled "<<chunkid);
+	NS_LOG_DEBUG("Pulled "<<chunkid);
 	return (m_pullTimes.find(chunkid)!=m_pullTimes.end());
 }
 
@@ -885,7 +885,7 @@ VideoPushApplication::SetPullSlotStart (Time start)
 	/// Schedule the next pull start
 	Time nextStart = start + GetPullSlot();
 	Time delay = GetPullSlot() - RPULLGUARD;
-//	NS_LOG_INFO ("Now "<< Simulator::Now()<< " Start="<<m_pullSlotStart
+//	NS_LOG_DEBUG ("Now "<< Simulator::Now()<< " Start="<<m_pullSlotStart
 //			<<" End="<<GetPullSlotEnd()<< " Slot="<<GetPullSlot()
 //			<<" Delay="<<delay<<" Next="<<nextStart);
 	m_pullSlotEvent = Simulator::Schedule (delay, &VideoPushApplication::SetPullSlotStart, this, nextStart);
@@ -900,7 +900,7 @@ VideoPushApplication::GetPullSlotEnd() const
 double
 VideoPushApplication::PullSlot ()
 {
-	NS_LOG_INFO ("Node=" <<m_node->GetId()<< " NextSlot="<<GetPullSlotEnd().GetSeconds());
+	NS_LOG_DEBUG ("Node=" <<m_node->GetId()<< " NextSlot="<<GetPullSlotEnd().GetSeconds());
 	Time now = Simulator::Now();
 	double r = 1.0;
 	if (now >= GetPullSlotStart() && now <= GetPullSlotEnd())
@@ -960,7 +960,7 @@ VideoPushApplication::PeerLoop ()
 	{
 		case PEER:
 		{
-			NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLSTART");
+			NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLSTART");
 			NS_ASSERT (GetPullActive());
 			NS_ASSERT (GetHelloActive());
 			NS_ASSERT (!m_pullTimer.IsRunning());
@@ -1002,13 +1002,13 @@ VideoPushApplication::PeerLoop ()
 				}
 				else
 				{
-					NS_LOG_INFO ("Node " <<m_node->GetId()<< " has no neighbors to pull chunk "<< GetChunkMissed());
-					NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
+					NS_LOG_DEBUG ("Node " <<m_node->GetId()<< " has no neighbors to pull chunk "<< GetChunkMissed());
+					NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND");
 					SetPullTimes (GetChunkMissed());
 				}
 			}
 			else
-				NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND "<< GetChunkMissed() << ", "<<InPullRange());
+				NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND "<< GetChunkMissed() << ", "<<InPullRange());
 			break;
 		}
 		case SOURCE:
@@ -1078,7 +1078,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 			NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< chunk.c_id<< " after "
 					<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
 		}
-		NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
+		NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND");
 	  }
 	  Time delay = Simulator::Now() - MicroSeconds(chunk.c_tstamp);
 	  SetChunkDelay(chunk.c_id, delay);
@@ -1123,7 +1123,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		StatisticAddPullReceived ();
 		if (hasChunk && chunkid >= GetPullWBase() && GetPullCReply() <= GetPullMReply() && PullSlot () < PullRepThr)
 		{
-			NS_LOG_INFO(GetPullSlotStart().GetMicroSeconds()<<" < " << now.GetMicroSeconds() << " < " << GetPullSlotEnd().GetMicroSeconds() << " : "<< (GetPullSlotEnd()-Simulator::Now()).GetMicroSeconds());
+			NS_LOG_DEBUG(GetPullSlotStart().GetMicroSeconds()<<" < " << now.GetMicroSeconds() << " < " << GetPullSlotEnd().GetMicroSeconds() << " : "<< (GetPullSlotEnd()-Simulator::Now()).GetMicroSeconds());
 			NS_ASSERT (now >= GetPullSlotStart());
 			NS_ASSERT (now <= GetPullSlotEnd());
 			m_chunkEvent = Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
@@ -1155,7 +1155,7 @@ VideoPushApplication::HandleHello (ChunkHeader::HelloMessage &helloheader, const
 			uint32_t n_chunks = helloheader.GetChunksReceived();
 			double n_ratio = (helloheader.GetChunksRatio()/1000.0);
 			Ipv4Mask mask ("255.0.0.0");
-			NS_LOG_INFO ("Node " << GetLocalAddress() << " receives broadcast hello from " << sender << " #Chunks="<< n_chunks << " Ratio="<< n_ratio);
+			NS_LOG_DEBUG ("Node " << GetLocalAddress() << " receives broadcast hello from " << sender << " #Chunks="<< n_chunks << " Ratio="<< n_ratio);
 			Neighbor nt (sender, PUSH_PORT);
 			if (m_neighbors.IsNeighbor(nt))
 			{
@@ -1490,7 +1490,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 		pull.GetPullMessage ().SetChunk (chunkid);
 		Ptr<Packet> packet = Create<Packet> ();
 		packet->AddHeader(pull);
-		NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
+		NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
 		NS_ASSERT( GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
 		NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
 		NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
@@ -1531,7 +1531,7 @@ void VideoPushApplication::SendHello ()
 			Ptr<Packet> packet = Create<Packet> ();
 			packet->AddHeader(hello);
 			m_txControlTrace (packet);
-			NS_LOG_INFO ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
+			NS_LOG_DEBUG ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
 			m_socket->SendTo(packet, 0, InetSocketAddress (subnet, PUSH_PORT));
 		//	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 1000)), Time::MS);
 			m_helloTimer.Schedule ();
