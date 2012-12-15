@@ -879,7 +879,6 @@ void
 VideoPushApplication::SetPullSlotStart (Time start)
 {
 	m_pullSlotStart = start + LPULLGUARD;
-	ResetPullCReply ();
 	if (m_pullSlotEvent.IsRunning())
 		m_pullSlotEvent.Cancel();
 	/// Schedule the next pull start
@@ -1050,6 +1049,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	if (sender == GetSource() && !duplicated)
 	{
 		SetPullSlotStart (Simulator::Now());
+		ResetPullCReply ();
 		if (m_chunks.GetSize() == 1) // this is the first chunk
 		{
 			NS_ASSERT (!m_playout.IsRunning());
