@@ -1123,7 +1123,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 		Ptr<Packet> packet = Create<Packet> ();
 		packet->AddHeader(pull);
 		NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
-		NS_ASSERT( GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
+		NS_ASSERT (GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
 		NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
 		NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
 		AddPullRetry(GetChunkMissed());
