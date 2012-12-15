@@ -1565,10 +1565,6 @@ VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
 	{
 		case PEER:
 		{
-			if (!IsPending(chunkid)){
-				NS_LOG_DEBUG("Chunk "<< chunkid << " is not pending anymore");
-				break;
-			}
 			ChunkHeader chunk (MSG_CHUNK);
 			ChunkVideo *copy = m_chunks.GetChunk(chunkid);
 			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
