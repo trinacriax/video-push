@@ -1062,7 +1062,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	}
 	else //chunk received correctly
 	{
-	  SetChunkDelay(chunk.c_id, (Simulator::Now() - Time::FromInteger(chunk.c_tstamp,Time::US)));
 	  if (GetPullRetry(chunk.c_id))// has been pulled
 	  {
 		if (toolate)
@@ -1081,25 +1080,26 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		}
 		NS_LOG_INFO ("Node " <<m_node->GetId()<<" PULLEND");
 	  }
+	  Time delay = Simulator::Now() - MicroSeconds(chunk.c_tstamp);
+	  SetChunkDelay(chunk.c_id, delay);
 	}
 	SetChunkMissed(ChunkSelection(m_chunkSelection));
-	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate ":" Received "))
-		  << chunk.c_id
-		  <<" from " << sender
-		  <<" Ratio="<<GetReceived()
-		  <<" Pull "<< m_pullTimer.IsRunning() << "(D="<<m_pullTimer.GetDelay()<<"/N=" << m_pullTimer.GetDelayLeft()<<")"
+	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate ":" Received ")) << chunk.c_id
+		  <<" from " << sender <<" Ratio="<<GetReceived() <<" Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
+		  <<" PullTimer "<< m_pullTimer.IsRunning() << "(D="<<m_pullTimer.GetDelay()<<"/N=" << m_pullTimer.GetDelayLeft()<<")"
 		  <<" #Neighbors "<< m_neighbors.GetSize()
-		  <<" Missed="<<GetChunkMissed()
-		  <<" Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
+		  <<" Missed="<<GetChunkMissed()<< " Chunks="<<m_chunks.GetBufferSize()
 		  <<" Slot="<<GetPullSlotStart().GetSeconds());
-	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() && InPullRange() && PullSlot() < PullReqThr)
+//	NS_LOG_INFO (m_chunks.PrintBuffer());
+	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() && InPullRange())
 	{
 		Time delay = TransmissionDelay(0, 2000, Time::US);
+		Time lag = GetPullSlotStart() - Simulator::Now();
 		if (GetPullSlotStart() > Simulator::Now())
-			delay = GetPullSlotStart() - Simulator::Now();
+			delay = delay>lag?delay:lag;
 		NS_ASSERT(GetPullSlotEnd() > Simulator::Now());
 		m_pullTimer.Schedule (delay);
-		NS_LOG_INFO ("Node " << GetLocalAddress() << " will pull "<<GetChunkMissed()<< " @ "<<delay.GetSeconds());
+		NS_LOG_INFO ("Node " << GetLocalAddress() << " will pull "<<GetChunkMissed()<< " at "<<(Simulator::Now()+delay));
 	}
 }
 
