@@ -978,7 +978,8 @@ VideoPushApplication::PeerLoop ()
 						<<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<"/"<<GetPullMax()<<") New missed="<<GetChunkMissed ());
 			}
 			double ratio = GetReceived ();
-			SetChunkMissed((!GetChunkMissed() || GetChunkMissed() < GetPullWBase()) ? ChunkSelection(m_chunkSelection) : GetChunkMissed());
+//			SetChunkMissed ((!GetChunkMissed() || GetChunkMissed() < GetPullWBase()) ? ChunkSelection(m_chunkSelection) : GetChunkMissed());
+			SetChunkMissed (ChunkSelection(m_chunkSelection));
 			NS_LOG_INFO ("Node " << m_node->GetId() << " IP=" << GetLocalAddress()
 					<< " Ratio=" << ratio << " ["<<GetPullRatioMin() << ":" << GetPullRatioMax() << "]" << " Total="<< m_chunks.GetSize()
 					<< " Last=" << m_chunks.GetLastChunk() << " Missed=" << GetChunkMissed() << " ("<<(GetChunkMissed()?GetPullRetry(GetChunkMissed()):0)<<","<<GetPullMax()<<")"
