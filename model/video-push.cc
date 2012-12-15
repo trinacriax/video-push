@@ -964,9 +964,11 @@ VideoPushApplication::PeerLoop ()
 			NS_ASSERT (GetPullActive());
 			NS_ASSERT (GetHelloActive());
 			NS_ASSERT (!m_pullTimer.IsRunning());
+			NS_ASSERT (!m_pullEvent.IsRunning());
 			/* There is a missed chunk*/
 			while (GetChunkMissed() && (GetPullRetry(GetChunkMissed()) >= GetPullMax()||GetChunkMissed()<GetPullWBase()))/* Mark chunks as skipped*/
 			{
+				NS_ASSERT (m_chunks.GetChunkState(GetChunkMissed())==CHUNK_MISSED);
 				m_chunks.SetChunkState(GetChunkMissed(), CHUNK_SKIPPED); // Mark as skipped
 				RemPullTimes(GetChunkMissed()); // Remove the chunk form PullTimes
 				SetPullTimes(GetChunkMissed(), Seconds(0));
@@ -1040,6 +1042,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 {
 	NS_ASSERT (m_peerType == PEER);
 	ChunkVideo chunk = chunkheader.GetChunk();
+	NS_ASSERT (chunk);
 	m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
 	bool toolate = (m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED || chunk.c_id < GetPullWBase()); // chunk has been expired
 	bool duplicated = !toolate && !m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
