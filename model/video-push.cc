@@ -1203,18 +1203,6 @@ VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
 		case SOURCE:
 		{
 			NS_ASSERT_MSG(false, "source cannot reply to pull");
-//			if (!IsPending(chunkid)){
-//				NS_LOG_DEBUG("Chunk "<< chunkid << " is not pending anymore");
-//				break;
-//			}
-//			ChunkHeader chunk (MSG_CHUNK);
-//			ChunkVideo *copy = m_chunks.GetChunk(chunkid);
-//			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
-//			chunk.GetChunkMessage().SetChunk(*copy);
-//			packet->AddHeader(chunk);
-//			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies pull to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
-//			m_txDataTrace (packet);
-//			m_socket->SendTo (packet, 0, InetSocketAddress(target, PUSH_PORT));
 			break;
 		}
 		default:
