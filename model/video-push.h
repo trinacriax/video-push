@@ -67,8 +67,8 @@ enum ChunkPolicy {
 const uint32_t PUSH_PORT = 9999;
 const Time LPULLGUARD = MicroSeconds(0);
 const Time RPULLGUARD = MicroSeconds(0);
-const double PullReqThr = 0.80;
-const double PullRepThr = 0.90;
+const double PullReqThr = 0.90;
+const double PullRepThr = 0.95;
 
 class VideoPushApplication : public Application
 {
