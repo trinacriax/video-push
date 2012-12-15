@@ -1491,18 +1491,13 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 		pull.GetPullMessage ().SetChunk (chunkid);
 		Ptr<Packet> packet = Create<Packet> ();
 		packet->AddHeader(pull);
-		NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid << m_pullEvent.IsRunning());
+		NS_LOG_INFO ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
 		NS_ASSERT( GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
 		NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
 		NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
 		AddPullRetry(GetChunkMissed());
 		StatisticAddPullRequest();
 		//TODO CHECK Create too late chunks
-//		if (chunkid <GetPullWBase()) //the chunk window has just shifted
-//		{
-//			m_pullTimer.Cancel();
-//			m_pullTimer.Schedule ();
-//		}
 		NS_ASSERT (chunkid <= (GetPullWBase()+GetPullWindow()));
 		m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
 		m_txControlPullTrace (packet);
