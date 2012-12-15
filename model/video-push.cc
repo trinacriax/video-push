@@ -1112,6 +1112,34 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 }
 
 void
+VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
+{
+	NS_LOG_FUNCTION (this<<chunkid);
+	NS_ASSERT (chunkid>0);
+	if (PullSlot () < PullReqThr)/*Check whether the node is within a pull slot or not*/
+	{
+		ChunkHeader pull (MSG_PULL);
+		pull.GetPullMessage ().SetChunk (chunkid);
+		Ptr<Packet> packet = Create<Packet> ();
+		packet->AddHeader(pull);
+		NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
+		NS_ASSERT( GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
+		NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
+		NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
+		AddPullRetry(GetChunkMissed());
+		StatisticAddPullRequest();
+		//TODO CHECK Create too late chunks
+		NS_ASSERT (chunkid <= (GetPullWBase()+GetPullWindow()));
+		m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
+		m_txControlPullTrace (packet);
+	}
+	else // out of threshold, cancel the PeerLoop
+	{
+		m_pullTimer.Cancel();
+	}
+}
+
+void
 VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ipv4Address &sender)
 {
 	switch (m_peerType)
@@ -1145,6 +1173,55 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		NS_ASSERT_MSG (false, "State not valid");
 		break;
 	}
+	}
+}
+
+void
+VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
+{
+	NS_LOG_FUNCTION (this<<chunkid<<target);
+	NS_ASSERT (chunkid>0);
+	NS_ASSERT (target != GetLocalAddress());
+	NS_ASSERT (GetPullActive());
+	NS_ASSERT (GetHelloActive());
+	switch (m_peerType)
+	{
+		case PEER:
+		{
+			ChunkHeader chunk (MSG_CHUNK);
+			ChunkVideo *copy = m_chunks.GetChunk(chunkid);
+			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
+			chunk.GetChunkMessage().SetChunk(*copy);
+			packet->AddHeader(chunk);
+			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies pull to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
+			StatisticAddPullReply ();
+			AddPullCReply();
+			m_txDataPullTrace (packet);
+			m_socket->SendTo (packet, 0, InetSocketAddress(target, PUSH_PORT));
+			break;
+		}
+		case SOURCE:
+		{
+			NS_ASSERT_MSG(false, "source cannot reply to pull");
+//			if (!IsPending(chunkid)){
+//				NS_LOG_DEBUG("Chunk "<< chunkid << " is not pending anymore");
+//				break;
+//			}
+//			ChunkHeader chunk (MSG_CHUNK);
+//			ChunkVideo *copy = m_chunks.GetChunk(chunkid);
+//			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
+//			chunk.GetChunkMessage().SetChunk(*copy);
+//			packet->AddHeader(chunk);
+//			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies pull to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
+//			m_txDataTrace (packet);
+//			m_socket->SendTo (packet, 0, InetSocketAddress(target, PUSH_PORT));
+			break;
+		}
+		default:
+		{
+			NS_LOG_ERROR("Condition not allowed");
+			break;
+		}
 	}
 }
 
@@ -1487,34 +1564,6 @@ void VideoPushApplication::SendPacket ()
 	}
 }
 
-void
-VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
-{
-	NS_LOG_FUNCTION (this<<chunkid);
-	NS_ASSERT (chunkid>0);
-	if (PullSlot () < PullReqThr)/*Check whether the node is within a pull slot or not*/
-	{
-		ChunkHeader pull (MSG_PULL);
-		pull.GetPullMessage ().SetChunk (chunkid);
-		Ptr<Packet> packet = Create<Packet> ();
-		packet->AddHeader(pull);
-		NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
-		NS_ASSERT( GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
-		NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
-		NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
-		AddPullRetry(GetChunkMissed());
-		StatisticAddPullRequest();
-		//TODO CHECK Create too late chunks
-		NS_ASSERT (chunkid <= (GetPullWBase()+GetPullWindow()));
-		m_socket->SendTo(packet, 0, InetSocketAddress (target, PUSH_PORT));
-		m_txControlPullTrace (packet);
-	}
-	else // out of threshold, cancel the PeerLoop
-	{
-		m_pullTimer.Cancel();
-	}
-}
-
 void VideoPushApplication::SendHello ()
 {
 	switch (m_peerType)
@@ -1548,55 +1597,6 @@ void VideoPushApplication::SendHello ()
 		default:
 		{
 			NS_ASSERT_MSG (false, "no valid peer state");
-			break;
-		}
-	}
-}
-
-void
-VideoPushApplication::SendChunk (uint32_t chunkid, const Ipv4Address target)
-{
-	NS_LOG_FUNCTION (this<<chunkid<<target);
-	NS_ASSERT (chunkid>0);
-	NS_ASSERT (target != GetLocalAddress());
-	NS_ASSERT (GetPullActive());
-	NS_ASSERT (GetHelloActive());
-	switch (m_peerType)
-	{
-		case PEER:
-		{
-			ChunkHeader chunk (MSG_CHUNK);
-			ChunkVideo *copy = m_chunks.GetChunk(chunkid);
-			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
-			chunk.GetChunkMessage().SetChunk(*copy);
-			packet->AddHeader(chunk);
-			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies pull to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
-			StatisticAddPullReply ();
-			AddPullCReply();
-			m_txDataPullTrace (packet);
-			m_socket->SendTo (packet, 0, InetSocketAddress(target, PUSH_PORT));
-			break;
-		}
-		case SOURCE:
-		{
-			NS_ASSERT_MSG(false, "source cannot reply to pull");
-//			if (!IsPending(chunkid)){
-//				NS_LOG_DEBUG("Chunk "<< chunkid << " is not pending anymore");
-//				break;
-//			}
-//			ChunkHeader chunk (MSG_CHUNK);
-//			ChunkVideo *copy = m_chunks.GetChunk(chunkid);
-//			Ptr<Packet> packet = Create<Packet> (copy->GetSize());
-//			chunk.GetChunkMessage().SetChunk(*copy);
-//			packet->AddHeader(chunk);
-//			NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies pull to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
-//			m_txDataTrace (packet);
-//			m_socket->SendTo (packet, 0, InetSocketAddress(target, PUSH_PORT));
-			break;
-		}
-		default:
-		{
-			NS_LOG_ERROR("Condition not allowed");
 			break;
 		}
 	}
