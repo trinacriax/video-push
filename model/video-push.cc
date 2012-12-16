@@ -122,37 +122,15 @@ VideoPushApplication::GetTypeId (void)
 				   	   	   	   	   	CS_LEAST_MISSED, "Least missed",
 				   	   	   	   	   	CS_LATEST_MISSED, "Latest missed",
 				   	   	   	   	   	CS_NEW_CHUNK, "New chunks"))
-    .AddTraceSource ("VideoTxData", "A data packet has been sent in push",
-                   MakeTraceSourceAccessor (&VideoPushApplication::m_txDataTrace))
-	.AddTraceSource ("VideoRxData", "A packet has been received in push",
-				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxDataTrace))
-	.AddTraceSource ("VideoTxControl", "A new packet is created and is sent",
-				   MakeTraceSourceAccessor (&VideoPushApplication::m_txControlTrace))
-	.AddTraceSource ("VideoRxControl", "A packet has been received",
-				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxControlTrace))
-	.AddTraceSource ("VideoTxPull", "A new pull has been sent",
-				   MakeTraceSourceAccessor (&VideoPushApplication::m_txControlPullTrace))
-	.AddTraceSource ("VideoRxPull", "A new pull has been received",
-    			   MakeTraceSourceAccessor (&VideoPushApplication::m_rxControlPullTrace))
-	.AddTraceSource ("VideoTxDataPull", "A data packet has been sent in reply to a pull request",
-				   MakeTraceSourceAccessor (&VideoPushApplication::m_txDataPullTrace))
-	.AddTraceSource ("VideoRxDataPull", "A data packet has been received after a pull request",
-				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxDataPullTrace))
-	.AddTraceSource ("VideoNeighborTrace", "Neighbors",
-				   MakeTraceSourceAccessor (&VideoPushApplication::m_neighborsTrace))
-	.AddTraceSource ("VideoPullStart", "Pull start",
-				   MakeTraceSourceAccessor (&VideoPushApplication::m_pullStartTrace))
-	.AddTraceSource ("VideoPullStop", "Pull stop",
-				   MakeTraceSourceAccessor (&VideoPushApplication::m_pullStopTrace))
 	.AddAttribute ("PullTime", "Time between two consecutive pulls.",
 				   TimeValue (MilliSeconds (50)),
 				   MakeTimeAccessor (&VideoPushApplication::SetPullTime,
-								   &VideoPushApplication::GetPullTime),
+								     &VideoPushApplication::GetPullTime),
 				   MakeTimeChecker ())
 	.AddAttribute ("HelloTime", "Hello Time.",
 				   TimeValue (Seconds (10)),
 				   MakeTimeAccessor (&VideoPushApplication::SetHelloTime,
-								   &VideoPushApplication::GetHelloTime),
+								     &VideoPushApplication::GetHelloTime),
 				   MakeTimeChecker ())
 	.AddAttribute ("PullMax", "Max number of pull.",
 				   UintegerValue (1),
@@ -192,7 +170,7 @@ VideoPushApplication::GetTypeId (void)
 	.AddAttribute ("HelloActive", "Hello activation.",
 				   UintegerValue (0),
 				   MakeUintegerAccessor (&VideoPushApplication::SetHelloActive,
-										&VideoPushApplication::GetHelloActive),
+										 &VideoPushApplication::GetHelloActive),
 				   MakeUintegerChecker<uint32_t> (0))
 	.AddAttribute ("SelectionWeight", "Neighbor selection weight (p * W) + (1-p) * (%ChunkReceived).",
 				   DoubleValue (0),
@@ -207,6 +185,28 @@ VideoPushApplication::GetTypeId (void)
 				   PointerValue (),
 				   MakePointerAccessor (&VideoPushApplication::m_delay),
 				   MakePointerChecker<TimeMinMaxAvgTotalCalculator>())
+   .AddTraceSource ("VideoTxData", "A data packet has been sent in push",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_txDataTrace))
+   .AddTraceSource ("VideoRxData", "A packet has been received in push",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxDataTrace))
+   .AddTraceSource ("VideoTxControl", "A new packet is created and is sent",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_txControlTrace))
+   .AddTraceSource ("VideoRxControl", "A packet has been received",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxControlTrace))
+   .AddTraceSource ("VideoTxPull", "A new pull has been sent",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_txControlPullTrace))
+   .AddTraceSource ("VideoRxPull", "A new pull has been received",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxControlPullTrace))
+   .AddTraceSource ("VideoTxDataPull", "A data packet has been sent in reply to a pull request",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_txDataPullTrace))
+   .AddTraceSource ("VideoRxDataPull", "A data packet has been received after a pull request",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_rxDataPullTrace))
+   .AddTraceSource ("VideoNeighborTrace", "Neighbors",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_neighborsTrace))
+   .AddTraceSource ("VideoPullStart", "Pull start",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_pullStartTrace))
+   .AddTraceSource ("VideoPullStop", "Pull stop",
+				   MakeTraceSourceAccessor (&VideoPushApplication::m_pullStopTrace))
   ;
   return tid;
 }
@@ -988,13 +988,13 @@ VideoPushApplication::PeerLoop ()
 			{
 				Neighbor target = PeerSelection (m_peerSelection);
 				m_neighborsTrace (m_neighbors.GetSize());
+				NS_ASSERT (!m_pullTimer.IsRunning());
+				NS_ASSERT (!m_pullEvent.IsRunning());
 				if (target.GetAddress() != Ipv4Address::GetAny())
 				{
 					NS_ASSERT (m_neighbors.IsNeighbor(target));
-					Time delay = TransmissionDelay(0, 2000, Time::US); //[0-1000]us random
+					Time delay = TransmissionDelay(100, 1000, Time::US); //[0-1000]us random
 					SetPullTimes (GetChunkMissed());
-					NS_ASSERT (!m_pullTimer.IsRunning());
-					NS_ASSERT (!m_pullEvent.IsRunning());
 					m_pullTimer.Schedule ();
 					m_pullEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, GetChunkMissed(), target.GetAddress());
 					NS_LOG_INFO ("Node " <<m_node->GetId()<< " schedule pull to "<< target.GetAddress()
@@ -1079,6 +1079,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 			NS_ASSERT (sender != GetSource());
 			NS_ASSERT (m_pullTimer.IsRunning());
 			NS_ASSERT (!m_pullEvent.IsRunning());
+			NS_ASSERT (m_pullTimer.IsRunning());
 			m_pullTimer.Cancel();
 			StatisticAddPullHit();
 			Time shift = (Simulator::Now()-GetPullTimes(chunk.c_id));
@@ -1100,8 +1101,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		  <<" Slot="<<GetPullSlotStart().GetSeconds());
 	if (GetPullActive() && GetChunkMissed() && !m_pullTimer.IsRunning() && !m_pullEvent.IsRunning() && InPullRange())
 	{
-		NS_ASSERT (!m_pullTimer.IsRunning());
-		NS_ASSERT (!m_pullEvent.IsRunning());
 		Time delay (0);
 		if (GetPullSlotStart() > Simulator::Now())
 			delay = GetPullSlotStart() - Simulator::Now();
@@ -1116,6 +1115,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 {
 	NS_LOG_FUNCTION (this<<chunkid);
 	NS_ASSERT (chunkid>0);
+	NS_ASSERT (GetPullActive());
 	if (PullSlot () < PullReqThr)/*Check whether the node is within a pull slot or not*/
 	{
 		ChunkHeader pull (MSG_PULL);
