@@ -995,7 +995,6 @@ VideoPushApplication::PeerLoop ()
 				{
 					NS_ASSERT (m_neighbors.IsNeighbor(target));
 					Time delay = TransmissionDelay(100, 1000, Time::US); //[0-1000]us random
-					SetPullTimes (GetChunkMissed());
 					m_pullTimer.Schedule ();
 					m_pullEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, GetChunkMissed(), target.GetAddress());
 					NS_LOG_INFO ("Node " <<m_node->GetId()<< " schedule pull to "<< target.GetAddress()
@@ -1007,7 +1006,6 @@ VideoPushApplication::PeerLoop ()
 				{
 					NS_LOG_DEBUG ("Node " <<m_node->GetId()<< " has no neighbors to pull chunk "<< GetChunkMissed());
 					NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND");
-					SetPullTimes (GetChunkMissed());
 				}
 			}
 			else
@@ -1086,6 +1084,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 			Time shift = (Simulator::Now()-GetPullTimes(chunk.c_id));
 			NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< chunk.c_id<< " after "
 					<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
+			SetPullTimes(chunk.c_id, shift);
 			NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND");
 		}
 		else{
@@ -1128,7 +1127,8 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 		NS_ASSERT (GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
 		NS_ASSERT (Simulator::Now() >= GetPullSlotStart());
 		NS_ASSERT (Simulator::Now() <= GetPullSlotEnd());
-		AddPullRetry(GetChunkMissed());
+		AddPullRetry (chunkid);
+		SetPullTimes (chunkid);
 		StatisticAddPullRequest();
 		//TODO CHECK Create too late chunks
 		NS_ASSERT (chunkid <= (GetPullWBase()+GetPullWindow()));
