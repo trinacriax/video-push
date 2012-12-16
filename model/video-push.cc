@@ -734,7 +734,7 @@ VideoPushApplication::SetPullWBase (uint32_t base)
 uint32_t
 VideoPushApplication::GetPullWBase ()
 {
-	return (m_pullWBase<1?1:m_pullWBase);
+	return m_pullWBase;
 }
 
 void
