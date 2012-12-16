@@ -994,7 +994,7 @@ VideoPushApplication::PeerLoop ()
 				if (target.GetAddress() != Ipv4Address::GetAny())
 				{
 					NS_ASSERT (m_neighbors.IsNeighbor(target));
-					Time delay = TransmissionDelay(100, 1000, Time::US); //[0-1000]us random
+					Time delay (0);//= TransmissionDelay(100, 1000, Time::US); //[0-1000]us random
 					m_pullTimer.Schedule ();
 					m_pullEvent = Simulator::Schedule (delay, &VideoPushApplication::SendPull, this, GetChunkMissed(), target.GetAddress());
 					NS_LOG_INFO ("Node " <<m_node->GetId()<< " schedule pull to "<< target.GetAddress()
@@ -1160,7 +1160,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		uint32_t chunkid = pullheader.GetChunk();
 		Time now = Simulator::Now();
 		bool hasChunk = m_chunks.HasChunk (chunkid);
-		Time delay = TransmissionDelay(0, 1500, Time::US);
+		Time delay (0);//= TransmissionDelay(0, 1500, Time::US);
 		StatisticAddPullReceived ();
 		if (hasChunk && !m_chunkEvent.IsRunning() && /*chunkid >= GetPullWBase() &&*/ GetPullCReply() <= GetPullMReply() && PullSlot () < PullRepThr)
 		{
