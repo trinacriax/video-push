@@ -884,9 +884,9 @@ VideoPushApplication::SetPullSlotStart (Time start)
 	/// Schedule the next pull start
 	Time nextStart = start + GetPullSlot();
 	Time delay = GetPullSlot() - RPULLGUARD;
-//	NS_LOG_DEBUG ("Now "<< Simulator::Now()<< " Start="<<m_pullSlotStart
-//			<<" End="<<GetPullSlotEnd()<< " Slot="<<GetPullSlot()
-//			<<" Delay="<<delay<<" Next="<<nextStart);
+	NS_LOG_DEBUG ("Now "<< Simulator::Now()<< " Start="<<m_pullSlotStart
+			<<" End="<<GetPullSlotEnd()<< " Slot="<<GetPullSlot()
+			<<" Delay="<<delay<<" Next="<<nextStart);
 	m_pullSlotEvent = Simulator::Schedule (delay, &VideoPushApplication::SetPullSlotStart, this, nextStart);
 }
 
@@ -908,6 +908,7 @@ VideoPushApplication::PullSlot ()
 		double n = (now - GetPullSlotStart()).ToDouble(Time::US);
 		double m = (GetPullSlot () - RPULLGUARD - LPULLGUARD).ToDouble(Time::US);
 		r = n/m;
+		NS_LOG_DEBUG ("Slot ratio " <<n<< "/"<< m<<"="<<r);
 	}
 	return r;
 }
