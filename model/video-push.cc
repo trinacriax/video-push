@@ -1084,6 +1084,9 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 			Time shift = (Simulator::Now()-GetPullTimes(chunk.c_id));
 			NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< chunk.c_id<< " after "
 					<< shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
+//			Time pulltimeout = Time::FromDouble(0.5 * GetPullTime().ToDouble(Time::US) + 0.5 * shift.ToDouble(Time::US), Time::US);
+//			NS_LOG_INFO ("Node updates its pull timeout from "<< GetPullTime().GetMilliSeconds() << " to "<< pulltimeout.GetMilliSeconds());
+//			SetPullTime(pulltimeout); //TODO need min and max values to limit the timeout value.
 			SetPullTimes(chunk.c_id, shift);
 			NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND");
 		}
