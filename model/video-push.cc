@@ -1330,12 +1330,10 @@ switch (m_peerType)
  						  double sinr = ptag.GetSinr();
 						  double alpha = 1.0;//more weight to latest sample
 // 						  if(chunkH.GetHelloMessage().GetChunksRatio() >= GetPullRatioMin())//Wrong, need hellos more frequent!
-						  m_neighbors.AddNeighbor(nt);
-						  if (m_neighbors.IsNeighbor(nt))
-						  {
-							  sinr = alpha * sinr + (1-alpha)*m_neighbors.GetNeighbor (nt)->GetSINR();
-							  m_neighbors.GetNeighbor (nt)->SetSINR(sinr);
-						  }
+						  if (!m_neighbors.IsNeighbor(nt))
+							  m_neighbors.AddNeighbor(nt);
+						  sinr = (alpha * sinr) + ((1-alpha)*m_neighbors.GetNeighbor (nt)->GetSINR());
+						  m_neighbors.GetNeighbor (nt)->SetSINR(sinr);
 					  }
 					  m_rxControlTrace (packet, address);
 					  HandleHello(chunkH.GetHelloMessage(), sourceAddr);
