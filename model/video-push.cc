@@ -1117,6 +1117,7 @@ VideoPushApplication::SendPull (uint32_t chunkid, const Ipv4Address target)
 	NS_LOG_FUNCTION (this<<chunkid);
 	NS_ASSERT (chunkid>0);
 	NS_ASSERT (GetPullActive());
+	NS_ASSERT (m_chunks.GetLastChunk()>GetPullWindow());
 	if (PullSlot () < PullReqThr)/*Check whether the node is within a pull slot or not*/
 	{
 		ChunkHeader pull (MSG_PULL);
