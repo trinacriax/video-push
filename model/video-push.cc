@@ -1164,7 +1164,7 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 		uint32_t chunkid = pullheader.GetChunk();
 		Time now = Simulator::Now();
 		bool hasChunk = m_chunks.HasChunk (chunkid);
-		Time delay (0);//= TransmissionDelay(0, 1500, Time::US);
+		Time delay = TransmissionDelay(100, 1500, Time::US);
 		StatisticAddPullReceived ();
 		if (hasChunk && !m_chunkEvent.IsRunning() && /*chunkid >= GetPullWBase() &&*/ GetPullCReply() <= GetPullMReply() && PullSlot () < PullRepThr)
 		{
