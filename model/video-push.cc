@@ -1056,7 +1056,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		{
 			NS_ASSERT (!m_playout.IsRunning());
 			double playtime = ceil (GetPullSlot().ToDouble(Time::US)*(GetPullWindow()-1));
-			m_playout.Schedule(MicroSeconds(playtime));
+			m_playout.Schedule(Time::FromDouble(playtime, Time::US));
 		}
 	}
 	if (duplicated) // Duplicated chunk
