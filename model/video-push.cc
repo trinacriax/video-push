@@ -1009,7 +1009,11 @@ VideoPushApplication::PeerLoop ()
 				}
 			}
 			else
+			{
 				NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND "<< GetChunkMissed() << ", "<<InPullRange());
+				NS_ASSERT (!m_pullTimer.IsRunning());
+				NS_ASSERT (!m_pullEvent.IsRunning());
+			}
 			break;
 		}
 		case SOURCE:
@@ -1041,7 +1045,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 {
 	NS_ASSERT (m_peerType == PEER);
 	ChunkVideo chunk = chunkheader.GetChunk();
-	NS_ASSERT (chunk);
 	m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
 	bool toolate = (m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED || chunk.c_id < GetPullWBase()); // chunk has been expired
 	bool duplicated = m_chunks.HasChunk(chunk.c_id);
@@ -1078,7 +1081,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 			NS_ASSERT (sender != GetSource());
 			NS_ASSERT (m_pullTimer.IsRunning());
 			NS_ASSERT (!m_pullEvent.IsRunning());
-			NS_ASSERT (m_pullTimer.IsRunning());
 			m_pullTimer.Cancel();
 			StatisticAddPullHit();
 			Time shift = (Simulator::Now()-GetPullTimes(chunk.c_id));
