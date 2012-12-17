@@ -925,9 +925,9 @@ VideoPushApplication::GetReceived ()
 	uint32_t last = m_chunks.GetLastChunk();
 	int32_t base = GetPullWBase ();
 	uint32_t window = GetPullWindow ();
-	window = last < window ? 0 : window; // should be 0
+	window = last < window ? 1 : window; // should be 0
 	double ratio = 0.0;
-	for (int32_t i = base ; i < (base + window); i++)
+	for (int32_t i = base ; base > 0 && i < (base + window); i++)
 	{
 		ratio += (m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PUSH /* || m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PULL */? 1.0 : 0.0);
 	}
