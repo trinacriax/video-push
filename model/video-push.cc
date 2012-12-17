@@ -834,7 +834,7 @@ void
 VideoPushApplication::SetChunkDelay (uint32_t chunkid, Time delay)
 {
 	NS_ASSERT (chunkid>0);
-	NS_ASSERT (m_chunks.HasChunk(chunkid)||m_chunks.GetChunkState(chunkid) == CHUNK_DELAYED);
+	NS_ASSERT (m_chunks.GetChunkState(chunkid) != CHUNK_DELAYED);
 	uint64_t udelay = delay.GetMicroSeconds();
 	NS_ASSERT (delay.GetMicroSeconds() >= 0);
 	NS_ASSERT(m_chunk_delay.find(chunkid) == m_chunk_delay.end());
