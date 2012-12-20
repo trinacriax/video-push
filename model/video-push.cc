@@ -1048,17 +1048,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	m_totalRx += chunk.GetSize () + chunk.GetAttributeSize();
 	bool toolate = (m_chunks.GetChunkState(chunk.c_id) == CHUNK_SKIPPED || chunk.c_id < GetPullWBase()); // chunk has been expired
 	bool duplicated = m_chunks.HasChunk(chunk.c_id);
-	if (sender == GetSource() && !duplicated)
-	{
-		SetPullSlotStart (Simulator::Now());
-		ResetPullCReply ();
-		if (m_chunks.GetSize() == 1) // this is the first chunk
-		{
-			NS_ASSERT (!m_playout.IsRunning());
-			double playtime = ceil (GetPullSlot().ToDouble(Time::US)*(GetPullWindow()-1));
-			m_playout.Schedule(Time::FromDouble(playtime, Time::US));
-		}
-	}
 	if (duplicated) // Duplicated chunk
 	{
 	  StatisticAddDuplicateChunk (chunk.c_id);
@@ -1095,6 +1084,14 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 			NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND");
 		}
 		else{
+			SetPullSlotStart (Simulator::Now());
+			ResetPullCReply ();
+			if (m_chunks.GetSize() == 1) // this is the first chunk
+			{
+				NS_ASSERT (!m_playout.IsRunning());
+				double playtime = ceil (GetPullSlot().ToDouble(Time::US)*(GetPullWindow()-1));
+				m_playout.Schedule(Time::FromDouble(playtime, Time::US));
+			}
 			NS_ASSERT (sender == GetSource());
 			m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
 		}
