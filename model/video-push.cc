@@ -1051,8 +1051,6 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	if (duplicated) // Duplicated chunk
 	{
 	  StatisticAddDuplicateChunk (chunk.c_id);
-//	  if(IsPending(chunk.c_id))
-//		  RemovePending(chunk.c_id);
 	}
 	else if (GetPullRetry(chunk.c_id) && toolate)// has been pulled and received too late
 	{
@@ -1169,7 +1167,6 @@ VideoPushApplication::HandlePull (ChunkHeader::PullMessage &pullheader, const Ip
 			NS_ASSERT (now >= GetPullSlotStart());
 			NS_ASSERT (now <= GetPullSlotEnd());
 			m_chunkEvent = Simulator::Schedule (delay, &VideoPushApplication::SendChunk, this, chunkid, sender);
-			AddPending(chunkid);
 			NS_LOG_INFO ("Node " << GetLocalAddress() << " Received pull for " <<  chunkid << " from " << sender << ", reply in "<<delay.GetSeconds());
 		}
 		else
