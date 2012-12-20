@@ -764,12 +764,13 @@ VideoPushApplication::GetPullRatioMax () const
 bool
 VideoPushApplication::InPullRange ()
 {
-	double ratio = GetReceived();
-	bool active = (ratio <= GetPullRatioMax() && ratio >= GetPullRatioMin());
+	double low = GetReceived(CHUNK_RECEIVED_PUSH);
+	double up = low + GetReceived(CHUNK_RECEIVED_PULL);
+	bool active = (up <= GetPullRatioMax() && low >= GetPullRatioMin());
 	if (active)
-		m_pullStartTrace (ratio);
+		m_pullStartTrace (up);
 	else
-		m_pullStopTrace (ratio);
+		m_pullStopTrace (up);
 	return  active;
 }
 
@@ -920,7 +921,7 @@ VideoPushApplication::GetLocalAddress ()
 }
 
 double
-VideoPushApplication::GetReceived ()
+VideoPushApplication::GetReceived (enum ChunkState state)
 {
 	uint32_t last = m_chunks.GetLastChunk();
 	int32_t base = GetPullWBase ();
@@ -929,7 +930,7 @@ VideoPushApplication::GetReceived ()
 	double ratio = 0.0;
 	for (int32_t i = base ; base > 0 && i < (base + window); i++)
 	{
-		ratio += (m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PUSH /* || m_chunks.GetChunkState(i) == CHUNK_RECEIVED_PULL */? 1.0 : 0.0);
+		ratio += (m_chunks.GetChunkState(i) == state ? 1.0 : 0.0);
 	}
 	ratio = (ratio / window);
 	return  ratio;
@@ -977,11 +978,12 @@ VideoPushApplication::PeerLoop ()
 				NS_LOG_INFO ("Node " <<m_node->GetId()<< " is marking chunk "<< lastmissed
 						<<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<"/"<<GetPullMax()<<") New missed="<<GetChunkMissed ());
 			}
-			double ratio = GetReceived ();
+			double low = GetReceived (CHUNK_RECEIVED_PUSH);
+			double up = low + GetReceived (CHUNK_RECEIVED_PULL);
 //			SetChunkMissed ((!GetChunkMissed() || GetChunkMissed() < GetPullWBase()) ? ChunkSelection(m_chunkSelection) : GetChunkMissed());
 			SetChunkMissed (ChunkSelection(m_chunkSelection));
 			NS_LOG_INFO ("Node " << m_node->GetId() << " IP=" << GetLocalAddress()
-					<< " Ratio=" << ratio << " ["<<GetPullRatioMin() << ":" << GetPullRatioMax() << "]" << " Total="<< m_chunks.GetSize()
+					<< " Ratio [" << low << ":" << up << "] ["<<GetPullRatioMin() << ":" << GetPullRatioMax() << "]" << " Total="<< m_chunks.GetSize()
 					<< " Last=" << m_chunks.GetLastChunk() << " Missed=" << GetChunkMissed() << " ("<<(GetChunkMissed()?GetPullRetry(GetChunkMissed()):0)<<","<<GetPullMax()<<")"
 					<< " Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
 					<< " Timer="<<(m_pullTimer.IsRunning()?"Yes":"No"));
@@ -1097,7 +1099,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 	}
 	SetChunkMissed(ChunkSelection(m_chunkSelection));
 	NS_LOG_INFO ("Node " << GetLocalAddress() << (duplicated?" RecDup ":(toolate?" RecLate ":" Received ")) << chunk.c_id
-		  <<" from " << sender <<" Ratio="<<GetReceived() <<" Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
+		  <<" from " << sender <<" Ratio ["<<GetReceived(CHUNK_RECEIVED_PUSH)<<":"<<GetReceived(CHUNK_RECEIVED_PULL)<<"]"<<" Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
 		  <<" PullTimer "<< m_pullTimer.IsRunning() << "(D="<<m_pullTimer.GetDelay()<<"/N=" << m_pullTimer.GetDelayLeft()<<")"
 		  <<" #Neighbors "<< m_neighbors.GetSize()
 		  <<" Missed="<<GetChunkMissed()<< " Chunks="<<m_chunks.GetBufferSize()
@@ -1573,7 +1575,9 @@ void VideoPushApplication::SendHello ()
 			Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(Ipv4Mask (mask));
 			ChunkHeader hello (MSG_HELLO);
 			hello.GetHelloMessage().SetLastChunk (m_chunks.GetLastChunk());
-			uint32_t ratio = (GetReceived() == 0 ? 1 : (uint32_t)(floor(GetReceived() * 1000)));
+			double low = GetReceived (CHUNK_RECEIVED_PUSH);
+			double up = low + GetReceived (CHUNK_RECEIVED_PULL);
+			uint32_t ratio = ((low) == 0 ? 1 : (uint32_t)(floor(up * 1000)));
 			hello.GetHelloMessage().SetChunksRatio (ratio);
 			hello.GetHelloMessage().SetChunksReceived (m_chunks.GetBufferSize());
 //			hello.GetHelloMessage().SetDestination (subnet);

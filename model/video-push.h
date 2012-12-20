@@ -187,7 +187,7 @@ private:
 	void AddPending (uint32_t chunkid);
 	bool IsPending (uint32_t chunkid);
 	bool RemovePending (uint32_t chunkid);
-	double GetReceived ();
+	double GetReceived (enum ChunkState state);
 	void StatisticAddPullRequest ();
 	void StatisticAddPullHit ();
 	void StatisticAddPullReceived ();
