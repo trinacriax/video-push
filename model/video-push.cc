@@ -765,12 +765,12 @@ bool
 VideoPushApplication::InPullRange ()
 {
 	double low = GetReceived(CHUNK_RECEIVED_PUSH);
-	double up = low + GetReceived(CHUNK_RECEIVED_PULL);
-	bool active = (up <= GetPullRatioMax() && low >= GetPullRatioMin());
+//	double up = low + GetReceived(CHUNK_RECEIVED_PULL);
+	bool active = (low <= GetPullRatioMax() && low >= GetPullRatioMin());
 	if (active)
-		m_pullStartTrace (up);
+		m_pullStartTrace (low);
 	else
-		m_pullStopTrace (up);
+		m_pullStopTrace (low);
 	return  active;
 }
 
@@ -1577,7 +1577,7 @@ void VideoPushApplication::SendHello ()
 			hello.GetHelloMessage().SetLastChunk (m_chunks.GetLastChunk());
 			double low = GetReceived (CHUNK_RECEIVED_PUSH);
 			double up = low + GetReceived (CHUNK_RECEIVED_PULL);
-			uint32_t ratio = ((low) == 0 ? 1 : (uint32_t)(floor(up * 1000)));
+			uint32_t ratio = ((low) == 0 ? 1 : (uint32_t)(floor(low * 1000)));
 			hello.GetHelloMessage().SetChunksRatio (ratio);
 			hello.GetHelloMessage().SetChunksReceived (m_chunks.GetBufferSize());
 //			hello.GetHelloMessage().SetDestination (subnet);
