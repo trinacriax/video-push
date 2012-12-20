@@ -1000,6 +1000,7 @@ VideoPushApplication::PeerLoop ()
 					NS_LOG_INFO ("Node " <<m_node->GetId()<< " schedule pull to "<< target.GetAddress()
 							<< " for chunk " << GetChunkMissed() <<" ("<< GetPullRetry(GetChunkMissed())<<") at "
 							<<  Simulator::Now()+delay  << " timeout "<< (Simulator::Now()+m_pullTimer.GetDelay())
+							<< " useful time "<< (m_pullTimer.GetDelay()-delay)
 							<< " PullTimer "<< m_pullTimer.IsRunning());
 				}
 				else
