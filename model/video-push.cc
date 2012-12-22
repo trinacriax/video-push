@@ -1109,7 +1109,7 @@ VideoPushApplication::HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const
 		Time delay (0);
 		if (GetPullSlotStart() > Simulator::Now())
 			delay = GetPullSlotStart() - Simulator::Now();
-		NS_ASSERT(GetPullSlotEnd() > Simulator::Now());
+//		NS_ASSERT(GetPullSlotEnd() > Simulator::Now());
 		m_pullTimer.Schedule (delay);
 		NS_LOG_INFO ("Node " << GetLocalAddress() << " will pull "<<GetChunkMissed()<< " at "<<(Simulator::Now()+delay));
 	}
