@@ -664,6 +664,7 @@ VideoPushApplication::GetPullMReply () const
 void
 VideoPushApplication::SetPullMReply (uint32_t value)
 {
+  NS_ASSERT(value > 0);
 	m_pullReplyMax = value;
 }
 
@@ -682,6 +683,7 @@ VideoPushApplication::GetHelloActive () const
 void
 VideoPushApplication::SetPullTime (Time pullt)
 {
+  NS_ASSERT(pullt.GetSeconds()> 0);
 	m_pullTimeout = pullt;
 }
 
@@ -694,6 +696,7 @@ VideoPushApplication::GetPullTime () const
 void
 VideoPushApplication::SetHelloTime (Time hellot)
 {
+NS_ASSERT (hellot.GetSeconds() > 0);
 	m_helloTime = hellot;
 }
 
@@ -706,6 +709,7 @@ VideoPushApplication::GetHelloTime () const
 void
 VideoPushApplication::SetPullMax (uint32_t max)
 {
+  NS_ASSERT(max > 0);
 	m_pullRetriesMax = max;
 }
 
@@ -718,6 +722,7 @@ VideoPushApplication::GetPullMax () const
 void
 VideoPushApplication::SetPullWindow (uint32_t window)
 {
+  NS_ASSERT(window > 0);
 	m_playoutWindow = window;
 }
 
@@ -737,6 +742,7 @@ VideoPushApplication::UpdatePullWBase ()
 void
 VideoPushApplication::SetPullWBase (uint32_t base)
 {
+  NS_ASSERT(base >= 0);
 	m_pullWBase = base;
 }
 
