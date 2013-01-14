@@ -17,7 +17,7 @@ ChunkBufferTestCase::ChunkBufferTestCase ()
 void
 ChunkBufferTestCase::DoRun (void)
 {
-	bool test = true;
+//	bool test = true;
 	uint32_t size = 0;
 	for (uint32_t i = 1; i <1000; i++)
 	{
@@ -67,8 +67,8 @@ ChunkBufferStateTestCase::ChunkBufferStateTestCase ()
 void
 ChunkBufferStateTestCase::DoRun (void)
 {
-	bool test = true;
-	uint32_t size = 0;
+//	bool test = true;
+//	uint32_t size = 0;
 	for (uint32_t i = 1; i<1000; i++)
 	{
 		if(i%100==0) continue;

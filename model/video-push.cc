@@ -213,17 +213,22 @@ VideoPushApplication::GetTypeId (void)
 
 
 VideoPushApplication::VideoPushApplication ():
-		m_totalRx(0), m_residualBits(0), m_lastStartTime(0), m_totBytes(0),
-		m_connected(false), m_ipv4(0), m_socket(0),
-		m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullRetriesMax (0), m_helloTimer (Timer::CANCEL_ON_DESTROY),
-		m_statisticsPullRequest (0), m_statisticsPullHit (0), m_statisticsPullReceived (0), m_statisticsPullReply (0), m_pullReplyTimer (Timer::CANCEL_ON_DESTROY),
-		m_delay(0),
-		m_gateway(Ipv4Address::GetAny()), m_pktSize (0),
-		m_playoutWindow (0),  m_chunkRatioMin (0), m_chunkRatioMax (0),
-		m_pullActive (false), m_pullSlot (0), m_pullSlotStart (0),
-		m_pullReplyMax (0), m_pullReplyCurrent (0),
-		m_pullChunkMissed (0), m_helloActive (0), m_helloTime (0), n_selectionWeight (0),
-		m_pullWBase (0), m_playout (Timer::CANCEL_ON_DESTROY)
+     m_socket(0), m_localAddress (Ipv4Address::GetAny()),  m_localPort (0),
+    m_peerType (PEER), m_ipv4(0),
+    m_source (Ipv4Address::GetAny()), m_gateway (Ipv4Address::GetAny()),
+    m_totalRx(0), m_connected(false), m_pktSize (0),
+    m_residualBits(0), m_lastStartTime(0), m_maxBytes (0), m_totBytes(0),
+    m_playoutWindow (0),  m_chunkRatioMin (0), m_chunkRatioMax (0),
+    m_pullActive (false), m_pullSlot (0), m_pullSlotStart (0),
+    m_pullChunkMissed (0), m_pullReplyMax (0), m_pullReplyCurrent (0), m_pullReplyTimer (Timer::CANCEL_ON_DESTROY),
+    m_pullTimeout (0), m_pullTimer (Timer::CANCEL_ON_DESTROY), m_pullRetriesMax (0),
+    m_pullWBase (0), m_playout (Timer::CANCEL_ON_DESTROY),
+    m_statisticsPullRequest (0), m_statisticsPullReceived (0), m_statisticsPullReply (0), m_statisticsPullHit (0),
+    m_helloActive (0), m_helloTime (0), m_helloTimer (Timer::CANCEL_ON_DESTROY), m_helloLoss (0),
+    m_peerSelection (PS_RANDOM), m_chunkSelection (CS_LATEST),
+    n_selectionWeight (0),
+    m_delay(0)
+
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_socketList.clear();
@@ -295,7 +300,7 @@ VideoPushApplication::StatisticChunk (void)
   NS_LOG_FUNCTION_NOARGS ();
   std::map<uint32_t, ChunkVideo> current_buffer = m_chunks.GetChunkBuffer();
   uint32_t received = 1, receivedpull = 0, receivedpush = 0, delayed = 0, missed = 0, duplicates = 0, chunkID = 0, current = 1, split = 0, splitP = 0, splitL = 0;
-  uint64_t delay = 0, delaylate = 0, delayavg = 0, delayavgpush = 0, delayavgpull = 0;
+  uint64_t delaylate = 0, delayavg = 0, delayavgpush = 0, delayavgpull = 0;
   uint64_t delaymax = (current_buffer.empty() ? 0: GetChunkDelay(current_buffer.begin()->first).GetMicroSeconds()), delaymin = (current_buffer.empty()?0:GetChunkDelay(current_buffer.begin()->first).GetMicroSeconds());
   uint32_t missing[] = {0,0,0,0,0,0}, hole = 0; // hole size = 1 2 3 4 5 >5
   Time delay_max, delay_min, delay_avg, delay_avg_push, delay_avg_pull;
@@ -400,6 +405,10 @@ VideoPushApplication::StatisticChunk (void)
 			  sigmaL += pow(t_dev,2);
 			  break;
 		  }
+		  default:
+		    {
+		      break;
+		    }
   	  }
   }
   NS_ASSERT(received == (delayed+receivedpush+receivedpull));
@@ -924,11 +933,11 @@ double
 VideoPushApplication::GetReceived (enum ChunkState state)
 {
 	uint32_t last = m_chunks.GetLastChunk();
-	int32_t base = GetPullWBase ();
+	uint32_t base = GetPullWBase ();
 	uint32_t window = GetPullWindow ();
 	window = last < window ? 1 : window; // should be 0
 	double ratio = 0.0;
-	for (int32_t i = base ; base > 0 && i < (base + window); i++)
+	for (uint32_t i = base ; base > 0 && i < (base + window); i++)
 	{
 		ratio += (m_chunks.GetChunkState(i) == state ? 1.0 : 0.0);
 	}
@@ -1576,7 +1585,7 @@ void VideoPushApplication::SendHello ()
 			ChunkHeader hello (MSG_HELLO);
 			hello.GetHelloMessage().SetLastChunk (m_chunks.GetLastChunk());
 			double low = GetReceived (CHUNK_RECEIVED_PUSH);
-			double up = low + GetReceived (CHUNK_RECEIVED_PULL);
+//			double up = low + GetReceived (CHUNK_RECEIVED_PULL);
 			uint32_t ratio = ((low) == 0 ? 1 : (uint32_t)(floor(low * 1000)));
 			hello.GetHelloMessage().SetChunksRatio (ratio);
 			hello.GetHelloMessage().SetChunksReceived (m_chunks.GetBufferSize());
