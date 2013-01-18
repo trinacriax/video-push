@@ -4,22 +4,22 @@ def build(bld):
     module = bld.create_ns3_module('video-push', ['internet', 'network', 'config-store', 'tools', 'pimdm', 'wifi', 'applications', 'csma', 'stats', 'igmpx'])
     module.includes = '.'
     module.source = [
+        'model/chunk-packet.cc',
         'model/chunk-buffer.cc',		
         'model/neighbor-set.cc',
-        'model/video-push.cc',
-        'model/chunk-packet.cc',
+        'model/video-push.cc',       
         'helper/video-helper.cc',
         ]
 
     headers = bld.new_task_gen(features=['ns3header'])
     headers.module = 'video-push'
-    headers.source = [
-        'model/chunk-buffer.h',
+    headers.source = [        
         'model/chunk-video.h',
+        'model/chunk-packet.h',
+        'model/chunk-buffer.h',
         'model/neighbor.h',
         'model/neighbor-set.h',
-        'model/video-push.h',
-        'model/chunk-packet.h',
+        'model/video-push.h',        
         'helper/video-helper.h',
     ]
 
