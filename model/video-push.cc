@@ -26,43 +26,39 @@
   if (GetObject<Node> ()) { std::clog << "[node " << GetObject<Node> ()->GetId () << "] "; }
 
 
-#include "ns3/log.h"
-#include "ns3/address.h"
-#include "ns3/node.h"
-#include "ns3/nstime.h"
-#include "ns3/data-rate.h"
-#include "ns3/random-variable.h"
-#include "ns3/socket.h"
-#include "ns3/simulator.h"
-#include "ns3/socket-factory.h"
-#include "ns3/packet.h"
-#include "ns3/uinteger.h"
-#include "ns3/double.h"
-#include "ns3/pointer.h"
-#include "ns3/enum.h"
-#include "ns3/boolean.h"
-#include "ns3/trace-source-accessor.h"
-#include "ns3/udp-socket-factory.h"
-#include "ns3/address-utils.h"
-#include "ns3/inet-socket-address.h"
-#include "ns3/udp-socket.h"
-#include "ns3/snr-tag.h"
+#include "video-push.h"
+
+#include <ns3/log.h>
+#include <ns3/address.h>
+#include <ns3/node.h>
+#include <ns3/nstime.h>
+#include <ns3/data-rate.h>
+#include <ns3/random-variable.h>
+#include <ns3/socket.h>
+#include <ns3/simulator.h>
+#include <ns3/socket-factory.h>
+#include <ns3/packet.h>
+#include <ns3/uinteger.h>
+#include <ns3/double.h>
+#include <ns3/pointer.h>
+#include <ns3/enum.h>
+#include <ns3/boolean.h>
+#include <ns3/trace-source-accessor.h>
+#include <ns3/udp-socket-factory.h>
+#include <ns3/address-utils.h>
+#include <ns3/inet-socket-address.h>
+#include <ns3/udp-socket.h>
+#include <ns3/pimdm-routing.h>
+#include <ns3/snr-tag.h>
 #include <memory.h>
 #include <math.h>
 #include <stdio.h>
-
-#include "video-push.h"
-#include "ns3/pimdm-routing.h"
 
 NS_LOG_COMPONENT_DEFINE ("VideoPushApplication");
 
 static uint32_t m_latestChunkID;
 
-using namespace std;
-
 namespace ns3 {
-
-#define DELAY_UNIT Time::US
 
 NS_OBJECT_ENSURE_REGISTERED (VideoPushApplication);
 
@@ -956,9 +952,9 @@ VideoPushApplication::SetChunkMissed (uint32_t chunkid)
 {
 	NS_LOG_FUNCTION(this<<chunkid);
 	NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
-	NS_ASSERT(!chunkid||!m_chunks.ChunkDelayed(chunkid));
-	NS_ASSERT(!chunkid||!m_chunks.ChunkSkipped(chunkid));
-	NS_ASSERT(!chunkid|| m_chunks.ChunkMissed(chunkid));
+	NS_ASSERT(!chunkid||!m_chunks.isChunkState(chunkid,CHUNK_DELAYED));
+	NS_ASSERT(!chunkid||!m_chunks.isChunkState(chunkid,CHUNK_SKIPPED));
+	NS_ASSERT(!chunkid|| m_chunks.isChunkState(chunkid,CHUNK_MISSED));
 	m_pullChunkMissed = chunkid;
 }
 
@@ -1511,14 +1507,14 @@ VideoPushApplication::ChunkSelection (ChunkPolicy policy){
 		{
 			chunkid = m_chunks.GetLatestMissed(GetPullWBase(), GetPullWindow());
 			NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
-			NS_ASSERT(!chunkid||!m_chunks.ChunkSkipped(chunkid));
+			NS_ASSERT(!chunkid||!m_chunks.isChunkState(chunkid,CHUNK_SKIPPED));
 			break;
 		}
 		case CS_LEAST_MISSED:
 		{
 			chunkid = m_chunks.GetLeastMissed(GetPullWBase(), GetPullWindow());
 			NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
-			NS_ASSERT(!chunkid||!m_chunks.ChunkSkipped(chunkid));
+			NS_ASSERT(!chunkid||!m_chunks.isChunkState(chunkid,CHUNK_SKIPPED));
 			break;
 		}
 		case CS_LATEST:
@@ -1624,7 +1620,7 @@ void VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)
 void VideoPushApplication::ConnectionFailed (Ptr<Socket>)
 {
   NS_LOG_FUNCTION_NOARGS ();
-  cout << "VideoPush, Connection Failed" << endl;
+  NS_LOG_INFO("VideoPush, Connection Failed");
 }
 
 void VideoPushApplication::SetGateway (const Ipv4Address &gateway)
@@ -1636,7 +1632,6 @@ Time VideoPushApplication::TransmissionDelay (double l, double u, enum Time::Uni
 {
 	double delay = UniformVariable().GetValue(l,u);
 	Time delayms = Time::FromDouble(delay, unit);
-//	NS_LOG_DEBUG("Time ("<<l<<","<<u<<") = "<<delayms.GetSeconds()<<"s "<< delay);
 	return delayms;
 }
-} // Namespace ns3
+} // namespace ns3
