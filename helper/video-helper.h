@@ -32,80 +32,84 @@
 #include <ns3/node-container.h>
 #include <ns3/application-container.h>
 
-namespace ns3 {
-
-/**
- * \brief A helper to make it easier to instantiate an ns3::OnOffApplication
- * on a set of nodes.
- */
-class VideoHelper
+namespace ns3
 {
-public:
   /**
-   * Create an OnOffHelper to make it easier to work with OnOffApplications
-   *
-   * \param protocol the name of the protocol to use to send traffic
-   *        by the applications. This string identifies the socket
-   *        factory type used to create sockets for the applications.
-   *        A typical value would be ns3::UdpSocketFactory.
-   * \param address the address of the remote node to send traffic
-   *        to.
+   * \brief A helper to make it easier to instantiate an ns3::VideoPushApplication
+   * on a set of nodes.
    */
-	VideoHelper (std::string protocol, Address address);
+  class VideoHelper
+  {
+    public:
+      /**
+       * Create an VideoHelper to make it easier to work with VideoPushApplication
+       *
+       * \param protocol the name of the protocol to use to send traffic
+       *        by the applications. This string identifies the socket
+       *        factory type used to create sockets for the applications.
+       *        A typical value would be ns3::UdpSocketFactory.
+       * \param address the address of the remote node to send traffic
+       *        to.
+       */
+      VideoHelper (std::string protocol, Address address);
 
-  /**
-   * Helper function used to set the underlying application attributes.
-   *
-   * \param name the name of the application attribute to set
-   * \param value the value of the application attribute to set
-   */
-  void SetAttribute (std::string name, const AttributeValue &value);
+      /**
+       * Helper function used to set the underlying application attributes.
+       *
+       * \param name the name of the application attribute to set
+       * \param value the value of the application attribute to set
+       */
+      void
+      SetAttribute (std::string name, const AttributeValue &value);
 
-  /**
-   * Install an ns3::OnOffApplication on each node of the input container
-   * configured with all the attributes set with SetAttribute.
-   *
-   * \param c NodeContainer of the set of nodes on which an OnOffApplication
-   * will be installed.
-   * \returns Container of Ptr to the applications installed.
-   */
-  ApplicationContainer Install (NodeContainer c) const;
+      /**
+       * Install an ns3::VideoPushApplication on each node of the input container
+       * configured with all the attributes set with SetAttribute.
+       *
+       * \param c NodeContainer of the set of nodes on which an VideoPushApplication
+       * will be installed.
+       * \returns Container of Ptr to the applications installed.
+       */
+      ApplicationContainer
+      Install (NodeContainer c) const;
 
-  /**
-   * Install an ns3::OnOffApplication on the node configured with all the
-   * attributes set with SetAttribute.
-   *
-   * \param node The node on which an OnOffApplication will be installed.
-   * \returns Container of Ptr to the applications installed.
-   */
-  ApplicationContainer Install (Ptr<Node> node) const;
+      /**
+       * Install an ns3::VideoPushApplication on the node configured with all the
+       * attributes set with SetAttribute.
+       *
+       * \param node The node on which an VideoPushApplication will be installed.
+       * \returns Container of Ptr to the applications installed.
+       */
+      ApplicationContainer
+      Install (Ptr<Node> node) const;
 
-  /**
-   * Install an ns3::OnOffApplication on the node configured with all the
-   * attributes set with SetAttribute.
-   *
-   * \param nodeName The node on which an OnOffApplication will be installed.
-   * \returns Container of Ptr to the applications installed.
-   */
-  ApplicationContainer Install (std::string nodeName) const;
+      /**
+       * Install an ns3::VideoPushApplication on the node configured with all the
+       * attributes set with SetAttribute.
+       *
+       * \param nodeName The node on which an VideoPushApplication will be installed.
+       * \returns Container of Ptr to the applications installed.
+       */
+      ApplicationContainer
+      Install (std::string nodeName) const;
 
-private:
-  /**
-   * \internal
-   * Install an ns3::OnOffApplication on the node configured with all the
-   * attributes set with SetAttribute.
-   *
-   * \param node The node on which an OnOffApplication will be installed.
-   * \returns Ptr to the application installed.
-   */
-  Ptr<Application> InstallPriv (Ptr<Node> node) const;
-//  std::string m_protocol;
-//  Address m_remote;
-  ObjectFactory m_factory;
-};
+    private:
+      /**
+       * \internal
+       * Install an ns3::VideoPushApplication on the node configured with all the
+       * attributes set with SetAttribute.
+       *
+       * \param node The node on which an VideoPushApplication will be installed.
+       * \returns Ptr to the application installed.
+       */
+      Ptr<Application>
+      InstallPriv (Ptr<Node> node) const;
+      std::string m_protocol;
+      Address m_remote;
+      ObjectFactory m_factory;
+  };
 
 } // namespace ns3
-
 
 #endif /* VIDEO_HELPER_H_ */
 

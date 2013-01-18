@@ -26,53 +26,53 @@
 #include <ns3/string.h>
 #include <ns3/names.h>
 
-namespace ns3 {
-
-VideoHelper::VideoHelper (std::string protocol, Address address)
+namespace ns3
 {
-  m_factory.SetTypeId ("ns3::VideoPushApplication");
-  m_factory.Set ("Protocol", StringValue (protocol));
-  m_factory.Set ("Remote", AddressValue (address));
-}
+  VideoHelper::VideoHelper (std::string protocol, Address address)
+  {
+    m_factory.SetTypeId("ns3::VideoPushApplication");
+    m_factory.Set("Protocol", StringValue(protocol));
+    m_factory.Set("Remote", AddressValue(address));
+  }
 
-void
-VideoHelper::SetAttribute (std::string name, const AttributeValue &value)
-{
-  m_factory.Set (name, value);
-}
+  void
+  VideoHelper::SetAttribute (std::string name, const AttributeValue &value)
+  {
+    m_factory.Set(name, value);
+  }
 
-ApplicationContainer
-VideoHelper::Install (Ptr<Node> node) const
-{
-  return ApplicationContainer (InstallPriv (node));
-}
+  ApplicationContainer
+  VideoHelper::Install (Ptr<Node> node) const
+  {
+    return ApplicationContainer(InstallPriv(node));
+  }
 
-ApplicationContainer
-VideoHelper::Install (std::string nodeName) const
-{
-  Ptr<Node> node = Names::Find<Node> (nodeName);
-  return ApplicationContainer (InstallPriv (node));
-}
+  ApplicationContainer
+  VideoHelper::Install (std::string nodeName) const
+  {
+    Ptr<Node> node = Names::Find<Node>(nodeName);
+    return ApplicationContainer(InstallPriv(node));
+  }
 
-ApplicationContainer
-VideoHelper::Install (NodeContainer c) const
-{
-  ApplicationContainer apps;
-  for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
-    {
-      apps.Add (InstallPriv (*i));
-    }
+  ApplicationContainer
+  VideoHelper::Install (NodeContainer c) const
+  {
+    ApplicationContainer apps;
+    for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i)
+      {
+        apps.Add(InstallPriv(*i));
+      }
 
-  return apps;
-}
+    return apps;
+  }
 
-Ptr<Application>
-VideoHelper::InstallPriv (Ptr<Node> node) const
-{
-  Ptr<Application> app = m_factory.Create<Application> ();
-  node->AddApplication (app);
+  Ptr<Application>
+  VideoHelper::InstallPriv (Ptr<Node> node) const
+  {
+    Ptr<Application> app = m_factory.Create<Application>();
+    node->AddApplication(app);
 
-  return app;
-}
+    return app;
+  }
 
 } // namespace ns3
