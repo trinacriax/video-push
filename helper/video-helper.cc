@@ -1,7 +1,6 @@
 /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
 /*
  * Copyright (c) 2011 University of Trento, Italy
- * 					  University of California, Los Angeles, U.S.A.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,14 +18,13 @@
  *
  * Authors: Alessandro Russo <russo@disi.unitn.it>
  *          University of Trento, Italy
- *          University of California, Los Angeles U.S.A.
  */
 
 #include "video-helper.h"
-#include "ns3/inet-socket-address.h"
-#include "ns3/packet-socket-address.h"
-#include "ns3/string.h"
-#include "ns3/names.h"
+#include <ns3/inet-socket-address.h>
+#include <ns3/packet-socket-address.h>
+#include <ns3/string.h>
+#include <ns3/names.h>
 
 namespace ns3 {
 
