@@ -1410,7 +1410,7 @@ namespace ns3
   void
   VideoPushApplication::SetSource (Ipv4Address source)
   {
-    NS_ASSERT(source != Ipv4Address() && source != Ipv4Address::GetAny());
+    NS_ASSERT(source != Ipv4Address());
     m_source = source;
   }
 
