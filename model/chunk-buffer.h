@@ -1,7 +1,6 @@
 /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
 /*
  * Copyright (c) 2011 University of Trento, Italy
- * 					  University of California, Los Angeles, U.S.A.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,50 +18,195 @@
  *
  * Authors: Alessandro Russo <russo@disi.unitn.it>
  *          University of Trento, Italy
- *          University of California, Los Angeles U.S.A.
  */
 
 #ifndef __CHUNK_LIST_H__
 #define __CHUNK_LIST_H__
 
 #include "chunk-video.h"
-#include "ns3/object.h"
+#include <ns3/object.h>
 #include <map>
 #include <string>
-namespace ns3{
-using namespace streaming;
+namespace ns3
+{
 
-class ChunkBuffer{
+  namespace streaming
+  {
 
-public:
+    /**
+     * \brief Provide a chunk buffer structure for video streaming application.
+     *
+     * The class provides a simple chunk buffer data structure
+     * employed in video streaming applications.
+     *
+     */
 
-	ChunkBuffer ();
+    class ChunkBuffer
+    {
 
-	virtual ~ChunkBuffer ();
+      public:
 
-	ChunkVideo* GetChunk (uint32_t index);
-	bool HasChunk (uint32_t index);
-	bool AddChunk (const ChunkVideo &chunk, ChunkState state);
-	bool DelChunk (uint32_t index);
+        ChunkBuffer ();
 
-	const size_t GetBufferSize ();
-	std::string PrintBuffer();
-	std::map<uint32_t, ChunkVideo> GetChunkBuffer();
-	ChunkState GetChunkState (uint32_t index);
-	void SetChunkState (uint32_t chunkid, ChunkState state);
-	bool ChunkMissed (uint32_t chunkid);
-	bool ChunkDelayed (uint32_t chunkid);
-	bool ChunkSkipped (uint32_t chunkid);
-	uint32_t GetLeastMissed (uint32_t base, uint32_t window);
-	uint32_t GetLatestMissed (uint32_t base, uint32_t window);
-	uint32_t GetLastChunk ();
-	uint32_t GetSize ();
+        virtual
+        ~ChunkBuffer ();
 
-protected:
-	std::map<uint32_t, ChunkVideo> chunk_buffer;
-	std::map<uint32_t, ChunkState> chunk_state;
-	uint32_t last;
+        /**
+         *
+         * @param chunkId chunk identifier
+         * @return pointer to chunk
+         *
+         * Provides the i-th chunk.
+         */
 
-};
-}
+        ChunkVideo*
+        GetChunk (uint32_t chunkId);
+
+        /**
+         *
+         * @param chunkId chunk identifier
+         * @return True if the chunk is in the buffer, false otherwise.
+         *
+         * Check whether the chunk is in the buffer or not.
+         */
+
+        bool
+        HasChunk (uint32_t chunkId);
+
+        /**
+         *
+         * @param chunk Chunk data.
+         * @param state Chunk's state.
+         * @return True if added, false otherwise.
+         *
+         * Insert a chunk into the buffer with a given state.
+         */
+
+        bool
+        AddChunk (const ChunkVideo &chunk, ChunkState state);
+
+        /**
+         *
+         * @param chunkId chunk identifier.
+         * @return True if removed, false otherwise.
+         *
+         * Remove a chunk from the buffer.
+         */
+
+        bool
+        DelChunk (uint32_t chunkId);
+
+        /**
+         *
+         * @return Size of the buffer.
+         *
+         * Size of the current buffer.
+         */
+
+        const size_t
+        GetBufferSize ();
+
+        /**
+         *
+         * @return A string containing the identifier of all chunks.
+         *
+         * Create a string with the identifiers of all chunks into the buffer.
+         */
+
+        std::string
+        PrintBuffer ();
+
+        /**
+         *
+         * @return a copy of the chunk buffer.
+         *
+         * Give the whole chunk buffer.
+         */
+
+        std::map<uint32_t, ChunkVideo>
+        GetChunkBuffer ();
+
+        /**
+         *
+         * @param chunkId chunk identifier.
+         * @return The state of the chunk.
+         *
+         * Get the state of the chunk.
+         */
+
+        ChunkState
+        GetChunkState (uint32_t chunkId);
+
+        /**
+         *
+         * @param chunkId chunk identifier.
+         * @param state chunk's state
+         *
+         * Set the state of the chunk.
+         */
+
+        void
+        SetChunkState (uint32_t chunkId, ChunkState state);
+
+        /**
+         *
+         * @param chunkId chunk identifier.
+         * @return True is the chunks' state is equal to the one give, false otherwise.
+         *
+         * Compare the chunk's state with the given one.
+         */
+
+        bool
+        isChunkState (uint32_t chunkId, ChunkState state);
+
+        /**
+         *
+         * @param base Starting chunk identifier to look into the buffer.
+         * @param window Window size to consider to find the least chunk missed.
+         * @return Least missed chunk.
+         *
+         * Get the least missed chunk
+         */
+
+        uint32_t
+        GetLeastMissed (uint32_t base, uint32_t window);
+
+        /**
+         *
+         * @param base Starting chunk identifier to look into the buffer.
+         * @param window Window size to consider to find the latest chunk missed.
+         * @return Latest missed chunk.
+         *
+         * Get the latest missed chunk
+         */
+
+        uint32_t
+        GetLatestMissed (uint32_t base, uint32_t window);
+
+        /**
+         *
+         * @return Last chunk identifier.
+         *
+         * Get the last chunk identifier in the buffer.
+         */
+
+        uint32_t
+        GetLastChunk ();
+
+        /**
+         *
+         * @return Chunk buffer size.
+         * Get the chunk buffer size.
+         */
+        uint32_t
+        GetSize ();
+
+      protected:
+        std::map<uint32_t, ChunkVideo> chunk_buffer; /// map containing the chunks
+        std::map<uint32_t, ChunkState> chunk_state;  /// map containing the chunks' state
+        uint32_t last;                               /// Last chunk identifier.
+
+    };
+  } // namespace streaming
+} // namespace ns3
 #endif
