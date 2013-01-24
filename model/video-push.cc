@@ -18,6 +18,7 @@
  *
  * Authors: Alessandro Russo <russo@disi.unitn.it>
  *          University of Trento, Italy
+ *
  */
 
 #define NS_LOG_APPEND_CONTEXT                                   \
@@ -156,7 +157,7 @@ namespace ns3
                      UintegerValue (1),
                      MakeUintegerAccessor (&VideoPushApplication::SetHelloLoss,
                                            &VideoPushApplication::GetHelloLoss),
-                     MakeUintegerChecker<uint32_t> (1))
+                     MakeUintegerChecker<uint32_t> (0))
       .AddAttribute ("Source", "Source IP.",
                      Ipv4AddressValue (Ipv4Address::GetAny()),
                      MakeIpv4AddressAccessor (&VideoPushApplication::SetSource,
@@ -166,15 +167,15 @@ namespace ns3
                      UintegerValue (0),
                      MakeUintegerAccessor (&VideoPushApplication::SetHelloActive,
                                            &VideoPushApplication::GetHelloActive),
-                     MakeUintegerChecker<uint32_t> (0))
+                     MakeUintegerChecker<uint32_t> (0, 1))
       .AddAttribute ("SelectionWeight", "Neighbor selection weight (p * W) + (1-p) * (%ChunkReceived).",
                      DoubleValue (0),
                      MakeDoubleAccessor (&VideoPushApplication::n_selectionWeight),
                      MakeDoubleChecker<double> (0))
       .AddAttribute ("MaxPullReply", "Max number of pull to reply.",
-                     UintegerValue (0),
-                     MakeUintegerAccessor (&VideoPushApplication::SetPullMReply,
-                                           &VideoPushApplication::GetPullMReply),
+                     UintegerValue (1),
+                     MakeUintegerAccessor (&VideoPushApplication::SetPullReplyMax,
+                                           &VideoPushApplication::GetPullReplyMax),
                      MakeUintegerChecker<uint32_t> (0))
       .AddAttribute ("ChunkDelay", "Chunk Delay Trace",
                      PointerValue (),
@@ -279,7 +280,6 @@ namespace ns3
     StatisticChunk();
     m_socket = 0;
     m_socketList.clear();
-    // chain up
     Application::DoDispose();
   }
 
@@ -304,7 +304,6 @@ namespace ns3
         current = received + missed;
         while (current < chunkID)
           {
-//            NS_LOG_DEBUG ("Missed chunk "<< received << "-"<<m_chunks.GetChunk(received));
             NS_ASSERT(!m_chunks.HasChunk(current));
             missed++;
             hole++;
@@ -475,7 +474,6 @@ namespace ns3
   {
     NS_LOG_FUNCTION_NOARGS ();
     m_ipv4 = m_node->GetObject<Ipv4>();
-    // Create the socket if not already
     CancelEvents();
     if (!m_socket)
       {
@@ -507,11 +505,8 @@ namespace ns3
         m_pullSlot = Time::FromDouble(inter_time, Time::S);
         m_playout.SetDelay(Time::FromDouble(inter_time, Time::S));
         m_playout.SetFunction(&VideoPushApplication::UpdatePullWBase, this);
-//        m_pullSlot -= MicroSeconds(LPULLGUARD + RPULLGUARD);
-//        double v = ceil(m_pullSlot.ToDouble(Time::US) / m_pullTime.ToDouble(Time::US));
-//        SetPullMReply((uint32_t) v);
         m_pullReplyTimer.SetDelay(m_pullSlot);
-        m_pullReplyTimer.SetFunction(&VideoPushApplication::ResetPullCReply, this);
+        m_pullReplyTimer.SetFunction(&VideoPushApplication::ResetPullReplyCurrent, this);
       }
     StartSending();
   }
@@ -574,6 +569,7 @@ namespace ns3
     Simulator::Cancel(m_helloEvent);
     Simulator::Cancel(m_loopEvent);
     Simulator::Cancel(m_pullEvent);
+    Simulator::Cancel(m_pullSlotEvent);
     Simulator::Cancel(m_chunkEvent);
   }
 
@@ -615,42 +611,41 @@ namespace ns3
   }
 
   uint32_t
-  VideoPushApplication::GetPullCReply () const
+  VideoPushApplication::GetPullReplyCurrent () const
   {
     return m_pullReplyCurrent;
   }
 
   void
-  VideoPushApplication::SetPullCReply (uint32_t value)
+  VideoPushApplication::SetPullReplyCurrent (uint32_t value)
   {
     m_pullReplyCurrent = value;
   }
 
   void
-  VideoPushApplication::AddPullCReply ()
+  VideoPushApplication::AddPullReplyCurrent ()
   {
     m_pullReplyCurrent++;
   }
 
   void
-  VideoPushApplication::ResetPullCReply ()
+  VideoPushApplication::ResetPullReplyCurrent ()
   {
-    SetPullCReply(0);
+    SetPullReplyCurrent(0);
     if (m_pullReplyTimer.IsRunning())
       m_pullReplyTimer.Cancel();
     m_pullReplyTimer.Schedule();
   }
 
   uint32_t
-  VideoPushApplication::GetPullMReply () const
+  VideoPushApplication::GetPullReplyMax () const
   {
     return m_pullReplyMax;
   }
 
   void
-  VideoPushApplication::SetPullMReply (uint32_t value)
+  VideoPushApplication::SetPullReplyMax (uint32_t value)
   {
-    NS_ASSERT(value > 0);
     m_pullReplyMax = value;
   }
 
@@ -708,7 +703,6 @@ namespace ns3
   void
   VideoPushApplication::SetPullWindow (uint32_t window)
   {
-    NS_ASSERT(window > 0);
     m_playoutWindow = window;
   }
 
@@ -766,7 +760,6 @@ namespace ns3
   VideoPushApplication::InPullRange ()
   {
     double low = GetReceived(CHUNK_RECEIVED_PUSH);
-//	double up = low + GetReceived(CHUNK_RECEIVED_PULL);
     bool active = (low <= GetPullRatioMax() && low >= GetPullRatioMin());
     if (active)
       m_pullStartTrace(low);
@@ -852,7 +845,6 @@ namespace ns3
   void
   VideoPushApplication::SetHelloLoss (uint32_t loss)
   {
-    NS_ASSERT(loss>0);
     m_helloLoss = loss;
   }
 
@@ -924,7 +916,7 @@ namespace ns3
     uint32_t last = m_chunks.GetLastChunk();
     uint32_t base = GetPullWBase();
     uint32_t window = GetPullWindow();
-    window = last < window ? 1 : window; // should be 0
+    window = last < window ? 1 : window;
     double ratio = 0.0;
     for (uint32_t i = base; base > 0 && i < (base + window); i++)
       {
@@ -967,7 +959,7 @@ namespace ns3
           NS_ASSERT(!m_pullEvent.IsRunning());
           /* There is a missed chunk*/
           while (GetChunkMissed()
-              && (GetPullRetry(GetChunkMissed()) >= GetPullMax() || GetChunkMissed() < GetPullWBase()))/* Mark chunks as skipped*/
+              && (GetPullRetryCurrent(GetChunkMissed()) >= GetPullMax() || GetChunkMissed() < GetPullWBase()))/* Mark chunks as skipped*/
             {
               NS_ASSERT(m_chunks.GetChunkState(GetChunkMissed())==CHUNK_MISSED);
               m_chunks.SetChunkState(GetChunkMissed(), CHUNK_SKIPPED); // Mark as skipped
@@ -976,14 +968,14 @@ namespace ns3
               uint32_t lastmissed = GetChunkMissed();
               SetChunkMissed(ChunkSelection(m_chunkSelection)); // Update chunk missed
               NS_LOG_INFO ("Node " <<m_node->GetId()<< " is marking chunk "<< lastmissed
-                  <<" as skipped ("<<(lastmissed?GetPullRetry(lastmissed):0)<<"/"<<GetPullMax()<<") New missed="<<GetChunkMissed ());
+                  <<" as skipped ("<<(lastmissed?GetPullRetryCurrent(lastmissed):0)<<"/"<<GetPullMax()<<") New missed="<<GetChunkMissed ());
             }
           double low = GetReceived(CHUNK_RECEIVED_PUSH);
           double up = low + GetReceived(CHUNK_RECEIVED_PULL);
           SetChunkMissed(ChunkSelection(m_chunkSelection));
           NS_LOG_INFO ("Node " << m_node->GetId() << " IP=" << GetLocalAddress()
               << " Ratio [" << low << ":" << up << "] ["<<GetPullRatioMin() << ":" << GetPullRatioMax() << "]" << " Total="<< m_chunks.GetSize()
-              << " Last=" << m_chunks.GetLastChunk() << " Missed=" << GetChunkMissed() << " ("<<(GetChunkMissed()?GetPullRetry(GetChunkMissed()):0)<<","<<GetPullMax()<<")"
+              << " Last=" << m_chunks.GetLastChunk() << " Missed=" << GetChunkMissed() << " ("<<(GetChunkMissed()?GetPullRetryCurrent(GetChunkMissed()):0)<<","<<GetPullMax()<<")"
               << " Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
               << " Timer="<<(m_pullTimer.IsRunning()?"Yes":"No"));
           if (GetChunkMissed() && InPullRange())/*check whether the node is within Pull-allowed range*/
@@ -995,12 +987,12 @@ namespace ns3
               if (target.GetAddress() != Ipv4Address::GetAny())
                 {
                   NS_ASSERT(m_neighbors.IsNeighbor(target));
-                  Time delay = TransmissionDelay(100, 2000, Time::US); //[0-1000]us random
+                  Time delay = TransmissionDelay(100, 2000, Time::US); //[0-2000]us random
                   m_pullTimer.Schedule();
                   m_pullEvent = Simulator::Schedule(delay, &VideoPushApplication::SendPull, this, GetChunkMissed(),
                       target.GetAddress());
                   NS_LOG_INFO ("Node " <<m_node->GetId()<< " schedule pull to "<< target.GetAddress()
-                      << " for chunk " << GetChunkMissed() <<" ("<< GetPullRetry(GetChunkMissed())<<") at "
+                      << " for chunk " << GetChunkMissed() <<" ("<< GetPullRetryCurrent(GetChunkMissed())<<") at "
                       << Simulator::Now()+delay << " timeout "<< (Simulator::Now()+m_pullTimer.GetDelay())
                       << " useful time "<< (m_pullTimer.GetDelay()-delay)
                       << " PullTimer "<< m_pullTimer.IsRunning());
@@ -1054,7 +1046,7 @@ namespace ns3
       {
         StatisticAddDuplicateChunk(chunk.c_id);
       }
-    else if (GetPullRetry(chunk.c_id) && toolate) // has been pulled and received too late
+    else if (GetPullRetryCurrent(chunk.c_id) && toolate) // has been pulled and received too late
       {
         m_chunks.SetChunkState(chunk.c_id, CHUNK_DELAYED);
         NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received too late missed chunk "<< chunk.c_id);NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND");
@@ -1063,7 +1055,7 @@ namespace ns3
       {
         Time delay = Simulator::Now() - MicroSeconds(chunk.c_tstamp);
         SetChunkDelay(chunk.c_id, delay);
-        if (GetPullRetry(chunk.c_id)) // has been pulled and received in time
+        if (GetPullRetryCurrent(chunk.c_id)) // has been pulled and received in time
           {
             m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PULL);
             NS_ASSERT(sender != GetSource());
@@ -1074,10 +1066,10 @@ namespace ns3
             Time shift = (Simulator::Now() - GetPullTimes(chunk.c_id));
             NS_LOG_INFO ("Node "<< GetLocalAddress() << " has received missed chunk "<< chunk.c_id<< " after "
                 << shift.GetSeconds()<< " ~ "<< (shift.GetSeconds()/(1.0*GetPullTime().GetSeconds())));
-            /*			TODO need min and max values to limit the timeout value.
-             * 				Time pulltimeout = Time::FromDouble(0.5 * GetPullTime().ToDouble(Time::US) + 0.5 * shift.ToDouble(Time::US), Time::US);
-             * 				NS_LOG_INFO ("Node updates its pull timeout from "<< GetPullTime().GetMilliSeconds() << " to "<< pulltimeout.GetMilliSeconds());
-             * 				SetPullTime(pulltimeout);
+            /* TODO need min and max values to limit the timeout value.
+             * Time pulltimeout = Time::FromDouble(0.5 * GetPullTime().ToDouble(Time::US) + 0.5 * shift.ToDouble(Time::US), Time::US);
+             * NS_LOG_INFO ("Node updates its pull timeout from "<< GetPullTime().GetMilliSeconds() << " to "<< pulltimeout.GetMilliSeconds());
+             * SetPullTime(pulltimeout);
              */
             SetPullTimes(chunk.c_id, shift);
             NS_LOG_DEBUG ("Node " <<m_node->GetId()<<" PULLEND");
@@ -1085,7 +1077,7 @@ namespace ns3
         else
           {
             SetPullSlotStart(Simulator::Now());
-            ResetPullCReply();
+            ResetPullReplyCurrent();
             if (m_chunks.GetSize() == 1) // this is the first chunk
               {
                 NS_ASSERT(!m_playout.IsRunning());
@@ -1108,7 +1100,6 @@ namespace ns3
         Time delay(0);
         if (GetPullSlotStart() > Simulator::Now())
           delay = GetPullSlotStart() - Simulator::Now();
-//        NS_ASSERT(GetPullSlotEnd() > Simulator::Now());
         m_pullTimer.Schedule(delay);
         NS_LOG_INFO ("Node " << GetLocalAddress() << " will pull "<<GetChunkMissed()<< " at "<<(Simulator::Now()+delay));
       }
@@ -1131,10 +1122,10 @@ namespace ns3
         NS_ASSERT(GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
         NS_ASSERT(Simulator::Now() >= GetPullSlotStart());
         NS_ASSERT(Simulator::Now() <= GetPullSlotEnd());
-        AddPullRetry(chunkid);
+        AddPullRetryCurrent(chunkid);
         SetPullTimes(chunkid);
         StatisticAddPullRequest();
-        //TODO CHECK Create too late chunks
+        //TODO CHECK too late chunks
         NS_ASSERT(chunkid <= (GetPullWBase()+GetPullWindow()));
         m_socket->SendTo(packet, 0, InetSocketAddress(target, PUSH_PORT));
         m_txControlPullTrace(packet);
@@ -1163,8 +1154,8 @@ namespace ns3
           bool hasChunk = m_chunks.HasChunk(chunkid);
           Time delay = TransmissionDelay(100, 1500, Time::US);
           StatisticAddPullReceived();
-          if (hasChunk && !m_chunkEvent.IsRunning()
-              && /*chunkid >= GetPullWBase() &&*/GetPullCReply() <= GetPullMReply() && PullSlot() < PullRepThr)
+          if (hasChunk && !m_chunkEvent.IsRunning() && GetPullReplyCurrent() <= GetPullReplyMax()
+              && PullSlot() < PullRepThr)
             {
               NS_LOG_DEBUG(GetPullSlotStart().GetMicroSeconds()<<" < " << now.GetMicroSeconds() << " < " << GetPullSlotEnd().GetMicroSeconds() << " : "<< (GetPullSlotEnd()-Simulator::Now()).GetMicroSeconds());
               NS_ASSERT(now >= GetPullSlotStart());
@@ -1204,7 +1195,7 @@ namespace ns3
           packet->AddHeader(chunk);
           NS_LOG_LOGIC ("Node " << GetLocalAddress() << " replies pull to " << target << " for chunk [" << *copy<< "] Size " << packet->GetSize() << " UID "<< packet->GetUid());
           StatisticAddPullReply();
-          AddPullCReply();
+          AddPullReplyCurrent();
           m_txDataPullTrace(packet);
           m_socket->SendTo(packet, 0, InetSocketAddress(target, PUSH_PORT));
           break;
@@ -1421,7 +1412,7 @@ namespace ns3
   }
 
   void
-  VideoPushApplication::AddPullRetry (uint32_t chunkid)
+  VideoPushApplication::AddPullRetryCurrent (uint32_t chunkid)
   {
     NS_ASSERT(chunkid>0);
     if (m_pullRetriesCurrent.find(chunkid) == m_pullRetriesCurrent.end())
@@ -1430,7 +1421,7 @@ namespace ns3
   }
 
   uint32_t
-  VideoPushApplication::GetPullRetry (uint32_t chunkid)
+  VideoPushApplication::GetPullRetryCurrent (uint32_t chunkid)
   {
     NS_ASSERT(chunkid>0);
     if (m_pullRetriesCurrent.find(chunkid) == m_pullRetriesCurrent.end())
@@ -1538,7 +1529,7 @@ namespace ns3
           ChunkVideo *copy = m_chunks.GetChunk(new_chunk);
           ChunkHeader chunk(MSG_CHUNK);
           chunk.GetChunkMessage().SetChunk(*copy);
-          Ptr<Packet> packet = Create<Packet>(m_pktSize); //TODO Here the chunk data
+          Ptr<Packet> packet = Create<Packet>(m_pktSize); //TODO You can add here the real chunk data
           packet->AddHeader(chunk);
           uint32_t payload = copy->c_size + copy->c_attributes_size; //data and attributes already in chunk header;
           m_txDataTrace(packet);
@@ -1578,7 +1569,6 @@ namespace ns3
           ChunkHeader hello(MSG_HELLO);
           hello.GetHelloMessage().SetLastChunk(m_chunks.GetLastChunk());
           double low = GetReceived(CHUNK_RECEIVED_PUSH);
-//          double up = low + GetReceived(CHUNK_RECEIVED_PULL);
           uint32_t ratio = ((low) == 0 ? 1 : (uint32_t) (floor(low * 1000)));
           hello.GetHelloMessage().SetChunksRatio(ratio);
           hello.GetHelloMessage().SetChunksReceived(m_chunks.GetBufferSize());
@@ -1589,7 +1579,6 @@ namespace ns3
           m_txControlTrace(packet);
           NS_LOG_DEBUG ("Node " << GetLocalAddress()<< " sends hello to "<< subnet);
           m_socket->SendTo(packet, 0, InetSocketAddress(subnet, PUSH_PORT));
-          //	Time t = Time::FromDouble((0.01 * UniformVariable ().GetValue (0, 1000)), Time::MS);
           m_helloTimer.Schedule();
           break;
         }
@@ -1601,19 +1590,20 @@ namespace ns3
       }
   }
 
-  void
-  VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)
-  {
-    NS_LOG_FUNCTION_NOARGS ();
-    m_connected = true;
+//  void
+//  VideoPushApplication::ConnectionSucceeded (Ptr<Socket>)
+//  {
+//    NS_LOG_FUNCTION_NOARGS ();
+//    m_connected = true;
+//
+//  }
 
-  }
-
-  void
-  VideoPushApplication::ConnectionFailed (Ptr<Socket>)
-  {
-    NS_LOG_FUNCTION_NOARGS ();NS_LOG_INFO("VideoPush, Connection Failed");
-  }
+//  void
+//  VideoPushApplication::ConnectionFailed (Ptr<Socket>)
+//  {
+//    NS_LOG_FUNCTION_NOARGS ();
+//    NS_LOG_INFO("VideoPush, Connection Failed");
+//  }
 
   void
   VideoPushApplication::SetGateway (const Ipv4Address &gateway)

@@ -1,15 +1,7 @@
 ## -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 def build(bld):
-    obj = bld.create_ns3_program('video-streaming', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'applications', 'mbn-aodv'])
+    obj = bld.create_ns3_program('video-streaming', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'applications'])
     obj.source = 'video-streaming.cc'
     obj = bld.create_ns3_program('streaming-pull', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'applications'])
     obj.source = 'streaming-pull.cc'
-    obj = bld.create_ns3_program('video-streaming-pimdm', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'mbn-aodv', 'pimdm', 'igmpx', 'applications'])
-    obj.source = 'video-streaming-pimdm.cc'
-    obj = bld.create_ns3_program('push-example-CoNEXT', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'applications', 'flow-monitor'])
-    obj.source = 'push-example-CoNEXT.cc'
-    obj = bld.create_ns3_program('push-example-multiBSS', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'applications', 'flow-monitor', 'pimdm', 'igmpx'])
-    obj.source = 'push-example-multiBSS.cc'
-    obj = bld.create_ns3_program('push-example-singleBSS', ['internet', 'csma', 'video-push', 'wifi', 'aodv', 'applications', 'flow-monitor', 'pimdm', 'igmpx'])
-    obj.source = 'push-example-singleBSS.cc'    

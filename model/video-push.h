@@ -18,6 +18,7 @@
  *
  * Authors: Alessandro Russo <russo@disi.unitn.it>
  *          University of Trento, Italy
+ *
  */
 
 #ifndef __VIDEO_PUSH_H__
@@ -66,8 +67,9 @@ namespace ns3
 
   /**
    * \brief A video application.
-   * Provide a simple video application in push,
-   * where the pull mechanism might be enable.
+   * This module provides a simple push protocol for video streaming application.
+   * User can enable the pull mechanism to retrieve chunks,
+   * setting the proper scheduling algorithm for both peer and chunk selection.
    */
   class VideoPushApplication : public Application
   {
@@ -86,7 +88,7 @@ namespace ns3
 
       /**
        *
-       * @param gateway Access Point address.
+       * \param gateway Access Point address.
        * Associated access point
        */
       void
@@ -130,209 +132,599 @@ namespace ns3
       std::list<Ptr<Socket> >
       GetAcceptedSockets (void) const;
 
-      void
-      AddPullRetry (uint32_t chunkid);
-      uint32_t
-      GetPullRetry (uint32_t chunkid);
+      /**
+       * \param chunkid chunk identifier
+       * Set the max pull retries for a given chunk identifier.
+       */
       void
       SetPullMax (uint32_t max);
-      uint32_t
-      GetPullMax () const;
-      void
-      SetPullWindow (uint32_t window);
-      uint32_t
-      GetPullWindow () const;
-      void
-      SetPullRatioMin (double ratio);
-      double
-      GetPullRatioMin () const;
-      void
-      SetPullRatioMax (double ratio);
-      double
-      GetPullRatioMax () const;
-      bool
-      InPullRange ();
 
       /**
-       * Activate or deactivate the pull mechanism.
-       * */
+       * \return max number of pull retries
+       * Get the max number of pull retries for a given chunk identifier.
+       */
+      uint32_t
+      GetPullMax () const;
+
+      /**
+       * \param window size.
+       * Set the pull window size.
+       */
+      void
+      SetPullWindow (uint32_t window);
+
+      /**
+       * \return window size.
+       * Get the pull window size.
+       */
+      uint32_t
+      GetPullWindow () const;
+
+      /**
+       * \param ratio Chunk ratio within the pull window.
+       * Set the minimum chunk ratio within the window to activate pull in the node.
+       */
+      void
+      SetPullRatioMin (double ratio);
+
+      /**
+       * \return Minimum chunk ratio within the pull window.
+       * Get the minimum chunk ratio within the window to activate pull in the node.
+       */
+      double
+      GetPullRatioMin () const;
+
+      /**
+       * \param ratio Chunk ratio within the pull window.
+       * Set the maximum chunk ratio within the window before deactivating the pull in the node.
+       */
+      void
+      SetPullRatioMax (double ratio);
+
+      /**
+       * \return Maximum chunk ratio within the pull window.
+       * Get the maximum chunk ratio within the window before deactivating the pull in the node.
+       */
+      double
+      GetPullRatioMax () const;
+
+      /**
+       * \param pull True if the pull mechanism is enabled, false otherwise.
+       * Set whether the pull mechanism is enabled or not.
+       */
       void
       SetPullActive (bool pull);
 
       /**
-       * Get the state of the pull mechanism, whether is active or not.
-       * */
+       * \return True if the pull mechanism is enabled, false otherwise.
+       * Get whether the pull mechanism is enabled or not.
+       */
       bool
       GetPullActive () const;
+
+      /**
+       * \return Max number of replies.
+       * Get the maximum current number of pull reply.
+       */
       uint32_t
-      GetPullCReply () const;
+      GetPullReplyMax () const;
+
+      /**
+       * \param Max number of replies.
+       * Set the maximum current number of pull reply.
+       */
       void
-      SetPullCReply (uint32_t value);
-      void
-      AddPullCReply ();
-      void
-      ResetPullCReply ();
-      uint32_t
-      GetPullMReply () const;
-      void
-      SetPullMReply (uint32_t value);
-      void
-      SetHelloActive (uint32_t hello);
-      uint32_t
-      GetHelloActive () const;
-      void
-      SetChunkDelay (uint32_t chunkid, Time delay);
-      Time
-      GetChunkDelay (uint32_t chunkid);
+      SetPullReplyMax (uint32_t value);
+
+      /**
+       * \param time Pull timeout as the maxium time to retrieve a chunk.
+       * Set the pull timeout before issuing another pull message or skip the chunk.
+       */
       void
       SetPullTime (Time time);
+
+      /**
+       * \return The pull timeout as the maxium time to retrieve a chunk.
+       * Get the pull timeout before issuing another pull message or skip the chunk.
+       */
       Time
       GetPullTime () const;
+
+      /**
+       * \return True if the hello messages are enabled, false otherwise.
+       * Set whether hello messages are enabled or not.
+       */
+      void
+      SetHelloActive (uint32_t hello);
+
+      /**
+       * \param True if the hello messages are enabled, false otherwise.
+       * Get whether hello messages are enabled or not.
+       */
+      uint32_t
+      GetHelloActive () const;
+
+      /**
+       * \param time Hello time.
+       * Set the time period for hello messages.
+       */
       void
       SetHelloTime (Time time);
+
+      /**
+       * \return Hello time.
+       * Get the time period for hello messages.
+       */
       Time
       GetHelloTime () const;
+
+      /**
+       * \param loss Maximum hello messages loss.
+       * Set the maximum loss allowed in hello messages before deleting a neighbor.
+       */
       void
       SetHelloLoss (uint32_t loss);
+
+      /**
+       * \return Maximum hello messages loss.
+       * Get the maximum loss allowed in hello messages before deleting a neighbor.
+       */
       uint32_t
       GetHelloLoss () const;
+
+      /**
+       * \param source Multicast source address.
+       * Set the multicast source address for this application.
+       */
       void
       SetSource (Ipv4Address source);
+
+      /**
+       * \return Multicast source address.
+       * Get the multicast source address for this application.
+       */
       Ipv4Address
       GetSource () const;
-      Time
-      TransmissionDelay (double l, double u, enum Time::Unit unit);
 
-      void
-      SetDelayTracker (Ptr<TimeMinMaxAvgTotalCalculator> delay);
+//      /**
+//       * \param delay Pointer to tracker delay.
+//       * Pointer to tracker delay to collect statistics.
+//       */
+//      void
+//      SetDelayTracker (Ptr<TimeMinMaxAvgTotalCalculator> delay);
+
     protected:
       virtual void
       DoDispose (void);
+
     private:
       // inherited from Application base class.
       virtual void
       StartApplication (void);    // Called at time specified by Start
+
+      // inherited from Application base class.
       virtual void
       StopApplication (void);     // Called at time specified by Stop
 
-      //helpers
+      /**
+       * Cancel all pending events.
+       */
       void
       CancelEvents ();
 
+//      void
+//      ConnectionSucceeded (Ptr<Socket>);
+
+//      void
+//      ConnectionFailed (Ptr<Socket>);
+
+//      void
+//      Ignore (Ptr<Socket>);
+
+      /**
+       * \param Socket pointer.
+       * \param from Address.
+       * Accepted socket on the address.
+       */
       void
-      Construct (Ptr<Node> n, const Address &remote, std::string tid, const RandomVariable& ontime,
-                 const RandomVariable& offtime, uint32_t size);
+      HandleAccept (Ptr<Socket>, const Address& from);
+
+      /**
+       * \param socket pointer.
+       * Socket closed successfully.
+       */
+      void
+      HandlePeerClose (Ptr<Socket>);
+
+      /**
+       * \param socket pointer
+       * Socket error in close.
+       */
+      void
+      HandlePeerError (Ptr<Socket>);
+
+      /**
+       * \return Local address.
+       * Get current node address.
+       */
+      Ipv4Address
+      GetLocalAddress ();
+
+      /**
+       * \return Current application identifier.
+       * Get current application identifier.
+       */
 
       uint32_t
       GetApplicationId (void) const;
 
+      /**
+       * \return A new chunk video.
+       * Forge a new video chunk.
+       */
+      ChunkVideo
+      ForgeChunk ();
+
+      /**
+       * Peer Loop function.
+       * Is the core function of the protocol where the source
+       * sends new chunks and the peers execute the pull mechanism.
+       */
       void
       PeerLoop ();
-      void
-      StatisticAddDuplicateChunk (uint32_t chunkid);
-      uint32_t
-      GetDuplicate (uint32_t chunkid);
 
+      /**
+       * Activate the chunk sending.
+       */
       void
       StartSending ();
+
+      /**
+       * Stop chunk sending.
+       */
       void
       StopSending ();
+
+      /**
+       * Source forge and send a new chunk.
+       */
       void
       SendPacket ();
+
+      /**
+       * \param chunkid chunk identifier.
+       * \param target neighbor address.
+       * Send a chunk to a given peer.
+       */
       void
       SendChunk (uint32_t chunkid, const Ipv4Address target);
+
+      /**
+       *
+       * \param chunkid chunk identifier.
+       * \param target neighbor address
+       * Send a pull message for a given chunk to a neighbor node.
+       */
       void
       SendPull (uint32_t chunkid, const Ipv4Address target);
+
+      /**
+       * Send hello message.
+       */
       void
       SendHello ();
 
-      ChunkVideo
-      ForgeChunk ();
-      uint32_t
-      ChunkSelection (ChunkPolicy policy);
-      Neighbor
-      PeerSelection (PeerPolicy policy);
+      /**
+       * \param Socket source.
+       * Parse a packet received from a socket, delivering the packet to the proper handler.
+       */
 
       void
-      AddPending (uint32_t chunkid);
-      bool
-      IsPending (uint32_t chunkid);
-      bool
-      RemovePending (uint32_t chunkid);
-      double
-      GetReceived (enum ChunkState state);
+      HandleReceive (Ptr<Socket>);
+
+      /**
+       * \param chunkheader Chunk header.
+       * \param sender Sender node.
+       * Parse a chunk received.
+       */
+      void
+      HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const Ipv4Address &sender);
+
+      /**
+       * \param pullheader Pull header.
+       * \param sender Sender node.
+       * Parse a pull message.
+       */
+      void
+      HandlePull (ChunkHeader::PullMessage &pullheader, const Ipv4Address &sender);
+
+      /**
+       * \param helloheader Hello header.
+       * \param sender Sender node.
+       * Parse a hello message.
+       */
+      void
+      HandleHello (ChunkHeader::HelloMessage &helloheader, const Ipv4Address &sender);
+
+      /**
+       * Add a pull request sent for statistics
+       */
       void
       StatisticAddPullRequest ();
-      void
-      StatisticAddPullHit ();
+
+      /**
+       * Add a pull received for statistics
+       */
       void
       StatisticAddPullReceived ();
+
+      /**
+       * Add a pull reply for statistics
+       */
       void
       StatisticAddPullReply ();
 
+      /**
+       * Add a successful pull for statistics (receive a positive reply)
+       */
       void
-      SetPullSlotStart (Time start);
-      Time
-      GetPullSlotStart () const;
-      Time
-      GetPullSlotEnd () const;
-      Time
-      GetPullSlot () const;
-      double
-      PullSlot ();
+      StatisticAddPullHit ();
 
-      void
-      SetChunkMissed (uint32_t chunkid);
-      uint32_t
-      GetChunkMissed () const;
-
-      void
-      SetPullTimes (uint32_t chunkid);
-      void
-      SetPullTimes (uint32_t chunkid, Time time);
-      Time
-      GetPullTimes (uint32_t chunkid);
-      Time
-      RemPullTimes (uint32_t chunkid);
-      bool
-      Pulled (uint32_t chunkid);
-      // Event handlers
-      void
-      HandleReceive (Ptr<Socket>);
-      void
-      HandleChunk (ChunkHeader::ChunkMessage &chunkheader, const Ipv4Address &sender);
-      void
-      HandlePull (ChunkHeader::PullMessage &pullheader, const Ipv4Address &sender);
-      void
-      HandleHello (ChunkHeader::HelloMessage &helloheader, const Ipv4Address &sender);
-      void
-      HandleAccept (Ptr<Socket>, const Address& from);
-      void
-      HandlePeerClose (Ptr<Socket>);
-      void
-      HandlePeerError (Ptr<Socket>);
-      Ptr<Ipv4Route>
-      GetRoute (const Ipv4Address &local, const Ipv4Address &destination);
-      Ipv4Address
-      GetNextHop (const Ipv4Address &destination);
-
-      void
-      ConnectionSucceeded (Ptr<Socket>);
-      void
-      ConnectionFailed (Ptr<Socket>);
-      void
-      Ignore (Ptr<Socket>);
-      Ipv4Address
-      GetLocalAddress ();
+      /**
+       * Compute chunks statistics.
+       */
       void
       StatisticChunk (void);
 
+      /**
+       * \param chunkid chunk identifier.
+       * Add one duplicate for the given chunk.
+       */
+      void
+      StatisticAddDuplicateChunk (uint32_t chunkid);
+
+      /**
+       * \param start Time to start sending pull messages.
+       * Set the pull slot start, where the pull may occur.
+       */
+      void
+      SetPullSlotStart (Time start);
+
+      /**
+       * \return Time to start sending pull messages.
+       * Get the pull slot start, where the pull may occur.
+       */
+      Time
+      GetPullSlotStart () const;
+
+      /**
+       * \return Time to end sending pull messages.
+       * Get the pull slot end, after which no pull messages can be sent.
+       */
+      Time
+      GetPullSlotEnd () const;
+
+      /**
+       * \return Time slot to send pull messages.
+       * Get the pull slot time.
+       */
+      Time
+      GetPullSlot () const;
+
+      /**
+       * \return percentage of pull slot used.
+       * Get the fraction of pull slot already used.
+       */
+      double
+      PullSlot ();
+
+      /**
+       * \param state Chunk state.
+       * \return Fraction of chunks in pull window.
+       * Fraction of chunks received with the pull window with the given state.
+       */
+      double
+      GetReceived (enum ChunkState state);
+
+      /**
+       * \param chunkid chunk identifier.
+       * Set the time a node started pulling a chunk.
+       */
+      void
+      SetPullTimes (uint32_t chunkid);
+
+      /**
+       * \param chunkid chunk identifier.
+       * \param time start time
+       * Set the time a node started pulling a chunk.
+       */
+      void
+      SetPullTimes (uint32_t chunkid, Time time);
+
+      /**
+       * \return Chunk identifier.
+       * Get the time a node started pulling a chunk.
+       */
+      Time
+      GetPullTimes (uint32_t chunkid);
+
+      /**
+       * \param chunkid chunk identifier.
+       * \return Time pull start.
+       * Get the time a node started pulling the given chunk,
+       * removing the item from the list.
+       */
+      Time
+      RemPullTimes (uint32_t chunkid);
+
+      /**
+       * \param chunkid chunk identifier.
+       * \return True, the chunk has been pulled, false otherwise.
+       * Check whether the chunk has been pulled or not.
+       */
+      bool
+      Pulled (uint32_t chunkid);
+
+      /**
+       * \param chunkid chunk identifier
+       * Set the current pull retries for a given chunk identifier.
+       */
+
+      void
+      AddPullRetryCurrent (uint32_t chunkid);
+
+      /**
+       * \param chunkid chunk identifier
+       * \return number of pull retries for the chunk.
+       * Get the current pull retries for a given chunk identifier.
+       */
+      uint32_t
+      GetPullRetryCurrent (uint32_t chunkid);
+
+      /**
+       * \return True if the chunk ratio is withing min and max ratio, false otherwise.
+       * Check whether the node's chunk ratio is between the minimum and the maximum chunk ratio
+       * in order to activate or not the pull mechanism.
+       */
+      bool
+      InPullRange ();
+
+      /**
+       * \return Current number of replies.
+       * Get the current number of pull reply.
+       */
+      uint32_t
+      GetPullReplyCurrent () const;
+
+      /**
+       * \param value Number of pull replies.
+       * Set the current number of pull reply.
+       */
+      void
+      SetPullReplyCurrent (uint32_t value);
+
+      /**
+       * Add one to the current number of pull replies.
+       */
+      void
+      AddPullReplyCurrent ();
+
+      /**
+       * Reset the current number of pull replies.
+       */
+      void
+      ResetPullReplyCurrent ();
+
+      /**
+       * \return Pull window base chunk identifier.
+       * Get the lowest chunk identifier in the pull window,
+       * i.e., the first that will be consumed in the next cycle.
+       */
       uint32_t
       GetPullWBase ();
+
+      /**
+       * \param Pull window base chunk identifier.
+       * Set the lowest chunk identifier in the pull window.
+       */
       void
       SetPullWBase (uint32_t base);
+
+      /**
+       * Advance the lowest chunk identifier in the pull window by one.
+       */
       void
       UpdatePullWBase ();
+
+      /**
+       * \param chunkid chunk identifier.
+       * Set the current chunk as pending in the transmission queue.
+       */
+
+      void
+      AddPending (uint32_t chunkid);
+
+      /**
+       * \param chunkid chunk identifier.
+       * \return True is the chunk is pending in the transmission queue, false otherwise.
+       * Check whether the chunk is pending in the transmission queue or not.
+       */
+
+      bool
+      IsPending (uint32_t chunkid);
+
+      /**
+       * \param chunkid chunk identifier.
+       * \return True if the chunk was pending, false otherwise.
+       * Remove the chunk as pending in the transmission queue.
+       */
+      bool
+      RemovePending (uint32_t chunkid);
+
+      /**
+       * \param chunkid chunk identifier.
+       * \param delay Chunk delay.
+       * Set the chunk delay.
+       */
+      void
+      SetChunkDelay (uint32_t chunkid, Time delay);
+
+      /**
+       * \param chunkid chunk identifier.
+       * \return Chunk delay.
+       * Get the chunk delay.
+       */
+      Time
+      GetChunkDelay (uint32_t chunkid);
+
+      /**
+       * \param chunkid chunk identifier.
+       * \return Number of duplicates.
+       * Number of duplicates for a given chunk
+       */
+      uint32_t
+      GetDuplicate (uint32_t chunkid);
+
+      /**
+       * \param chunkid chunk identifier.
+       * Mark the chunk as missed
+       */
+      void
+      SetChunkMissed (uint32_t chunkid);
+
+      /**
+       * \return Missed chunk identifier.
+       * Current missed chunk identifier.
+       */
+      uint32_t
+      GetChunkMissed () const;
+
+      /**
+       * \param policy Chunk selection policy.
+       * \return Chunk identifier according to policy, 0 otherwise.
+       * Piece selection algorithm.
+       */
+      uint32_t
+      ChunkSelection (ChunkPolicy policy);
+
+      /**
+       * \param policy Peer selection policy.
+       * \return Neighbor node according to policy, null otherwise.
+       * Peer selection algorithm.
+       */
+      Neighbor
+      PeerSelection (PeerPolicy policy);
+
+      /**
+       *
+       * \param l Minimum value.
+       * \param u Maximum value.
+       * \param unit Time unit.
+       * \return Time Random time between min and max with the given unit.
+       * Random time within the given bounds.
+       */
+      Time
+      TransmissionDelay (double l, double u, enum Time::Unit unit);
 
       Ptr<Socket> m_socket;                    /// Associated socket
       std::list<Ptr<Socket> > m_socketList;    /// Accepted sockets
