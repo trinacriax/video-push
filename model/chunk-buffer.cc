@@ -130,7 +130,7 @@ namespace ns3
           }
         case CHUNK_SKIPPED:
           { //CHECK should be !HasChunk(chunkId)
-            ret = (HasChunk(chunkId) && GetChunkState(chunkId) == CHUNK_SKIPPED);
+            ret = (!HasChunk(chunkId) && GetChunkState(chunkId) == CHUNK_SKIPPED);
             break;
           }
         default:
@@ -191,7 +191,7 @@ namespace ns3
     ChunkBuffer::SetChunkState (uint32_t chunkId, ChunkState state)
     {
       if (!HasChunk(chunkId))
-        chunk_state.insert(std::pair<uint32_t, ChunkState>(chunkId, state));
+        chunk_state.insert(std::pair<uint32_t, ChunkState>(chunkId, CHUNK_MISSED));
       switch (state)
         {
         case CHUNK_RECEIVED_PULL:
@@ -207,8 +207,7 @@ namespace ns3
           {
             NS_ASSERT(!HasChunk(chunkId));
             chunk_state.find(chunkId)->second = state;
-            NS_ASSERT(
-                isChunkState(chunkId, CHUNK_SKIPPED)||isChunkState(chunkId, CHUNK_MISSED)||isChunkState(chunkId, CHUNK_DELAYED));
+            NS_ASSERT(isChunkState(chunkId, state));
             break;
           }
         default:
@@ -223,7 +222,7 @@ namespace ns3
     ChunkBuffer::GetChunkState (uint32_t chunkId)
     {
       NS_ASSERT(chunkId>0);
-      if (!HasChunk(chunkId))
+      if (!HasChunk(chunkId) && chunk_state.find(chunkId)->second != CHUNK_SKIPPED)
         {
           return CHUNK_MISSED;
         }
