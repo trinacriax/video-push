@@ -960,12 +960,14 @@ namespace ns3
           while (GetChunkMissed()
               && (GetPullRetryCurrent(GetChunkMissed()) >= GetPullMax() || GetChunkMissed() < GetPullWBase()))/* Mark chunks as skipped*/
             {
-              NS_ASSERT(m_chunks.GetChunkState(GetChunkMissed())==CHUNK_MISSED);
-              m_chunks.SetChunkState(GetChunkMissed(), CHUNK_SKIPPED); // Mark as skipped
-              RemPullTimes(GetChunkMissed()); // Remove the chunk form PullTimes
-              SetPullTimes(GetChunkMissed(), Seconds(0));
               uint32_t lastmissed = GetChunkMissed();
+              NS_ASSERT(m_chunks.GetChunkState(lastmissed)==CHUNK_MISSED);
+              m_chunks.SetChunkState(lastmissed, CHUNK_SKIPPED); // Mark as skipped
+              NS_ASSERT(m_chunks.GetChunkState(lastmissed)==CHUNK_SKIPPED);
+              RemPullTimes(lastmissed); // Remove the chunk form PullTimes
+              SetPullTimes(lastmissed, Seconds(0));
               SetChunkMissed(ChunkSelection(m_chunkSelection)); // Update chunk missed
+              NS_ASSERT (lastmissed != GetChunkMissed());
               NS_LOG_INFO ("Node " <<m_node->GetId()<< " is marking chunk "<< lastmissed
                   <<" as skipped ("<<(lastmissed?GetPullRetryCurrent(lastmissed):0)<<"/"<<GetPullMax()<<") New missed="<<GetChunkMissed ());
             }
