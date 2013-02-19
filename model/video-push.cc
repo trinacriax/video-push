@@ -46,7 +46,6 @@
 #include <ns3/address-utils.h>
 #include <ns3/inet-socket-address.h>
 #include <ns3/udp-socket.h>
-#include <ns3/pimdm-routing.h>
 #include <ns3/snr-tag.h>
 #include <memory.h>
 #include <math.h>
@@ -1266,9 +1265,7 @@ namespace ns3
                 {
                   break;
                 }
-              ns3::pimdm::RelayTag relayTag;
               SnrTag ptag;
-              bool rtag = packet->RemovePacketTag(relayTag);
               bool packetTag = packet->RemovePacketTag(ptag);
               InetSocketAddress address = InetSocketAddress::ConvertFrom(from);
               Ipv4Address sourceAddr = address.GetIpv4();
@@ -1277,13 +1274,7 @@ namespace ns3
               Neighbor nt(sourceAddr, port);
               Ipv4Address subnet = GetLocalAddress().GetSubnetDirectedBroadcast(mask);
               NS_LOG_DEBUG("Node " << GetLocalAddress() << " receives packet from "<< sourceAddr
-                  << /*" gw " << gateway<< */" Tag ["<< relayTag.m_sender<<","<< relayTag.m_receiver<<"] :: "<<relayTag.m_receiver.IsBroadcast()
                   << " SINR "<< ptag.GetSinr());
-              if (rtag && subnet != relayTag.m_receiver)
-                {
-//	    	  NS_LOG_DEBUG("Discarded: not for clients "<<relayTag.m_receiver);
-                  break;
-                }
               // Filter on associated access point.
 //	      if(gateway!=relayTag.m_sender)
 //	      {
