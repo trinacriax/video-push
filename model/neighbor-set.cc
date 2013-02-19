@@ -374,7 +374,7 @@ namespace ns3
 //        {
 //          NS_LOG_DEBUG ("Neighbor="<< iter->first <<" Data=" << iter->second << " Prob="<< (weight[i] / weights) );
 //        } NS_LOG_DEBUG ("Neighbors P(all)=" << tot);
-      NS_ASSERT_MSG(abs(1-tot)< pow10(-6), "Error in computing probabilities");
+      NS_ASSERT_MSG((1>tot?(1-tot):(tot-1))< pow10(-6), "Error in computing probabilities");
     }
 
     Neighbor
