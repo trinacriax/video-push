@@ -930,9 +930,9 @@ namespace ns3
   {
     NS_LOG_FUNCTION(this<<chunkid);
     NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
-    NS_ASSERT(!chunkid||!m_chunks.isChunkState(chunkid,CHUNK_DELAYED));
-    NS_ASSERT(!chunkid||!m_chunks.isChunkState(chunkid,CHUNK_SKIPPED));
-    NS_ASSERT(!chunkid|| m_chunks.isChunkState(chunkid,CHUNK_MISSED));
+    NS_ASSERT(!chunkid||m_chunks.GetChunkState(chunkid)!=CHUNK_DELAYED);
+    NS_ASSERT(!chunkid||m_chunks.GetChunkState(chunkid)!=CHUNK_SKIPPED);
+    NS_ASSERT(!chunkid||m_chunks.GetChunkState(chunkid)==CHUNK_MISSED);
     m_pullChunkMissed = chunkid;
   }
 
@@ -1480,14 +1480,14 @@ namespace ns3
         {
           chunkid = m_chunks.GetLatestMissed(GetPullWBase(), GetPullWindow());
           NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
-          NS_ASSERT(!chunkid||!m_chunks.isChunkState(chunkid,CHUNK_SKIPPED));
+          NS_ASSERT(!chunkid||m_chunks.GetChunkState(chunkid)==CHUNK_MISSED);
           break;
         }
       case CS_LEAST_MISSED:
         {
           chunkid = m_chunks.GetLeastMissed(GetPullWBase(), GetPullWindow());
           NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
-          NS_ASSERT(!chunkid||!m_chunks.isChunkState(chunkid,CHUNK_SKIPPED));
+          NS_ASSERT(!chunkid||m_chunks.GetChunkState(chunkid)==CHUNK_MISSED);
           break;
         }
       case CS_LATEST:

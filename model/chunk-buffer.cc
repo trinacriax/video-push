@@ -110,37 +110,6 @@ namespace ns3
       return buf.str();
     }
 
-    bool
-    ChunkBuffer::isChunkState (uint32_t chunkId, ChunkState state)
-    {
-      bool ret = false;
-      NS_ASSERT(chunkId>0);
-      NS_ASSERT(state >= CHUNK_RECEIVED_PUSH && state <= CHUNK_MISSED);
-      switch (state)
-        {
-        case CHUNK_MISSED:
-          {
-            ret = (!HasChunk(chunkId));
-            break;
-          }
-        case CHUNK_DELAYED:
-          {
-            ret = (HasChunk(chunkId) && GetChunkState(chunkId) == CHUNK_DELAYED);
-            break;
-          }
-        case CHUNK_SKIPPED:
-          { //CHECK should be !HasChunk(chunkId)
-            ret = (!HasChunk(chunkId) && GetChunkState(chunkId) == CHUNK_SKIPPED);
-            break;
-          }
-        default:
-          {
-            break;
-          }
-        }
-      return ret;
-    }
-
     uint32_t
     ChunkBuffer::GetLatestMissed (uint32_t base, uint32_t window)
     {
@@ -148,7 +117,7 @@ namespace ns3
       uint32_t low = base;
       low = low < 1 ? 1 : low;
       while (missed >= low
-          && (HasChunk(missed) || isChunkState(missed, CHUNK_SKIPPED) || isChunkState(missed, CHUNK_DELAYED)))
+          && (HasChunk(missed) || GetChunkState(missed) == CHUNK_SKIPPED || GetChunkState(missed) == CHUNK_DELAYED))
         {
           missed--;
         }
@@ -166,7 +135,7 @@ namespace ns3
       missed = low < 1 ? 1 : low;
       uint32_t upper = (base + window <= last ? base + window : last);
       while (missed <= upper
-          && (HasChunk(missed) || isChunkState(missed, CHUNK_SKIPPED) || isChunkState(missed, CHUNK_DELAYED)))
+          && (HasChunk(missed) || GetChunkState(missed) == CHUNK_SKIPPED || GetChunkState(missed) == CHUNK_DELAYED))
         {
           missed++;
         }
@@ -190,32 +159,14 @@ namespace ns3
     void
     ChunkBuffer::SetChunkState (uint32_t chunkId, ChunkState state)
     {
-      if (!HasChunk(chunkId))
+      NS_ASSERT(chunkId>0);
+      NS_ASSERT(
+          ((state>=CHUNK_RECEIVED_PUSH && state<=CHUNK_RECEIVED_PULL) && HasChunk(chunkId)) ||
+          ((state>=CHUNK_SKIPPED && state<=CHUNK_MISSED) && !HasChunk(chunkId)));
+      if (chunk_state.find(chunkId) == chunk_state.end())
         chunk_state.insert(std::pair<uint32_t, ChunkState>(chunkId, CHUNK_MISSED));
-      switch (state)
-        {
-        case CHUNK_RECEIVED_PULL:
-        case CHUNK_RECEIVED_PUSH:
-          {
-            NS_ASSERT(HasChunk(chunkId));
-            chunk_state.find(chunkId)->second = state;
-            break;
-          }
-        case CHUNK_MISSED:
-        case CHUNK_SKIPPED:
-        case CHUNK_DELAYED:
-          {
-            NS_ASSERT(!HasChunk(chunkId));
-            chunk_state.find(chunkId)->second = state;
-            NS_ASSERT(isChunkState(chunkId, state));
-            break;
-          }
-        default:
-          {
-            NS_ASSERT(true);
-            break;
-          }
-        }
+      chunk_state.find(chunkId)->second = state;
+      NS_ASSERT(GetChunkState(chunkId) == state);
     }
 
     ChunkState

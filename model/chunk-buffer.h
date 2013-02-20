@@ -146,17 +146,6 @@ namespace ns3
 
         /**
          *
-         * \param chunkId chunk identifier.
-         * \return True is the chunks' state is equal to the one give, false otherwise.
-         *
-         * Compare the chunk's state with the given one.
-         */
-
-        bool
-        isChunkState (uint32_t chunkId, ChunkState state);
-
-        /**
-         *
          * \param base Starting chunk identifier to look into the buffer.
          * \param window Window size to consider to find the least chunk missed.
          * \return Least missed chunk.
