@@ -69,11 +69,8 @@ namespace ns3
       bool ret = false;
       if (!HasChunk(chunk.c_id))
         {
-          std::pair<uint32_t, ChunkVideo> entry(chunk.c_id, chunk);
-          chunk_buffer.insert(entry);
-          state = (chunk_state.find(chunk.c_id) == chunk_state.end() ? state : CHUNK_RECEIVED_PULL);
-          std::pair<uint32_t, ChunkState> sentry(chunk.c_id, state);
-          chunk_state.insert(sentry);
+          chunk_buffer.insert(std::pair<uint32_t, ChunkVideo> (chunk.c_id, chunk));
+          SetChunkState(chunk.c_id,state);
           last = (chunk.c_id > last) ? chunk.c_id : last;
           ret = true;
         }
