@@ -783,8 +783,7 @@ namespace ns3
     NS_LOG_DEBUG("LOADING "<<chunkid);
     if (m_pullTimes.find(chunkid) == m_pullTimes.end())
       {
-        std::pair<uint32_t, Time> pair(chunkid, Seconds(time));
-        m_pullTimes.insert(pair);
+        m_pullTimes.insert(std::pair<uint32_t, Time> (chunkid, Seconds(time)));
       }
   }
 
