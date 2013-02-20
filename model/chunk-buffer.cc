@@ -170,12 +170,9 @@ namespace ns3
     ChunkBuffer::GetChunkState (uint32_t chunkId)
     {
       NS_ASSERT(chunkId>0);
-      if (!HasChunk(chunkId) && chunk_state.find(chunkId)->second != CHUNK_SKIPPED)
-        {
-          return CHUNK_MISSED;
-        }
-      else
-        return chunk_state.find(chunkId)->second;
+      if (chunk_state.find(chunkId) == chunk_state.end())
+        chunk_state.insert(std::pair<uint32_t, ChunkState>(chunkId, CHUNK_MISSED));
+      return chunk_state.find(chunkId)->second;
     }
 
   } // namespace streaming
