@@ -1473,6 +1473,7 @@ namespace ns3
           chunkid = m_chunks.GetLatestMissed(GetPullWBase(), GetPullWindow());
           NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
           NS_ASSERT(!chunkid||m_chunks.GetChunkState(chunkid)==CHUNK_MISSED);
+          NS_ASSERT(!chunkid||(chunkid>=GetPullWBase() && chunkid<=(GetPullWBase()+GetPullWindow())));
           break;
         }
       case CS_LEAST_MISSED:
@@ -1480,6 +1481,7 @@ namespace ns3
           chunkid = m_chunks.GetLeastMissed(GetPullWBase(), GetPullWindow());
           NS_ASSERT(!chunkid||!m_chunks.HasChunk(chunkid));
           NS_ASSERT(!chunkid||m_chunks.GetChunkState(chunkid)==CHUNK_MISSED);
+          NS_ASSERT(!chunkid||(chunkid>=GetPullWBase() && chunkid<=(GetPullWBase()+GetPullWindow())));
           break;
         }
       case CS_LATEST:
