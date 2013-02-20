@@ -1111,7 +1111,7 @@ namespace ns3
         pull.GetPullMessage().SetChunk(chunkid);
         Ptr<Packet> packet = Create<Packet>();
         packet->AddHeader(pull);
-        NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid);
+        NS_LOG_DEBUG ("Node " << GetNode()->GetId() << " sends pull to "<< target << " for chunk "<< chunkid<< " pid "<< packet->GetUid());
         NS_ASSERT(GetPullSlotStart() <= Simulator::Now() && (GetPullSlotStart() + m_pullSlot) > Simulator::Now());
         NS_ASSERT(Simulator::Now() >= GetPullSlotStart());
         NS_ASSERT(Simulator::Now() <= GetPullSlotEnd());
