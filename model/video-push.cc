@@ -798,10 +798,9 @@ namespace ns3
   VideoPushApplication::RemPullTimes (uint32_t chunkid)
   {
     NS_LOG_DEBUG("REMLOADING "<<chunkid);
-    Time p = Seconds(0);
-    if (m_pullTimes.find(chunkid) != m_pullTimes.end())
+    Time p = (m_pullTimes.find(chunkid)!= m_pullTimes.end()?m_pullTimes.find(chunkid)->second:Seconds(0));
+    if(m_pullTimes.find(chunkid)!= m_pullTimes.end())
       {
-        p = m_pullTimes.find(chunkid)->second;
         m_pullTimes.erase(chunkid);
       }
     return p;
