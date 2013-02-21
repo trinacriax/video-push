@@ -124,16 +124,9 @@ namespace ns3
   ChunkBuffer::GetLeastMissed (uint32_t base, uint32_t window)
   {
     NS_ASSERT(base >=0 && window > 0);
-    uint32_t missed = 1;
-    uint32_t low = base;
-    missed = low < 1 ? 1 : low;
-    uint32_t upper = (base + window <= last ? base + window : last);
-    while (missed <= upper && (HasChunk(missed) || GetChunkState(missed)==CHUNK_SKIPPED || GetChunkState(missed)==CHUNK_DELAYED))
-      {
-        missed++;
-      }
-    missed = (missed <= upper ? missed : 0);
-    missed = (missed >= low ? missed : 0);
+    uint32_t missed = (base<=1?1:base-1);
+    while (++missed <= (base + window) && (HasChunk(missed) || GetChunkState(missed)==CHUNK_SKIPPED || GetChunkState(missed)==CHUNK_DELAYED));
+    missed = (missed >= base && missed <= base + window ? missed : 0);
     return missed;
   }
 
