@@ -148,17 +148,6 @@ namespace ns3
 
       /**
        *
-       * \param chunkId chunk identifier.
-       * \return True is the chunk is missed, false otherwise.
-       *
-       * Check whether the chunks state is missed or not.
-       */
-
-      bool
-      ChunkMissed (uint32_t chunkid);
-
-      /**
-       *
        * \param base Starting chunk identifier to look into the buffer.
        * \param window Window size to consider to find the least chunk missed.
        * \return Least missed chunk.

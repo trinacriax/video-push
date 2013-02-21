@@ -105,14 +105,6 @@ namespace ns3
     return buf.str();
   }
 
-  bool
-  ChunkBuffer::ChunkMissed (uint32_t chunkid)
-  {
-    NS_ASSERT(chunkid>0);
-    bool ret = (chunk_buffer.find(chunkid) == chunk_buffer.end());
-    return ret;
-  }
-
   uint32_t
   ChunkBuffer::GetLatestMissed (uint32_t base, uint32_t window)
   {
