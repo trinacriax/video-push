@@ -54,13 +54,10 @@ namespace ns3
   }
 
   bool
-  ChunkBuffer::HasChunk (uint32_t chunkid)
+  ChunkBuffer::HasChunk (uint32_t chunkId)
   {
-    NS_ASSERT(chunkid>0);
-    std::map<uint32_t, ChunkVideo>::iterator const result = chunk_buffer.find(chunkid);
-    if (result != chunk_buffer.end())
-      return true;
-    return false;
+    NS_ASSERT(chunkId>0);
+    return (chunk_buffer.find(chunkId) != chunk_buffer.end());
   }
 
   bool
