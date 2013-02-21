@@ -109,6 +109,6 @@ namespace ns3
     {
       return (a.c_id == b.c_id) && (a.c_size == b.c_size) && (a.c_tstamp == b.c_tstamp);
     }
-  }
-};
+  } // namespace streaming
+} // namespace ns3
 #endif /* CHUNK_VIDEO_H_ */
