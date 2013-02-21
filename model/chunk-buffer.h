@@ -168,16 +168,6 @@ namespace ns3
       bool
       ChunkDelayed (uint32_t chunkid);
 
-      /**
-       *
-       * \param chunkId chunk identifier.
-       * \return True is the chunk is skipped, false otherwise.
-       *
-       * Check whether the chunks state is skipped or not.
-       */
-
-      bool
-      ChunkSkipped (uint32_t chunkid);
 
       /**
        *

@@ -106,14 +106,6 @@ namespace ns3
   }
 
   bool
-  ChunkBuffer::ChunkSkipped (uint32_t chunkid)
-  {
-    NS_ASSERT(chunkid>0);
-    bool ret = (chunk_state.find(chunkid) != chunk_state.end() && chunk_state.find(chunkid)->second == CHUNK_SKIPPED);
-    return ret;
-  }
-
-  bool
   ChunkBuffer::ChunkMissed (uint32_t chunkid)
   {
     NS_ASSERT(chunkid>0);
@@ -135,7 +127,7 @@ namespace ns3
     uint32_t missed = (base + window <= last ? base + window : last);
     uint32_t low = base;
     low = low < 1 ? 1 : low;
-    while (missed >= low && (HasChunk(missed) || ChunkSkipped(missed) || ChunkDelayed(missed)))
+    while (missed >= low && (HasChunk(missed) || GetChunkState(missed)==CHUNK_SKIPPED || ChunkDelayed(missed)))
       {
         missed--;
       }
@@ -152,7 +144,7 @@ namespace ns3
     uint32_t low = base;
     missed = low < 1 ? 1 : low;
     uint32_t upper = (base + window <= last ? base + window : last);
-    while (missed <= upper && (HasChunk(missed) || ChunkSkipped(missed) || ChunkDelayed(missed)))
+    while (missed <= upper && (HasChunk(missed) || GetChunkState(missed)==CHUNK_SKIPPED || ChunkDelayed(missed)))
       {
         missed++;
       }
