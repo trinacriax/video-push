@@ -159,18 +159,6 @@ namespace ns3
 
       /**
        *
-       * \param chunkId chunk identifier.
-       * \return True is the chunk is delayed, false otherwise.
-       *
-       * Check whether the chunks state is delayed or not.
-       */
-
-      bool
-      ChunkDelayed (uint32_t chunkid);
-
-
-      /**
-       *
        * \param base Starting chunk identifier to look into the buffer.
        * \param window Window size to consider to find the least chunk missed.
        * \return Least missed chunk.
