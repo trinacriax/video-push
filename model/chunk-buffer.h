@@ -53,8 +53,8 @@ namespace ns3
 
       /**
        *
-       * @param chunkId chunk identifier
-       * @return pointer to chunk
+       * \param chunkId chunk identifier
+       * \return pointer to chunk
        *
        * Provides the i-th chunk.
        */
@@ -64,8 +64,8 @@ namespace ns3
 
       /**
        *
-       * @param chunkId chunk identifier
-       * @return True if the chunk is in the buffer, false otherwise.
+       * \param chunkId chunk identifier
+       * \return True if the chunk is in the buffer, false otherwise.
        *
        * Check whether the chunk is in the buffer or not.
        */
@@ -75,9 +75,9 @@ namespace ns3
 
       /**
        *
-       * @param chunk Chunk data.
-       * @param state Chunk's state.
-       * @return True if added, false otherwise.
+       * \param chunk Chunk data.
+       * \param state Chunk's state.
+       * \return True if added, false otherwise.
        *
        * Insert a chunk into the buffer with a given state.
        */
@@ -87,8 +87,8 @@ namespace ns3
 
       /**
        *
-       * @param chunkId chunk identifier.
-       * @return True if removed, false otherwise.
+       * \param chunkId chunk identifier.
+       * \return True if removed, false otherwise.
        *
        * Remove a chunk from the buffer.
        */
@@ -98,7 +98,7 @@ namespace ns3
 
       /**
        *
-       * @return Size of the buffer.
+       * \return Size of the buffer.
        *
        * Size of the current buffer.
        */
@@ -108,7 +108,7 @@ namespace ns3
 
       /**
        *
-       * @return A string containing the identifier of all chunks.
+       * \return A string containing the identifier of all chunks.
        *
        * Create a string with the identifiers of all chunks into the buffer.
        */
@@ -118,7 +118,7 @@ namespace ns3
 
       /**
        *
-       * @return a copy of the chunk buffer.
+       * \return a copy of the chunk buffer.
        *
        * Give the whole chunk buffer.
        */
@@ -128,8 +128,8 @@ namespace ns3
 
       /**
        *
-       * @param chunkId chunk identifier.
-       * @return The state of the chunk.
+       * \param chunkId chunk identifier.
+       * \return The state of the chunk.
        *
        * Get the state of the chunk.
        */
@@ -139,8 +139,8 @@ namespace ns3
 
       /**
        *
-       * @param chunkId chunk identifier.
-       * @param state chunk's state
+       * \param chunkId chunk identifier.
+       * \param state chunk's state
        *
        * Set the state of the chunk.
        */
@@ -150,8 +150,8 @@ namespace ns3
 
       /**
        *
-       * @param chunkId chunk identifier.
-       * @return True is the chunk is missed, false otherwise.
+       * \param chunkId chunk identifier.
+       * \return True is the chunk is missed, false otherwise.
        *
        * Check whether the chunks state is missed or not.
        */
@@ -161,8 +161,8 @@ namespace ns3
 
       /**
        *
-       * @param chunkId chunk identifier.
-       * @return True is the chunk is delayed, false otherwise.
+       * \param chunkId chunk identifier.
+       * \return True is the chunk is delayed, false otherwise.
        *
        * Check whether the chunks state is delayed or not.
        */
@@ -172,8 +172,8 @@ namespace ns3
 
       /**
        *
-       * @param chunkId chunk identifier.
-       * @return True is the chunk is skipped, false otherwise.
+       * \param chunkId chunk identifier.
+       * \return True is the chunk is skipped, false otherwise.
        *
        * Check whether the chunks state is skipped or not.
        */
@@ -183,9 +183,9 @@ namespace ns3
 
       /**
        *
-       * @param base Starting chunk identifier to look into the buffer.
-       * @param window Window size to consider to find the least chunk missed.
-       * @return Least missed chunk.
+       * \param base Starting chunk identifier to look into the buffer.
+       * \param window Window size to consider to find the least chunk missed.
+       * \return Least missed chunk.
        *
        * Get the least missed chunk
        */
@@ -195,9 +195,9 @@ namespace ns3
 
       /**
        *
-       * @param base Starting chunk identifier to look into the buffer.
-       * @param window Window size to consider to find the latest chunk missed.
-       * @return Latest missed chunk.
+       * \param base Starting chunk identifier to look into the buffer.
+       * \param window Window size to consider to find the latest chunk missed.
+       * \return Latest missed chunk.
        *
        * Get the latest missed chunk
        */
@@ -207,7 +207,7 @@ namespace ns3
 
       /**
        *
-       * @return Last chunk identifier.
+       * \return Last chunk identifier.
        *
        * Get the last chunk identifier in the buffer.
        */
@@ -217,7 +217,7 @@ namespace ns3
 
       /**
        *
-       * @return Chunk buffer size.
+       * \return Chunk buffer size.
        * Get the chunk buffer size.
        */
 
