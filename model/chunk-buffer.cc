@@ -208,16 +208,12 @@ namespace ns3
   }
 
   ChunkState
-  ChunkBuffer::GetChunkState (uint32_t chunkid)
+  ChunkBuffer::GetChunkState (uint32_t chunkId)
   {
-    NS_ASSERT(chunkid>0);
-    std::map<uint32_t, ChunkState>::iterator iter = chunk_state.find(chunkid);
-    if (iter == chunk_state.end())
-      {
-        return CHUNK_MISSED;
-      }
-    else
-      return iter->second;
+    NS_ASSERT(chunkId>0);
+    if (chunk_state.find(chunkId) == chunk_state.end())
+      chunk_state.insert(std::pair<uint32_t, ChunkState>(chunkId, CHUNK_MISSED));
+    return chunk_state.find(chunkId)->second;
   }
 
 }
