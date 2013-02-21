@@ -149,8 +149,9 @@ namespace ns3
     NS_ASSERT(
         ((state>=CHUNK_RECEIVED_PUSH && state<=CHUNK_RECEIVED_PULL) && HasChunk(chunkId)) || ((state>=CHUNK_SKIPPED && state<=CHUNK_MISSED) && !HasChunk(chunkId)));
     if (chunk_state.find(chunkId) == chunk_state.end())
-      chunk_state.insert(std::pair<uint32_t, ChunkState>(chunkId, CHUNK_MISSED));
-    chunk_state.find(chunkId)->second = state;
+      chunk_state.insert(std::pair<uint32_t, ChunkState>(chunkId, state));
+    else
+      chunk_state.find(chunkId)->second = state;
     NS_ASSERT(GetChunkState(chunkId) == state);
   }
 
