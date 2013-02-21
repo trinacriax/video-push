@@ -64,18 +64,15 @@ namespace ns3
   ChunkBuffer::AddChunk (const ChunkVideo &chunk, ChunkState state)
   {
     NS_ASSERT(state==CHUNK_RECEIVED_PUSH||state==CHUNK_RECEIVED_PULL);
-    std::map<uint32_t, ChunkVideo>::iterator result = chunk_buffer.find(chunk.c_id);
-    if (result == chunk_buffer.end())
+    bool ret = false;
+    if (!HasChunk(chunk.c_id))
       {
-        std::pair<uint32_t, ChunkVideo> entry(chunk.c_id, chunk);
-        chunk_buffer.insert(entry);
-        state = (chunk_state.find(chunk.c_id) == chunk_state.end() ? state : CHUNK_RECEIVED_PULL);
-        std::pair<uint32_t, ChunkState> sentry(chunk.c_id, state);
-        chunk_state.insert(sentry);
+        chunk_buffer.insert(std::pair<uint32_t, ChunkVideo>(chunk.c_id, chunk));
+        SetChunkState(chunk.c_id, state);
         last = (chunk.c_id > last) ? chunk.c_id : last;
-        return true;
+        ret = true;
       }
-    return false;
+    return ret;
   }
 
   bool
