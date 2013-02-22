@@ -1074,7 +1074,7 @@ namespace ns3
             if (m_chunks.GetSize() == 1) // this is the first chunk
               {
                 NS_ASSERT(!m_playout.IsRunning());
-                double playtime = ceil(GetPullSlot().ToDouble(Time::US) * (GetPullWindow() - 1));
+                double playtime = ( (8.0 * m_pktSize * GetPullWindow()) / m_cbrRate.GetBitRate() );
                 m_playout.Schedule(Time::FromDouble(playtime, Time::US));
               }
             NS_ASSERT(sender == GetSource());
