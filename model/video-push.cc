@@ -963,11 +963,9 @@ namespace ns3
               NS_LOG_INFO ("Node " <<m_node->GetId()<< " is marking chunk "<< lastmissed
                   <<" as skipped ("<<(lastmissed?GetPullRetryCurrent(lastmissed):0)<<"/"<<GetPullMax()<<") New missed="<<GetChunkMissed ());
             }
-          double low = GetReceived(CHUNK_RECEIVED_PUSH);
-          double up = low + GetReceived(CHUNK_RECEIVED_PULL);
           SetChunkMissed(ChunkSelection(m_chunkSelection));
           NS_LOG_INFO ("Node " << m_node->GetId() << " IP=" << GetLocalAddress()
-              << " Ratio [" << low << ":" << up << "] ["<<GetPullRatioMin() << ":" << GetPullRatioMax() << "]" << " Total="<< m_chunks.GetSize()
+              << " Ratio [" << GetReceived(CHUNK_RECEIVED_PUSH) << ":" << GetReceived(CHUNK_RECEIVED_PUSH) + GetReceived(CHUNK_RECEIVED_PULL) << "] ["<<GetPullRatioMin() << ":" << GetPullRatioMax() << "]" << " Total="<< m_chunks.GetSize()
               << " Last=" << m_chunks.GetLastChunk() << " Missed=" << GetChunkMissed() << " ("<<(GetChunkMissed()?GetPullRetryCurrent(GetChunkMissed()):0)<<","<<GetPullMax()<<")"
               << " Wmin=" << GetPullWBase() <<" Wmax="<< GetPullWindow()+GetPullWBase()
               << " Timer="<<(m_pullTimer.IsRunning()?"Yes":"No"));
