@@ -1075,7 +1075,7 @@ namespace ns3
               {
                 NS_ASSERT(!m_playout.IsRunning());
                 double playtime = ( (8.0 * m_pktSize * GetPullWindow()) / m_cbrRate.GetBitRate() );
-                m_playout.Schedule(Time::FromDouble(playtime, Time::US));
+                m_playout.Schedule(Time::FromDouble(playtime, Time::S));
               }
             NS_ASSERT(sender == GetSource());
             m_chunks.AddChunk(chunk, CHUNK_RECEIVED_PUSH);
@@ -1104,7 +1104,7 @@ namespace ns3
     NS_LOG_FUNCTION (this<<chunkid);
     NS_ASSERT(chunkid>0);
     NS_ASSERT(GetPullActive());
-    NS_ASSERT(m_chunks.GetLastChunk()>GetPullWindow());
+    NS_ASSERT(m_chunks.GetLastChunk()>=GetPullWindow());
     if (PullSlot() < PullReqThr)/*Check whether the node is within a pull slot or not*/
       {
         ChunkHeader pull(MSG_PULL);
