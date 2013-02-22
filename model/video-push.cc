@@ -759,7 +759,7 @@ namespace ns3
   VideoPushApplication::InPullRange ()
   {
     double low = GetReceived(CHUNK_RECEIVED_PUSH);
-    bool active = (low <= GetPullRatioMax() && low >= GetPullRatioMin());
+    bool active = (low >= GetPullRatioMin() && low <= GetPullRatioMax());
     if (active)
       m_pullStartTrace(low);
     else
