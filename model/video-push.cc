@@ -133,7 +133,7 @@ namespace ns3
                                            &VideoPushApplication::GetPullMax),
                      MakeUintegerChecker<uint32_t> (0))
       .AddAttribute ("PullActive", "Pull activation.",
-                     BooleanValue (true),
+                     BooleanValue (false),
                      MakeBooleanAccessor (&VideoPushApplication::SetPullActive,
                                           &VideoPushApplication::GetPullActive),
                      MakeBooleanChecker() )
