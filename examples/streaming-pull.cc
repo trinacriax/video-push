@@ -174,7 +174,6 @@ int main(int argc, char **argv) {
 	// you can configure attributes here using SetAttribute(name, value)
 
 	InternetStackHelper fakeStack;
-//	stack.SetRoutingHelper(mbnaodv);
 	fakeStack.Install(fake);
 	InternetStackHelper stack;
 	stack.SetRoutingHelper(aodv);

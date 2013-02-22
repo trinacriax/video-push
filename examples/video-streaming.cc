@@ -44,7 +44,6 @@
 #include "ns3/video-push-module.h"
 #include "ns3/wifi-module.h"
 #include "ns3/aodv-helper.h"
-#include "ns3/mbn-aodv-module.h"
 #include "ns3/string.h"
 
 using namespace ns3;
@@ -194,7 +193,7 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("CCAMode1", "CCA mode 1 threshold dBm.", CCAMode1);
 	cmd.AddValue ("xmax", "Grid X max", xmax);
 	cmd.AddValue ("ymax", "Grid Y max", ymax);
-	cmd.AddValue ("routing", "Unicast Routing Protocol (1 - AODV, 2 - MBN) ", routing);
+	cmd.AddValue ("routing", "Unicast Routing Protocol (1 - AODV) ", routing);
 	cmd.AddValue ("hellotime", "Hello time", hellotime);
 	cmd.AddValue ("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
 	cmd.AddValue ("helloactive", "Hello activation", helloactive);
@@ -308,7 +307,6 @@ int main(int argc, char **argv) {
 	mobility.Install(nodes);
 
 	InternetStackHelper stack;
-	MbnAodvHelper mbnaodv;
 	AodvHelper aodv;
 	switch (routing)
 	{
@@ -323,22 +321,6 @@ int main(int argc, char **argv) {
 			Config::SetDefault ("ns3::aodv::RoutingProtocol::AllowedHelloLoss", UintegerValue (aodvHelloLoss));
 			Config::SetDefault ("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(aodvHello)));
 			stack.SetRoutingHelper(aodv);
-			break;
-		}
-		case 2:
-		{
-//			Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableHello", BooleanValue(false));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableBroadcast", BooleanValue(false));
-			/// Short Timer
-			uint32_t short_t = 2, long_t = 6, rule1 = 1, rule2 = 1;
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::HelloInterval", TimeValue(Seconds(short_t)));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::ShortInterval", TimeValue(Seconds(short_t)));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::LongInterval", TimeValue(Seconds(long_t)));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule1", BooleanValue(rule1==1));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule2", BooleanValue(rule2==1));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::localWeightFunction", EnumValue(mbn::W_NODE_DEGREE));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::AllowedHelloLoss", UintegerValue(1));
-			stack.SetRoutingHelper(mbnaodv);
 			break;
 		}
 		default:

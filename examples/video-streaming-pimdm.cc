@@ -28,7 +28,6 @@
 #include "ns3/pimdm-helper.h"
 #include "ns3/igmpx-helper.h"
 #include "ns3/aodv-helper.h"
-#include "ns3/mbn-aodv-helper.h"
 #include "ns3/video-helper.h"
 
 #include "ns3/wifi-module.h"
@@ -49,7 +48,6 @@
 #include "ns3/mobility-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/video-push-module.h"
-#include "ns3/mbn-aodv-module.h"
 #include "ns3/string.h"
 #include "ns3/video-helper.h"
 
@@ -240,7 +238,7 @@ int main(int argc, char **argv) {
 	cmd.AddValue ("CCAMode1", "CCA mode 1 threshold dBm.", CCAMode1);
 	cmd.AddValue ("xmax", "Grid X max", xmax);
 	cmd.AddValue ("ymax", "Grid Y max", ymax);
-	cmd.AddValue ("routing", "Unicast Routing Protocol (0 - Nothing, 1 - AODV, 2 - MBN) ", routing);
+	cmd.AddValue ("routing", "Unicast Routing Protocol (0 - Nothing, 1 - AODV) ", routing);
 	cmd.AddValue ("hellotime", "Hello time", hellotime);
 	cmd.AddValue ("helloloss", "Max number of hello loss to be removed from neighborhood", helloloss);
 	cmd.AddValue ("helloactive", "Hello activation", helloactive);
@@ -395,7 +393,6 @@ int main(int argc, char **argv) {
 
 	// INSTALL INTERNET STACK
 	AodvHelper aodvStack;
-	MbnAodvHelper mbnStack;
 	PimDmHelper pimdmStack;
 	IgmpxHelper igmpxStack;
 	NS_LOG_INFO ("Enabling Routing.");
@@ -415,22 +412,6 @@ int main(int argc, char **argv) {
 //			Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
 			Config::SetDefault ("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(2)));
 			listRouters.Add (aodvStack, 10);
-			break;
-		}
-		case 2:
-		{
-//			Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableHello", BooleanValue(false));
-//			Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableBroadcast", BooleanValue(false));
-			/// Short Timer
-			uint32_t short_t = 2, long_t = 6, rule1 = 1, rule2 = 1;
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::HelloInterval", TimeValue(Seconds(short_t)));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::ShortInterval", TimeValue(Seconds(short_t)));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::LongInterval", TimeValue(Seconds(long_t)));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule1", BooleanValue(rule1==1));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule2", BooleanValue(rule2==1));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::localWeightFunction", EnumValue(mbn::W_NODE_DEGREE));
-			Config::SetDefault ("ns3::mbn::RoutingProtocol::AllowedHelloLoss", UintegerValue(1));
-			listRouters.Add (mbnStack, 10);
 			break;
 		}
 		default:
@@ -461,22 +442,6 @@ int main(int argc, char **argv) {
 //				Config::SetDefault ("ns3::aodv::RoutingProtocol::EnableBroadcast", BooleanValue(false));
 				Config::SetDefault ("ns3::aodv::RoutingProtocol::HelloInterval", TimeValue(Seconds(2)));
 				listSource.Add (aodvStack, 10);
-				break;
-			}
-			case 2:
-			{
-	//			Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableHello", BooleanValue(false));
-				Config::SetDefault ("ns3::mbn::RoutingProtocol::EnableBroadcast", BooleanValue(false));
-				/// Short Timer
-				uint32_t short_t = 2, long_t = 6, rule1 = 1, rule2 = 1;
-				Config::SetDefault ("ns3::mbn::RoutingProtocol::HelloInterval", TimeValue(Seconds(short_t)));
-				Config::SetDefault ("ns3::mbn::RoutingProtocol::ShortInterval", TimeValue(Seconds(short_t)));
-				Config::SetDefault ("ns3::mbn::RoutingProtocol::LongInterval", TimeValue(Seconds(long_t)));
-				Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule1", BooleanValue(rule1==1));
-				Config::SetDefault ("ns3::mbn::RoutingProtocol::Rule2", BooleanValue(rule2==1));
-				Config::SetDefault ("ns3::mbn::RoutingProtocol::localWeightFunction", EnumValue(mbn::W_NODE_DEGREE));
-				Config::SetDefault ("ns3::mbn::RoutingProtocol::AllowedHelloLoss", UintegerValue(1));
-				listSource.Add (mbnStack, 10);
 				break;
 			}
 			default:
