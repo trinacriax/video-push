@@ -227,6 +227,10 @@ ChunkHeader::Deserialize (Buffer::Iterator start)
 //	|                        Chunk Attributes                    ....
 //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+ChunkHeader::ChunkMessage::~ChunkMessage()
+{}
+
+
 uint32_t
 ChunkHeader::ChunkMessage::GetSerializedSize (void) const
 {
@@ -302,6 +306,9 @@ ChunkHeader::ChunkMessage::SetChunk (ChunkVideo chunk)
 //	|                      Chunk Identifier                         |
 //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+ChunkHeader::PullMessage::~PullMessage()
+{}
+
 uint32_t
 ChunkHeader::PullMessage::GetSerializedSize (void) const
 {
@@ -349,6 +356,9 @@ ChunkHeader::PullMessage::SetChunk (uint32_t chunk)
 //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //	|                      Chunks Received							|
 //	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+ChunkHeader::HelloMessage::~HelloMessage()
+{}
 
 uint32_t
 ChunkHeader::HelloMessage::GetSerializedSize (void) const

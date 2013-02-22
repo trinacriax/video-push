@@ -117,6 +117,13 @@ namespace ns3
 
         struct ChunkMessage
         {
+            ChunkMessage():
+              m_chunk()
+            {};
+            ChunkMessage(ChunkVideo chunk):
+              m_chunk(chunk)
+            {};
+            virtual ~ChunkMessage();
             ChunkVideo m_chunk; // Chunk Data
             virtual void
             Print (std::ostream &os) const;
@@ -140,6 +147,13 @@ namespace ns3
 
         struct PullMessage
         {
+            PullMessage (uint32_t chunkId):
+              m_chunkID (chunkId)
+            {};
+            PullMessage ():
+              m_chunkID (0)
+            {};
+            virtual ~PullMessage();
             uint32_t m_chunkID; // Chunk ID to pull
             virtual void
             Print (std::ostream &os) const;
@@ -163,6 +177,13 @@ namespace ns3
 
         struct HelloMessage
         {
+            HelloMessage ():
+              m_lastChunk (0), m_chunksRec (0), m_chunksRatio (0)
+              {}
+            HelloMessage (uint32_t last, uint32_t rec, uint32_t ratio):
+              m_lastChunk (last), m_chunksRec (rec), m_chunksRatio (ratio)
+              {}
+            virtual ~HelloMessage ();
 //	  Ipv4Address m_destination; // Destination Address
             uint32_t m_lastChunk; /// Chunks received
             uint32_t m_chunksRec; /// Chunks received
