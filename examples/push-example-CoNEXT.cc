@@ -573,7 +573,7 @@ int main(int argc, char **argv)
 	all.Add (clients);
 
 
-	for (int k=0; k<sizeSource+sizeRouter+sizeClient; k++)
+	for (uint32_t k=0; k<sizeSource+sizeRouter+sizeClient; k++)
 	{
 	    msgTxVideoControl.push_back(0);
 	    msgTxControlPull.push_back(0);
