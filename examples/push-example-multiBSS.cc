@@ -654,7 +654,6 @@ int main(int argc, char **argv)
 	double nak_m2 = 1.0;
 
 	double selectionWeight = 0.0;
-	uint32_t aodvHello = 2, aodvHelloLoss = 2;
 
 	uint32_t flag = 0;
 
@@ -828,7 +827,7 @@ int main(int argc, char **argv)
 	all.Add (clients);
 
 
-	for (int k=0 ; k<sizeSource+sizeRouter+sizeClient; k++)
+	for (uint k=0 ; k<sizeSource+sizeRouter+sizeClient; k++)
 	{
 	    msgTxVideoControl.push_back(0);
 	    msgTxControlPull.push_back(0);
@@ -838,7 +837,7 @@ int main(int argc, char **argv)
 	    msgRxDataPull.push_back(0);
 	    neighbors.push_back(0);
 	}
-	for (int k=0 ; k<sizeSource+sizeRouter+sizeClient; k++)
+	for (uint k=0 ; k<sizeSource+sizeRouter+sizeClient; k++)
 	{
 	    msgTxControlAodv.push_back(0);
 	    msgRxControlAodv.push_back(0);
@@ -848,7 +847,7 @@ int main(int argc, char **argv)
 		msgRxDataPim.push_back(0);
 		msgTxControlRoute.push_back(0);
 	}
-	for (int k=0 ; k<sizeSource+sizeRouter+sizeClient; k++)
+	for (uint k=0 ; k<sizeSource+sizeRouter+sizeClient; k++)
 	{
 		msgTxControlIgmp.push_back(0);
 		msgRxControlIgmp.push_back(0);
